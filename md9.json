@@ -1,0 +1,49 @@
+{
+    "ClassName": "LAMMPS_API",
+    "ModuleName": "",
+    "Name": "LAMMPS",
+    "ID": "LAMMPS",
+    "Description": "Moluecular dynamics simulation for the Airbus case",
+    "Physics": {
+        "Type": "Molecular"
+    },
+    "Solver": {
+        "Software": "LAMMPS",
+        "Language": "C++",
+        "License": "Open-source",
+        "Creator": "Borek Patzak",
+        "Version_date": "lammps-12dec18",
+        "Type": "Atomistic/Mesoscopic",
+        "Documentation": "https://lammps.sandia.gov/doc/Manual.html",
+        "Estim_time_step_s": 1,
+        "Estim_comp_time_s": 0.01,
+        "Estim_execution_cost_EUR": 0.01,
+        "Estim_personnel_cost_EUR": 0.01,
+        "Required_expertise": "None",
+        "Accuracy": "High",
+        "Sensitivity": "High",
+        "Complexity": "Low",
+        "Robustness": "High"
+    },
+    "Inputs": [
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_MOLECULAR_STRUCTURE", "Name": "Monomer Molecular Structure", "Description": "Monomer Molecular Structure", "Units": "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MOLECULAR_WEIGHT", "Name": "Polymer Molecular Weight", "Description": "Polymer Molecular Weight",  "Units": "mol", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CROSSLINKER_TYPE", "Name": "CROSSLINKER TYPE", "Description": "CROSSLINKER TYPE",  "Units": "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_DESIGNATION", "Name": "FILLER DESIGNATION", "Description": "FILLER DESIGNATION", "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CROSSLINKONG_DENSITY", "Name": "CROSSLINKONG DENSITY", "Description": "CROSSLINKONG DENSITY",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_CONCENTRATION", "Name": "FILLER CONCENTRATION", "Description": "FILLER CONCENTRATION",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "degC", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PRESSURE", "Name": "PRESSURE", "Description": "TEMPERATURE",  "Units":  "atm", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_POLYDISPERSITY_INDEX", "Name": "POLYDISPERSITY INDEX", "Description": "POLYDISPERSITY INDEX",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE", "Name": "SMILE MODIFIER MOLECULAR STRUCTURE", "Description": "SMILE MODIFIER MOLECULAR STRUCTURE",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_FILLER_MOLECULAR_STRUCTURE", "Name": "SMILE FILLER MOLECULAR STRUCTURE", "Description": "SMILE FILLER MOLECULAR STRUCTURE", "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_DENSITY_OF_FUNCTIONALIZATION", "Name": "DENSITY OF FUNCTIONALIZATION", "Description": "DENSITY OF FUNCTIONALIZATION", "Units":  "None", "Origin": "Simulated", "Required": true}
+    ],
+    "Outputs": [
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_DENSITY", "Name": "density", "Description": "density", "Units": "g/cm^3", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_EModulus", "Name": "Young modulus", "Description": "Young modulus", "Units": "GPa", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_effective_conductivity", "Name": "Thermal Conductivity", "Description": "Thermal Conductivity", "Units": "W/m.??C", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TRANSITION_TEMPERATURE", "Name": "Glass Transition Temperature", "Description": "Glass Transition Temperature", "Units": "K", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio", "Name": "Poisson Ratio", "Description": "Poisson Ratio", "Units": "None", "Origin": "Simulated"}
+    ]
+}

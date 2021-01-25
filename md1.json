@@ -1,0 +1,37 @@
+{
+    "ClassName": "thermal",
+    "ModuleName": "models",
+    "Name": "Stationary thermal problem",
+    "ID": "Thermo-1",
+    "Description": "Stationary heat conduction using finite elements on rectangular domain",
+    "Version_date": "1.0.0, Feb 2019",
+    "Geometry": "2D rectangle",
+    "Boundary_conditions": "Dirichlet, Neumann",
+    "Inputs": [
+        {
+            "Name": "edge temperature",
+            "Type": "mupif.Property",
+            "Required": false,
+            "Type_ID": "mupif.PropertyID.PID_Temperature",
+            "Obj_ID": [
+                "Cauchy top",
+                "Cauchy bottom",
+                "Cauchy left",
+                "Cauchy right",
+                "Dirichlet top",
+                "Dirichlet bottom",
+                "Dirichlet left",
+                "Dirichlet right"
+            ]
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "temperature",
+            "Type_ID": "mupif.FieldID.FID_Temperature",
+            "Type": "mupif.Field",
+            "Required": false
+        }
+    ],
+    "Execution_type": "Local"
+}

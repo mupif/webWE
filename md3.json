@@ -1,0 +1,27 @@
+{
+    "ClassName": "mechanical",
+    "ModuleName": "models",
+    "Name": "Plane stress linear elastic",
+    "ID": "Mechanical-1",
+    "Description": "Plane stress problem with linear elastic thermo-elastic material",
+    "Version_date": "1.0.0, Feb 2019",
+    "Geometry": "2D rectangle",
+    "Boundary_conditions": "Dirichlet",
+    "Inputs": [
+        {
+            "Name": "temperature",
+            "Type_ID": "mupif.FieldID.FID_Temperature",
+            "Type": "mupif.Field",
+            "Required": true
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "displacement",
+            "Type_ID": "mupif.FieldID.FID_Displacement",
+            "Type": "mupif.Field",
+            "Required": false
+        }
+    ],
+    "Execution_type": "Local"
+}

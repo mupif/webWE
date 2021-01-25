@@ -1,0 +1,26 @@
+{
+    "ClassName": "",
+    "ModuleName": "",
+    "Name": "ESI VPS buckling analysis",
+    "ID": "ESI_VPS",
+    "Description": "Perform structural FEM based buckling analysis",
+    "Inputs": [
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_E0t1", "Name": "E0t1", "Description": "Tensile modulus 11", "Units": "kN/mm**2", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_E0t2", "Name": "E0t2", "Description": "Tensile modulus 22", "Units": "kN/mm**2", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_E0t3", "Name": "E0t3", "Description": "Tensile modulus 33", "Units": "kN/mm**2", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_G012", "Name": "G012", "Description": "Shear modulus 12", "Units": "kN/mm**2", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_G013", "Name": "G013", "Description": "Shear modulus 13", "Units": "kN/mm**2", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_G023", "Name": "G023", "Description": "Shear modulus 23", "Units": "kN/mm**2", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_NU12", "Name": "NU12", "Description": "Poisson ratio 12", "Units": " ", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_NU13", "Name": "NU13", "Description": "Poisson ratio 13", "Units": " ", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_NU23", "Name": "NU23", "Description": "Poisson ratio 23", "Units": " ", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_hPLY", "Name": "Ply thickness", "Description": "Ply thickness", "Units": "mm", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_PLY1_RHO", "Name": "Mass density", "Description": "Mass density", "Units": "mm", "Origin": "Simulated", "Required": true}
+    ],
+    "Outputs": [
+        {"Type": "mupif.Field", "Type_ID": "mupif.FieldID.FID_ESI_VPS_Displacement", "Name": "Displacement field", "Description": "Displacement field", "Units": "mm"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ESI_VPS_BUCKL_LOAD", "Name": "Buckling load", "Description": "Buckling load", "Units": "kN/mm"}
+    ],
+    "Execution_type": "Distributed",
+    "Execution_settings_jobManagerName": ""
+}

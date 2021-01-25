@@ -1,0 +1,38 @@
+{
+    "ClassName": "thermal_nonstat",
+    "ModuleName": "models",
+    "Name": "Non-stationary thermal problem",
+    "ID": "NonStatThermo-1",
+    "Description": "Non-stationary heat conduction using finite elements on a rectangular domain",
+    "Version_date": "1.0.0, Feb 2019",
+    "Representation": "Finite volumes",
+    "Geometry": "2D rectangle",
+    "Boundary_conditions": "Dirichlet, Neumann",
+    "Inputs": [
+        {
+            "Name": "edge temperature",
+            "Type": "mupif.Property",
+            "Required": false,
+            "Type_ID": "mupif.PropertyID.PID_Temperature",
+            "Obj_ID": [
+                "Cauchy top",
+                "Cauchy bottom",
+                "Cauchy left",
+                "Cauchy right",
+                "Dirichlet top",
+                "Dirichlet bottom",
+                "Dirichlet left",
+                "Dirichlet right"
+            ]
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "temperature",
+            "Type_ID": "mupif.FieldID.FID_Temperature",
+            "Type": "mupif.Field",
+            "Required": false
+        }
+    ],
+    "Execution_type": "Local"
+}
