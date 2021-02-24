@@ -13,6 +13,26 @@ class Block{
         this.menu_record = new VisualMenu();
 
         this.child_block_sort = 'horizontal';
+
+        this.defines_timestep = false;
+    }
+
+    getDefinesTimestep(){
+        return this.defines_timestep;
+    }
+
+    getTimestepVariableName(){
+        if(this.getDefinesTimestep())
+            return this.code_name + "_time_step";
+        return "None";
+    }
+
+    getTimestepVariableNameFromSelfOrParent(){
+        if(this.getDefinesTimestep())
+            return this.getTimestepVariableName();
+        if(this.parent_block !== null)
+            return this.parent_block.getTimestepVariableNameFromSelfOrParent();
+        return "None"
     }
 
     getMenu(){
@@ -29,6 +49,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'physicalquantity', 'Physical&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'property', 'Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'timeloop', 'Time&nbsp;Loop'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'dowhile', 'DoWhile&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
     }
 
@@ -147,7 +168,7 @@ class Block{
         return push_indents_before_each_line(code, indent);
     }
 
-    getExecutionCode(indent=0, time="", timestep="tstep"){
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
         let code = ["", "# execution code of "+this.code_name+" ("+this.name+")"];
         return push_indents_before_each_line(code, indent);
     }
@@ -294,6 +315,8 @@ class Block{
             block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.PropertyID.PID_None', 'mupif.ValueType.Scalar', 'none', '0');
         if (name === "timeloop")
             block = new BlockTimeloop(this.editor, this);
+        if (name === "dowhile")
+            block = new BlockDoWhile(this.editor, this);
         if (name === "model")
             block = new BlockModel(this.editor, this, {});
 

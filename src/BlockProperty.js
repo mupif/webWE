@@ -29,7 +29,7 @@ class BlockProperty extends Block{
         return [];
     }
 
-    getExecutionCode(indent=0, time="", timestep="tstep"){
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
 

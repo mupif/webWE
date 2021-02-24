@@ -364,7 +364,7 @@ class WorkflowEditor{
     menu_download_exec_code(){
         this.download("execution_code.py", this.getExecutionCode());
         let code = this.getExecutionCode();
-        console.log(code);
+        // console.log(code);
         let code_html = replaceAllInStr(code, '\t', '    ');
         code_html = replaceAllInStr(code_html, ' ', '&nbsp;&nbsp;');
         code_html = replaceAllInStr(code_html, '\n', '<br>');
@@ -374,7 +374,7 @@ class WorkflowEditor{
     menu_download_class_code(){
         this.download("class_code.py", this.getClassCode());
         let code = this.getClassCode();
-        console.log(code);
+        // console.log(code);
         let code_html = replaceAllInStr(code, '\t', ' ');
         code_html = replaceAllInStr(code_html, ' ', '&nbsp;&nbsp;');
         code_html = replaceAllInStr(code_html, '\n', '<br>');

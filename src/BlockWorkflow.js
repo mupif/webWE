@@ -67,7 +67,7 @@ class BlockWorkflow extends Block{
 
         code.push("");
         code.push("");
-        code.push("class " + this.settings_project_classname + "(mupif.Workflow.Workflow):");
+        code.push("class " + this.settings_project_classname + "(mupif.workflow.Workflow):");
 
         // __init__ function
 
@@ -75,15 +75,17 @@ class BlockWorkflow extends Block{
         code.push("\tdef __init__(self, metaData={}):");
 
         code.push("\t\tMD = {");
-        code.push("\t\t\t'Inputs': [");
-
-        code.push("\t\t\t],");
-        code.push("\t\t\t'Outputs': [");
-
-        code.push("\t\t\t],");
+        // code.push("\t\t\t'Inputs': [");
+        //
+        // code.push("\t\t\t],");
+        code.push("\t\t\t'Inputs': [],");
+        // code.push("\t\t\t'Outputs': [");
+        //
+        // code.push("\t\t\t],");
+        code.push("\t\t\t'Outputs': [],");
         code.push("\t\t}");
 
-        code.push("\t\tmupif.Workflow.Workflow.__init__(self, metaData=MD)");
+        code.push("\t\tmupif.workflow.Workflow.__init__(self, metaData=MD)");
 
         // metadata
         code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
@@ -184,7 +186,7 @@ class BlockWorkflow extends Block{
         // initialize function
 
         code.push("\t");
-        code.push("\tdef initialize(self, file='', workdir='', targetTime=mupif.Physics.PhysicalQuantities.PhysicalQuantity(0., 's'), metaData={}, validateMetaData=True, **kwargs):");
+        code.push("\tdef initialize(self, file='', workdir='', targetTime=mupif.physics.physicalquantities.PhysicalQuantity(0., 's'), metaData={}, validateMetaData=True, **kwargs):");
 
         code.push("\t\t");
 
@@ -205,7 +207,7 @@ class BlockWorkflow extends Block{
 
         code.push("\t\t");
 
-        code.push("\t\tmupif.Workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metaData={}, validateMetaData=validateMetaData, **kwargs)");
+        code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metaData={}, validateMetaData=validateMetaData, **kwargs)");
 
         // get critical time step function
 
@@ -235,7 +237,7 @@ class BlockWorkflow extends Block{
 
             code.push("\t\t\t");
             code.push("\t\t# in case of Property");
-            code.push("\t\tif isinstance(obj, mupif.Property.Property):");
+            code.push("\t\tif isinstance(obj, mupif.property.Property):");
             code.push("\t\t\tpass");
             slots = this.getAllExternalDataSlots("out");
             for(let i=0;i<slots.length;i++) {
@@ -249,7 +251,7 @@ class BlockWorkflow extends Block{
 
             code.push("\t\t\t");
             code.push("\t\t# in case of Field");
-            code.push("\t\tif isinstance(obj, mupif.Field.Field):");
+            code.push("\t\tif isinstance(obj, mupif.field.Field):");
             code.push("\t\t\tpass");
             slots = this.getAllExternalDataSlots("out");
             for(let i=0;i<slots.length;i++) {
@@ -322,16 +324,13 @@ class BlockWorkflow extends Block{
 
         for(let i=0;i<child_blocks.length;i++) {
             model = child_blocks[i];
-            code = code.concat(model.getExecutionCode(2, "tstep.getTime()"));
-            // extend_array(code, model.getExecutionCode(2, "tstep.getTime()"));
+            if(class_code)
+                code = code.concat(model.getExecutionCode(2, "tstep", false));
+            else
+                code = code.concat(model.getExecutionCode(2, "", true));
         }
 
-        if(!class_code) {
-            code.push("\t\t# terminate all models");
-            code.push("\t\tself.terminate()");
-            code.push("");
-        }
-
+        code.push("");
         code.push("");
 
         // execution
@@ -349,7 +348,6 @@ class BlockWorkflow extends Block{
             code.push("\t}");
             code.push("\tproblem.initialize(metaData=md)");
             code.push("\tproblem.solve()");
-            code.push("\tproblem.printMetadata()");
             code.push("\tproblem.terminate()");
             code.push("\t");
             code.push("\tprint('Simulation has finished.')");

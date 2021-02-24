@@ -2,6 +2,7 @@ class BlockTimeloop extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
         this.name = 'TimeLoop';
+        this.defines_timestep = true;
 
         this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false));
         this.addInputSlot(new Slot(this, 'in', 'target_time', 'target_time', 'mupif.PhysicalQuantity', false));
@@ -41,7 +42,7 @@ class BlockTimeloop extends Block{
         return 'None';
     }
 
-    getExecutionCode(indent=0, time="", timestep="tstep"){
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
         let code = super.getExecutionCode();
 
         let var_time = this.code_name + "_time";
@@ -88,12 +89,12 @@ class BlockTimeloop extends Block{
         while_code.push("\t\t" + var_compute + " = False");
 
         while_code.push("\t");
-        while_code.push("\t" + var_time_step + " = mupif.TimeStep.TimeStep(" + var_time + ", " + var_dt + ", " + var_target_time + ", n=" + var_time_step_number + ")");
+        while_code.push("\t" + var_time_step + " = mupif.timestep.TimeStep(" + var_time + ", " + var_dt + ", " + var_target_time + ", n=" + var_time_step_number + ")");
         // while_code.push("\t");
 
         let blocks = this.getBlocks();
         for(let i=0;i<blocks.length;i++){
-            while_code = while_code.concat(blocks[i].getExecutionCode(1, var_time_step + ".getTime()", var_time_step));
+            while_code = while_code.concat(blocks[i].getExecutionCode(1, var_time_step, solvefunc));
         }
 
         code = code.concat(while_code);

@@ -58,7 +58,7 @@ class BlockModel extends Block {
             for (let ii = 0; ii < md['Inputs'][i]['Obj_ID'].length; ii++) {
                 name = md['Inputs'][i]['Name'];
                 if (md['Inputs'][i]['Obj_ID'][ii] !== '')
-                    name += ' - ' + md['Inputs'][i]['Obj_ID'][ii];
+                    name += ' [' + md['Inputs'][i]['Obj_ID'][ii] + ']';
                 this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii]));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
@@ -72,7 +72,7 @@ class BlockModel extends Block {
             for (let ii = 0; ii < md['Outputs'][i]['Obj_ID'].length; ii++) {
                 name = md['Outputs'][i]['Name'];
                 if (md['Outputs'][i]['Obj_ID'][ii] !== '')
-                    name += ' - ' + md['Outputs'][i]['Obj_ID'][ii];
+                    name += ' [' + md['Outputs'][i]['Obj_ID'][ii] + ']';
                 this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], md['Outputs'][i]['Obj_ID'][ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
@@ -132,18 +132,24 @@ class BlockModel extends Block {
             code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
             code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metaData=" + metaDataStr + ")");
         }else{
-            if(this.input_file_name !== "")
-                code.push("loc_file = '" + this.input_file_name + "'");
-            if(this.input_file_directory !== "")
-                code.push("loc_workdir = '" + this.input_file_directory + "'");
-            code.push("self." + this.code_name + ".initialize(file=loc_file, workdir=loc_workdir, metaData=" + metaDataStr + ")");
+            code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metaData=" + metaDataStr + ")");
         }
 
         return push_indents_before_each_line(code, indent)
     }
 
-    getExecutionCode(indent = 0, time = "", timestep = "tstep") {
+    getExecutionCode(indent = 0, timestep = "", solvefunc=false) {
+        if(timestep === "")
+            timestep = this.getTimestepVariableNameFromSelfOrParent();
+
         let code = super.getExecutionCode();
+
+        if(timestep === "None" && solvefunc) {
+            code.push(this.code_name + "_virtual_timestep = mupif.timestep.TimeStep(mupif.physics.physicalquantities.PhysicalQuantity(0., 's'), mupif.physics.physicalquantities.PhysicalQuantity(1., 's'), mupif.physics.physicalquantities.PhysicalQuantity(1., 's'))");
+            timestep = this.code_name + "_virtual_timestep"
+        }
+        let timestep_time = timestep + ".getTime()";
+
         let linked_slot;
         let obj_id;
         for (let i = 0; i < this.input_slots.length; i++) {
@@ -152,15 +158,16 @@ class BlockModel extends Block {
                 obj_id = this.input_slots[i].obj_id;
                 if (typeof obj_id === 'string')
                     obj_id = "'" + obj_id + "'";
-                code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, time) + ", " + obj_id + ")");
+                code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
             }
         }
+
         code.push("self." + this.code_name + ".solveStep(" + timestep + ")");
 
         return push_indents_before_each_line(code, indent);
     }
 
-    generateOutputDataSlotGetFunction(slot, time = "") {
+    generateOutputDataSlotGetFunction(slot, time = "None") {
         //todo check if slot is mine
         // if (slot in self.getSlots(DataSlot.OutputDataSlot)) {
         if (true) {
