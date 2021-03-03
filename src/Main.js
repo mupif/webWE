@@ -608,6 +608,70 @@ function main()
             // s2 = workflow.output_slots[0];
             // editor.addDatalink(s1, s2);
         }
+        if (example_id === 4) {
+            workflow.settings_project_name = 'User Case 1';
+            workflow.settings_project_classname = 'UserCase1Workflow';
+            workflow.settings_project_id = 'user_case_1';
+            workflow.child_block_sort = 'vertical';
+
+            workflow.addExternalDataSlot('in', 'atomic_set', 'mupif.AtomicSet');
+            workflow.addExternalDataSlot('out', 'atomic_set', 'mupif.AtomicSet');
+            workflow.addExternalDataSlot('out', 'hopping_sites', 'mupif.HoppingSites');
+            workflow.addExternalDataSlot('out', 'neighbor_list', 'mupif.NeighborList');
+
+            //
+
+            let b_it = new BlockDoWhile(editor, workflow);
+            workflow.addBlock(b_it);
+            b_it.child_block_sort = 'vertical';
+
+            let b_m1 = new BlockModel(editor, b_it, md_p1);
+            b_it.addBlock(b_m1);
+
+            let b_m2 = new BlockModel(editor, b_it, md_p2);
+            b_it.addBlock(b_m2);
+
+            let b_m3 = new BlockModel(editor, workflow, md_p3);
+            workflow.addBlock(b_m3);
+
+            let b_m4 = new BlockModel(editor, workflow, md_p4);
+            workflow.addBlock(b_m4);
+
+            let s1, s2;
+
+            s1 = b_m1.output_slots[0];
+            s2 = b_m2.input_slots[0];
+            editor.addDatalink(s1, s2);
+
+            s1 = b_m1.output_slots[0];
+            s2 = b_m3.input_slots[0];
+            editor.addDatalink(s1, s2);
+
+            s1 = b_m3.output_slots[0];
+            s2 = b_m4.input_slots[0];
+            editor.addDatalink(s1, s2);
+
+            s1 = b_m2.output_slots[0];
+            s2 = b_it.input_slots[0];
+            editor.addDatalink(s1, s2);
+
+            s1 = workflow.output_slots[0];
+            s2 = b_m1.input_slots[0];
+            editor.addDatalink(s1, s2);
+
+            s1 = b_m4.output_slots[0];
+            s2 = workflow.input_slots[0];
+            editor.addDatalink(s1, s2);
+
+            s1 = b_m4.output_slots[1];
+            s2 = workflow.input_slots[1];
+            editor.addDatalink(s1, s2);
+
+            s1 = b_m4.output_slots[2];
+            s2 = workflow.input_slots[2];
+            editor.addDatalink(s1, s2);
+
+        }
     }
 
     // =====                                                                                          =====

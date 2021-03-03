@@ -1,6 +1,6 @@
 let metaDataThermalStat = {
-    'ClassName': 'thermal',//todo temporary fix
-    'ModuleName': 'models',//todo temporary fix
+    'ClassName': 'thermal',
+    'ModuleName': 'models',
     'Name': 'Stationary thermal problem',
     'ID': 'Thermo-1',
     'Description': 'Stationary heat conduction using finite elements on rectangular domain',
@@ -36,8 +36,8 @@ let metaDataThermalStat = {
 };
 
 let metaDataThermalNonStat = {
-    'ClassName': 'thermal_nonstat',//todo temporary fix
-    'ModuleName': 'models',//todo temporary fix
+    'ClassName': 'thermal_nonstat',
+    'ModuleName': 'models',
     'Name': 'Non-stationary thermal problem',
     'ID': 'NonStatThermo-1',
     'Description': 'Non-stationary heat conduction using finite elements on a rectangular domain',
@@ -74,8 +74,8 @@ let metaDataThermalNonStat = {
 };
 
 let metaDataMechanical = {
-    'ClassName': 'mechanical',//todo temporary fix
-    'ModuleName': 'models',//todo temporary fix
+    'ClassName': 'mechanical',
+    'ModuleName': 'models',
     'Name': 'Plane stress linear elastic',
     'ID': 'Mechanical-1',
     'Description': 'Plane stress problem with linear elastic thermo-elastic material',
@@ -288,4 +288,162 @@ let metaData_ABAQUS = {
     "geomUnit": "",
     "Execution_type": "Distributed",
     "Execution_settings_jobManagerName": "Abaqus@Mupif.LIST"
+};
+
+//
+//
+//
+
+let md_p1 = {
+    "ClassName": "ReplcaceHostMolsWithDopantMols",
+    "ModuleName": "usercase1",
+    "Name": "Replcace Host Mols With Dopant Mols",
+    "ID": "RHMWDM-1",
+    "Description": "Todo...",
+    "Version_date": "1.0.0, Feb 2021",
+    "Geometry": "unknown",
+    "Boundary_conditions": "unknown",
+    "Inputs": [
+        {
+            "Name": "coordinates",
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Type": "mupif.AtomicSet",
+            "Required": true,
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "allData",
+            "Type": "mupif.AtomicSet",
+            "Required": false,
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Execution_type": "Local"
+};
+
+let md_p2 = {
+    "ClassName": "ContainsPatologiesChecker",
+    "ModuleName": "usercase1",
+    "Name": "Contains Patologies Checker",
+    "ID": "Thermo-1",
+    "Description": "Todo...",
+    "Version_date": "1.0.0, Feb 2021",
+    "Geometry": "unknown",
+    "Boundary_conditions": "unknown",
+    "Inputs": [
+        {
+            "Name": "allData",
+            "Type": "mupif.AtomicSet",
+            "Required": true,
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "boolContainsPatology",
+            "Type_ID": "mupif.PropertyID.PID_Bool",
+            "Type": "mupif.Property",
+            "Required": false,
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Execution_type": "Local"
+};
+
+let md_p3 = {
+    "ClassName": "MD",
+    "ModuleName": "usercase1",
+    "Name": "MD",
+    "ID": "MD-1",
+    "Description": "Todo...",
+    "Version_date": "1.0.0, Feb 2021",
+    "Geometry": "unknown",
+    "Boundary_conditions": "unknown",
+    "Inputs": [
+        {
+            "Name": "allData",
+            "Type": "mupif.AtomicSet",
+            "Required": true,
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "allData",
+            "Type": "mupif.AtomicSet",
+            "Required": false,
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Execution_type": "Local"
+};
+
+let md_p4 = {
+    "ClassName": "ExtractHoppingSitesAndNeighbors",
+    "ModuleName": "usercase1",
+    "Name": "Extract Hopping Sites and Neighbors",
+    "ID": "EHSAN-1",
+    "Description": "Todo...",
+    "Version_date": "1.0.0, Feb 2021",
+    "Geometry": "unknown",
+    "Boundary_conditions": "unknown",
+    "Inputs": [
+        {
+            "Name": "allData",
+            "Type": "mupif.AtomicSet",
+            "Required": true,
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Outputs": [
+        {
+            "Name": "coordinates",
+            "Type_ID": "mupif.AtomicSetID.all",
+            "Type": "mupif.AtomicSet",
+            "Required": false,
+            "Obj_ID": [
+                0
+            ]
+        },
+        {
+            "Name": "hopping_sites",
+            "Type_ID": "mupif.HoppingSitesID.all",
+            "Type": "mupif.HoppingSites",
+            "Required": false,
+            "Obj_ID": [
+                0
+            ]
+        },
+        {
+            "Name": "neighbor_list",
+            "Type_ID": "mupif.NeighborListID.all",
+            "Type": "mupif.NeighborList",
+            "Required": false,
+            "Obj_ID": [
+                0
+            ]
+        }
+    ],
+    "Execution_type": "Local"
 };
