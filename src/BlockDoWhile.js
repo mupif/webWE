@@ -51,7 +51,7 @@ class BlockDoWhile extends Block{
         if(ts !== "None")
             ti = ts + ".getTime()";
         else
-            ti = "mupif.physics.physicalquantities.PhysicalQuantity(0., 's')";
+            ti = "0*mupif.Q.s";
         code.push("\t" + var_compute + " = "+this.getDo(ti));
 
         return push_indents_before_each_line(code, indent);

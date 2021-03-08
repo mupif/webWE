@@ -89,7 +89,7 @@ class BlockTimeloop extends Block{
         while_code.push("\t\t" + var_compute + " = False");
 
         while_code.push("\t");
-        while_code.push("\t" + var_time_step + " = mupif.timestep.TimeStep(" + var_time + ", " + var_dt + ", " + var_target_time + ", n=" + var_time_step_number + ")");
+        while_code.push("\t" + var_time_step + " = mupif.timestep.TimeStep(time=" + var_time + ", dt=" + var_dt + ", targetTime=" + var_target_time + ", number=" + var_time_step_number + ")");
         // while_code.push("\t");
 
         let blocks = this.getBlocks();

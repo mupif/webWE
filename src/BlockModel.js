@@ -130,9 +130,9 @@ class BlockModel extends Block {
 
         if(this.exec_type === "Distributed"){
             code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
-            code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metaData=" + metaDataStr + ")");
+            code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metadata=" + metaDataStr + ")");
         }else{
-            code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metaData=" + metaDataStr + ")");
+            code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
         }
 
         return push_indents_before_each_line(code, indent)
@@ -145,7 +145,7 @@ class BlockModel extends Block {
         let code = super.getExecutionCode();
 
         if(timestep === "None" && solvefunc) {
-            code.push(this.code_name + "_virtual_timestep = mupif.timestep.TimeStep(mupif.physics.physicalquantities.PhysicalQuantity(0., 's'), mupif.physics.physicalquantities.PhysicalQuantity(1., 's'), mupif.physics.physicalquantities.PhysicalQuantity(1., 's'))");
+            code.push(this.code_name + "_virtual_timestep = mupif.timestep.TimeStep(time=0*mupif.Q.s, dt=1*mupif.Q.s, targetTime=1*mupif.Q.s)");
             timestep = this.code_name + "_virtual_timestep"
         }
         let timestep_time = timestep + ".getTime()";

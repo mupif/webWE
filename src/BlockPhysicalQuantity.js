@@ -18,7 +18,7 @@ class BlockPhysicalQuantity extends Block{
 
     getInitCode(indent=0){
         let code = super.getInitCode();
-        code.push("self."+this.code_name+" = mupif.physics.physicalquantities.PhysicalQuantity("+this.value+", '"+this.units+"')");
+        code.push("self."+this.code_name+" = mupif.physics.physicalquantities.PhysicalQuantity(value="+this.value+", unit='"+this.units+"')");
         return push_indents_before_each_line(code, indent);
     }
 

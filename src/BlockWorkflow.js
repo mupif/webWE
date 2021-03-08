@@ -72,7 +72,7 @@ class BlockWorkflow extends Block{
         // __init__ function
 
         code.push("\t");
-        code.push("\tdef __init__(self, metaData={}):");
+        code.push("\tdef __init__(self, metadata={}):");
 
         code.push("\t\tMD = {");
         // code.push("\t\t\t'Inputs': [");
@@ -85,14 +85,14 @@ class BlockWorkflow extends Block{
         code.push("\t\t\t'Outputs': [],");
         code.push("\t\t}");
 
-        code.push("\t\tmupif.workflow.Workflow.__init__(self, metaData=MD)");
+        code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
         // metadata
         code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
         code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
         code.push("\t\tself.setMetadata('Description', '')");
 
-        code.push("\t\tself.updateMetadata(metaData)");
+        code.push("\t\tself.updateMetadata(metadata)");
 
         let code_add;
         let params;
@@ -186,11 +186,11 @@ class BlockWorkflow extends Block{
         // initialize function
 
         code.push("\t");
-        code.push("\tdef initialize(self, file='', workdir='', targetTime=mupif.physics.physicalquantities.PhysicalQuantity(0., 's'), metaData={}, validateMetaData=True, **kwargs):");
+        code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
 
         code.push("\t\t");
 
-        code.push("\t\tself.updateMetadata(dictionary=metaData)");
+        code.push("\t\tself.updateMetadata(dictionary=metadata)");
 
         code.push("\t\t");
         code.push("\t\texecMD = {");
@@ -207,7 +207,7 @@ class BlockWorkflow extends Block{
 
         code.push("\t\t");
 
-        code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metaData={}, validateMetaData=validateMetaData, **kwargs)");
+        code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
 
         // get critical time step function
 
@@ -346,7 +346,7 @@ class BlockWorkflow extends Block{
             code.push("\t\t\t'Task_ID': 'N/A'");
             code.push("\t\t}");
             code.push("\t}");
-            code.push("\tproblem.initialize(metaData=md)");
+            code.push("\tproblem.initialize(metadata=md)");
             code.push("\tproblem.solve()");
             code.push("\tproblem.terminate()");
             code.push("\t");

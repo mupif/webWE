@@ -1,8 +1,8 @@
 let metaDataThermalStat = {
-    'ClassName': 'thermal',
+    'ClassName': 'ThermalModel',
     'ModuleName': 'models',
     'Name': 'Stationary thermal problem',
-    'ID': 'Thermo-1',
+    'ID': 'ThermalModel-1',
     'Description': 'Stationary heat conduction using finite elements on rectangular domain',
     'Version_date': '1.0.0, Feb 2019',
     'Geometry': '2D rectangle',
@@ -36,10 +36,10 @@ let metaDataThermalStat = {
 };
 
 let metaDataThermalNonStat = {
-    'ClassName': 'thermal_nonstat',
+    'ClassName': 'ThermalNonstatModel',
     'ModuleName': 'models',
     'Name': 'Non-stationary thermal problem',
-    'ID': 'NonStatThermo-1',
+    'ID': 'ThermalNonstatModel-1',
     'Description': 'Non-stationary heat conduction using finite elements on a rectangular domain',
     'Version_date': '1.0.0, Feb 2019',
     'Representation': 'Finite volumes',
@@ -74,10 +74,10 @@ let metaDataThermalNonStat = {
 };
 
 let metaDataMechanical = {
-    'ClassName': 'mechanical',
+    'ClassName': 'MechanicalModel',
     'ModuleName': 'models',
     'Name': 'Plane stress linear elastic',
-    'ID': 'Mechanical-1',
+    'ID': 'MechanicalModel-1',
     'Description': 'Plane stress problem with linear elastic thermo-elastic material',
     'Version_date': '1.0.0, Feb 2019',
     'Geometry': '2D rectangle',
