@@ -1,7 +1,7 @@
 
 function keyPress(e){
     if(e.which === 46){
-        if(selected_datalink){
+        if(editor.selected_datalink){
             myquery_temp_instance = editor;
             let q_html = '';
             q_html += '<b>Delete selected datalink?</b><br>';
@@ -10,7 +10,7 @@ function keyPress(e){
 
             myQuery_show(q_html);
         }
-        if(selected_block && selected_block !== editor.workflowblock){
+        if(editor.selected_block && editor.selected_block !== editor.workflowblock){
             myquery_temp_instance = editor;
             let q_html = '';
             q_html += '<b>Delete selected block?</b><br>';
@@ -19,7 +19,7 @@ function keyPress(e){
 
             myQuery_show(q_html);
         }
-        if(selected_slot_ext){
+        if(editor.selected_slot_ext){
             myquery_temp_instance = editor;
             let q_html = '';
             q_html += '<b>Delete selected external dataslot?</b><br>';
@@ -32,8 +32,8 @@ function keyPress(e){
 }
 
 function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=null){
-    if(one_elem_check_disabling_propagation === false) {
-        one_elem_check_disabling_propagation = true;
+    if(editor.one_elem_check_disabling_propagation === false) {
+        editor.one_elem_check_disabling_propagation = true;
 
         let block_instance = editor.getBlockByUID(block_uid);
         let datalink_instance = editor.getDatalinkByUID(datalink_uid);
@@ -48,37 +48,37 @@ function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=nul
 
         if (event.button === 0 || event.button === 2) {
             // block
-            selected_block = block_instance;
+            editor.selected_block = block_instance;
             let blocks = editor.getAllBlocks();
             for (let i = 0; i < blocks.length; i++) {
                 blocks[i].getBlockDiv().classList.remove('we_block_selected');
                 blocks[i].getBlockMenuDiv().style.display = 'none';
             }
-            if (selected_block) {
-                selected_block.getBlockDiv().classList.add('we_block_selected');
+            if (editor.selected_block) {
+                editor.selected_block.getBlockDiv().classList.add('we_block_selected');
             }
 
-            if (event.button === 2 && selected_block) {
-                let block_menu = selected_block.getBlockMenuDiv();
+            if (event.button === 2 && editor.selected_block) {
+                let block_menu = editor.selected_block.getBlockMenuDiv();
                 block_menu.style.display = 'block';
             }
 
             // datalink
-            selected_datalink = null;
+            editor.selected_datalink = null;
             for (let i = 0; i < editor.datalinks.length; i++)
                 editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_selected');
             if (datalink_instance) {
-                selected_datalink = datalink_instance;
+                editor.selected_datalink = datalink_instance;
                 datalink_instance.getDatalinkDiv().classList.add('we_datalink_selected');
             }
 
             // external dataslot
-            selected_slot_ext = null;
+            editor.selected_slot_ext = null;
             let slots = editor.workflowblock.getAllExternalDataSlots();
             for (let i = 0; i < slots.length; i++)
                 slots[i].getDataslotDiv().classList.remove('slot_selected');
             if (ext_dataslot_instance) {
-                selected_slot_ext = ext_dataslot_instance;
+                editor.selected_slot_ext = ext_dataslot_instance;
                 ext_dataslot_instance.getDataslotDiv().classList.add('slot_selected');
             }
         }
@@ -100,16 +100,16 @@ function datalinkHoverIn(datalink_uid){
 }
 
 function datalink_creation_begin(slot_uid){
-    selected_slot_1 = editor.getSlotByUID(slot_uid);
+    editor.selected_slot_1 = editor.getSlotByUID(slot_uid);
 }
 
 function datalink_creation_finalize(slot_uid){
-    selected_slot_2 = editor.getSlotByUID(slot_uid);
+    editor.selected_slot_2 = editor.getSlotByUID(slot_uid);
 
-    if(selected_slot_1 && selected_slot_2){
-        editor.addDatalink(selected_slot_1, selected_slot_2);
-        selected_slot_1 = null;
-        selected_slot_2 = null;
+    if(editor.selected_slot_1 && editor.selected_slot_2){
+        editor.addDatalink(editor.selected_slot_1, editor.selected_slot_2);
+        editor.selected_slot_1 = null;
+        editor.selected_slot_2 = null;
     }
     editor.generateWorkflowHtml();
 }
@@ -150,30 +150,32 @@ function deleteMetaDataByListID(list_id){
 }
 
 function updateHtmlOfListOfModels(){
-    let elem_list_of_models = document.getElementById('block_list_of_models');
-    let temp_html = '<h2 style="margin-bottom:20px;"><b>Project models</b>' +
-        '<form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;display:inline-block;" id="form_metadata_data">' +
-        '<label for="form_metadata_file_selector" id="label_form_metadata_file_selector" style="display:none;">' +
-        'Load MetaData JSON from file' +
-        '<input type="file" id="form_metadata_file_selector" name="metadata_file" style="display:none;width:100px;" onchange="loadMetaDataFromJSONFileUsingAjax();">' +
-        '</label>' +
-        '<input type="hidden" value="Load from JSON" name="file_upload">' +
-        '</form>' +
-        '<button onclick="document.getElementById(\'label_form_metadata_file_selector\').click();" style="margin-left:30px;">Load MetaData JSON from file</button>' +
-        '</h2>';
+    if(editor.visual) {
+        let elem_list_of_models = document.getElementById('block_list_of_models');
+        let temp_html = '<h2 style="margin-bottom:20px;"><b>Project models</b>' +
+            '<form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;display:inline-block;" id="form_metadata_data">' +
+            '<label for="form_metadata_file_selector" id="label_form_metadata_file_selector" style="display:none;">' +
+            'Load MetaData JSON from file' +
+            '<input type="file" id="form_metadata_file_selector" name="metadata_file" style="display:none;width:100px;" onchange="loadMetaDataFromJSONFileUsingAjax();">' +
+            '</label>' +
+            '<input type="hidden" value="Load from JSON" name="file_upload">' +
+            '</form>' +
+            '<button onclick="document.getElementById(\'label_form_metadata_file_selector\').click();" style="margin-left:30px;">Load MetaData JSON from file</button>' +
+            '</h2>';
 
-    temp_html += '<table style="color:black;">';
-    for(let i=0;i<editor.list_of_model_metadata.length;i++){
-        temp_html += '' +
-            '<tr>' +
-            '<td>' + (i+1) + ']</td><td style="padding:3px 10px 3px 10px;"><b>' + editor.list_of_model_metadata[i]['Name'] + '</b></td>' +
-            '<td><button onclick="editor.download_ith_metadata(' + i + ');">download</button></td>' +
-            '<td><button onclick="deleteMetaDataByListID(' + i + ');">delete</button></td>' +
-            '</tr>';
+        temp_html += '<table style="color:black;">';
+        for (let i = 0; i < editor.list_of_model_metadata.length; i++) {
+            temp_html += '' +
+                '<tr>' +
+                '<td>' + (i + 1) + ']</td><td style="padding:3px 10px 3px 10px;"><b>' + editor.list_of_model_metadata[i]['Name'] + '</b></td>' +
+                '<td><button onclick="editor.download_ith_metadata(' + i + ');">download</button></td>' +
+                '<td><button onclick="deleteMetaDataByListID(' + i + ');">delete</button></td>' +
+                '</tr>';
+        }
+        temp_html += '</table>';
+
+        elem_list_of_models.innerHTML = temp_html;
     }
-    temp_html += '</table>';
-
-    elem_list_of_models.innerHTML = temp_html;
 }
 
 function loadMetaDataFromJSONFileUsingAjax(){
@@ -209,25 +211,47 @@ function loadMetaDataFromJSONFileUsingAjax(){
 }
 
 function loadMetaDataFromJSONOnServer(filename){
-    let xmlhttp = new XMLHttpRequest();
+//     let xmlhttp = new XMLHttpRequest();
+//
+//     xmlhttp.onload = function () {
+//         if (this.readyState === 4 && this.status === 200) {
+//             let answer = this.responseText.trim();
+//             // console.log(answer);
+//             let model_json = JSON.parse(answer);
+//             if(checkMetaDataValidity(model_json))
+//                 editor.list_of_model_metadata.push(model_json);
+//             else
+//                 console.log('MetaData JSON is not valid for usage.');
+//             updateHtmlOfListOfModels();
+//         }else{
+//             console.log('fail');
+//         }
+//     };
+//
+// xmlhttp.open('POST', 'do.php?action=get_metadata_from_json_file_on_server&myfilename='+filename, true);
+// xmlhttp.send();
 
-    xmlhttp.onload = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            let answer = this.responseText.trim();
-            // console.log(answer);
-            let model_json = JSON.parse(answer);
-            if(checkMetaDataValidity(model_json))
-                editor.list_of_model_metadata.push(model_json);
-            else
-                console.log('MetaData JSON is not valid for usage.');
-            updateHtmlOfListOfModels();
-        }else{
-            console.log('fail');
+
+    let rawFile = new XMLHttpRequest();
+    rawFile.open("GET", filename, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status === 0)
+            {
+                let answer = rawFile.responseText;
+                let model_json = JSON.parse(answer);
+                if(checkMetaDataValidity(model_json))
+                    editor.list_of_model_metadata.push(model_json);
+                else
+                    console.log('MetaData JSON is not valid for usage.');
+                updateHtmlOfListOfModels();
+            }
         }
     };
+    rawFile.send(null);
 
-    xmlhttp.open('POST', 'do.php?action=get_metadata_from_json_file_on_server&myfilename='+filename, true);
-    xmlhttp.send();
 }
 
 function checkMetaDataValidity(md){
@@ -247,7 +271,7 @@ function checkMetaDataValidity(md){
 }
 
 
-function main()
+function main(visual=false)
 {
 
 
@@ -265,15 +289,16 @@ function main()
 
     let workflow = new BlockWorkflow(editor, null);
     editor.workflowblock = workflow;
+    editor.visual = visual;
 
-    loadMetaDataFromJSONOnServer('md1.json');
-    loadMetaDataFromJSONOnServer('md2.json');
-    loadMetaDataFromJSONOnServer('md3.json');
-    loadMetaDataFromJSONOnServer('md4.json');
-    loadMetaDataFromJSONOnServer('md5.json');
-    loadMetaDataFromJSONOnServer('md6.json');
-    // loadMetaDataFromJSONOnServer('md7.json');
-    // loadMetaDataFromJSONOnServer('md8.json');
+    if(visual) {
+        loadMetaDataFromJSONOnServer('md1.json');
+        loadMetaDataFromJSONOnServer('md2.json');
+        loadMetaDataFromJSONOnServer('md3.json');
+        loadMetaDataFromJSONOnServer('md4.json');
+        loadMetaDataFromJSONOnServer('md5.json');
+        loadMetaDataFromJSONOnServer('md6.json');
+    }
 
     if(loaded_json != null){
         editor.loadFromJsonData(loaded_json);
@@ -681,8 +706,11 @@ function main()
     // ====================================================================================================
     // ====================================================================================================
 
+    if(visual) {
+        updateHtmlOfListOfModels();
+        focusOnEditor();
+        editor.generateWorkflowHtml();
+    }
 
-    updateHtmlOfListOfModels();
-    focusOnEditor();
-    editor.generateWorkflowHtml();
+    return editor;
 }

@@ -3,23 +3,19 @@ class WorkflowEditor{
         this.workflowblock = null;
         this.datalinks = [];
 
-        // this.list_of_model_metadata = [metaDataThermalStat, metaDataThermalNonStat, metaDataMechanical];
         this.list_of_model_metadata = [];
 
+        this.one_elem_check_disabling_propagation = false;
+        this.selected_block = null;
+        this.selected_slot_1 = null;
+        this.selected_slot_2 = null;
+        this.selected_datalink = null;
+        this.selected_slot_ext = null;
+
+        this.visual = true;
     }
 
-    // getMetadataByName(md_name){
-    //     console.log(this.list_of_model_metadata);
-    //     for(let i=0;i<this.list_of_model_metadata.length;i++) {
-    //         console.log(this.list_of_model_metadata[i]['Name']);
-    //         if (this.list_of_model_metadata[i]['Name'] === md_name)
-    //             return this.list_of_model_metadata[i];
-    //     }
-    //     return null;
-    // }
-
     /**
-     *
      * @param s1
      * @param s2
      * @returns {Datalink}*/
@@ -110,16 +106,13 @@ class WorkflowEditor{
         return null;
     }
 
-    addElementByJsonRecord(json_data){
-        // console.log(json_data);
-
+    addBlockByJsonRecord(json_data){
         let parent_block;
         let new_block = null;
         let slot;
 
         if(json_data['classname']==='BlockWorkflow'){
             this.workflowblock.code_name = json_data['uuid'];
-            // new_block = this.workflowblock;
 
             let inout = '';
             for(let i=0;i<json_data['ext_slots'].length;i++){
@@ -163,21 +156,8 @@ class WorkflowEditor{
             new_block.code_name = json_data['uuid'];
             parent_block.addBlock(new_block);
         }
-        if(json_data['classname']==='DataLink'){
-            let s1 = this.getSlotByUID(json_data['ds1_uid']);
-            let s2 = this.getSlotByUID(json_data['ds2_uid']);
-            if(s1 != null && s2 != null)
-                this.addDatalink(s1, s2);
-        }
 
         if(new_block != null){
-            // let slots = new_block.getSlots();
-            // for(let key in json_data['slot_uids']){
-            //     for(let i=0;i<slots.length;i++)
-            //         if(slots[i].name === key)
-            //             slots[i].id = json_data['slot_uids'][key];
-            // }
-
             let slots = new_block.getSlots();
             for(let i=0;i<slots.length;i++){
                 slots[i].id = json_data['slot_uids'][i];
@@ -186,14 +166,40 @@ class WorkflowEditor{
 
     }
 
+    addDatalinkByJsonRecord(json_data){
+        let s1 = this.getSlotByUID(json_data['ds1_uid']);
+        let s2 = this.getSlotByUID(json_data['ds2_uid']);
+        if(s1 != null && s2 != null)
+            this.addDatalink(s1, s2);
+    }
+
     loadFromJsonData(json_data){
         this.workflowblock = new BlockWorkflow(this, null);
-        console.log('loading...');
-        for(let i=0;i<json_data['elements'].length;i++)
-            this.addElementByJsonRecord(json_data['elements'][i]);
-        this.workflowblock.settings_project_name = json_data['settings']['settings_project_name'];
-        this.workflowblock.settings_project_classname = json_data['settings']['settings_project_classname'];
-        this.workflowblock.settings_project_id = json_data['settings']['settings_project_id'];
+        console.log('Constructing project from JSON.');
+        if(json_data.constructor === {}.constructor) {
+            if('blocks' in json_data && 'datalinks' in json_data && 'settings' in json_data) {
+                for (let i = 0; i < json_data['blocks'].length; i++)
+                    this.addBlockByJsonRecord(json_data['blocks'][i]);
+                for (let i = 0; i < json_data['datalinks'].length; i++)
+                    this.addDatalinkByJsonRecord(json_data['datalinks'][i]);
+                if('settings_project_name' in json_data['settings'])
+                    this.workflowblock.settings_project_name = json_data['settings']['settings_project_name'];
+                else
+                    console.log('Project name was not in settings.');
+                if('settings_project_classname' in json_data['settings'])
+                    this.workflowblock.settings_project_classname = json_data['settings']['settings_project_classname'];
+                else
+                    console.log('Project classname was not in settings.');
+                if('settings_project_id' in json_data['settings'])
+                    this.workflowblock.settings_project_id = json_data['settings']['settings_project_id'];
+                else
+                    console.log('Project ID was not in settings.');
+            }else{
+                console.log('ERROR: The JSON does not contain keys \'blocks\' or/and \'datalinks\' or/and \'settings\'!');
+            }
+        }else{
+            console.log('ERROR: Passed variable must be a dictionary!');
+        }
     }
 
     setProjectName(val){
@@ -437,16 +443,16 @@ class WorkflowEditor{
 
     myquery_proceed(action, p1=null, p2=null){
         if(action==='delete_selected_datalink') {
-            if(selected_datalink)
-                this.removeDatalink(selected_datalink);
+            if(this.selected_datalink)
+                this.removeDatalink(this.selected_datalink);
         }
         if(action==='delete_selected_block') {
-            if(selected_block)
-                selected_block.deleteSelf();
+            if(this.selected_block)
+                this.selected_block.deleteSelf();
         }
         if(action==='delete_selected_ext_slot') {
-            if(selected_slot_ext)
-                this.deleteExtSlot(selected_slot_ext);
+            if(this.selected_slot_ext)
+                this.deleteExtSlot(this.selected_slot_ext);
         }
         myQuery_hide();
         this.generateWorkflowHtml();

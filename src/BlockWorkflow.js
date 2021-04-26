@@ -40,6 +40,7 @@ class BlockWorkflow extends Block{
     }
 
     generateCode(class_code){
+        console.log('Generating Python code.');
 
         let num_of_external_input_dataslots = 0;
 
@@ -372,7 +373,8 @@ class BlockWorkflow extends Block{
         this.generateAllElementCodeNames();
 
         let ext_slots = [];
-        let elements = [];
+        let data_blocks = [];
+        let data_datalinks = [];
         let slot_dict = {};
         let slots = this.getSlots();
         for (let i = 0; i < slots.length; i++)
@@ -389,15 +391,15 @@ class BlockWorkflow extends Block{
             'ext_slots': ext_slots
         };
 
-        elements.push(elem_self);
+        data_blocks.push(elem_self);
 
         let blocks = this.getBlocksRecursive();
         for(let i=0;i<blocks.length;i++){
-            elements.push(blocks[i].getDictForJSON());
+            data_blocks.push(blocks[i].getDictForJSON());
         }
 
         for(let i=0;i<this.editor.datalinks.length;i++){
-            elements.push(this.editor.datalinks[i].getDictForJSON());
+            data_datalinks.push(this.editor.datalinks[i].getDictForJSON());
         }
 
         let settings = {
@@ -406,7 +408,7 @@ class BlockWorkflow extends Block{
             'settings_project_id': this.settings_project_id
         };
 
-        return {'elements': elements, 'settings': settings};
+        return {'blocks': data_blocks, 'datalinks': data_datalinks, 'settings': settings};
     }
 
     // #########################

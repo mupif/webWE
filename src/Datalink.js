@@ -17,7 +17,6 @@ class Datalink{
 
     getDictForJSON(){
         return {
-            'classname': this.getClassName(),
             'ds1_uid': this.slot1.getUID(),
             'ds2_uid': this.slot2.getUID()
         };
@@ -47,41 +46,6 @@ class Datalink{
         return document.getElementById(this.id);
     }
 
-    // createDatalinkSimpleDiv(x, y, length, angle) {
-    //     let classname_add = '';
-    //     if(selected_datalink === this)
-    //         classname_add = '_selected';
-    //
-    //     let html = '';
-    //     html += '' +
-    //         '<div class="we_simple_datalink'+classname_add+'" id="'+this.id+'" style="' +
-    //         'width: ' + length + 'px;' +
-    //         'height: 0px;' +
-    //         '-moz-transform: rotate(' + angle + 'rad);' +
-    //         '-webkit-transform: rotate(' + angle + 'rad);' +
-    //         '-o-transform: rotate(' + angle + 'rad);' +
-    //         '-ms-transform: rotate(' + angle + 'rad);' +
-    //         'top: ' + y + 'px;' +
-    //         'left: ' + x + 'px;' +
-    //         '" ' +
-    //         'onmousedown="anyClick(event, \'\', \''+this.id+'\');"' +
-    //         ' onmouseup="one_elem_check_disabling_propagation=false;">' +
-    //         '</div>';
-    //     return html;
-    // }
-    //
-    // createDatalinkSimpleLine(x1, y1, x2, y2) {
-    //     let a = x1 - x2,
-    //         b = y1 - y2,
-    //         c = Math.sqrt(a * a + b * b);
-    //     let sx = (x1 + x2) / 2,
-    //         sy = (y1 + y2) / 2;
-    //     let x = sx - c / 2,
-    //         y = sy;
-    //     let alpha = Math.PI - Math.atan2(-b, a);
-    //     return this.createDatalinkSimpleDiv(x, y, c, alpha);
-    // }
-
     createDatalinkLineDiv(x, y, length, angle) {
         let html = '';
         html += '' +
@@ -96,7 +60,7 @@ class Datalink{
             'left: ' + x + 'px;' +
             '" ' +
             'onmousedown="anyClick(event, \'\', \''+this.id+'\');"' +
-            ' onmouseup="one_elem_check_disabling_propagation=false;"' +
+            ' onmouseup="editor.one_elem_check_disabling_propagation=false;"' +
             ' onmouseenter="datalinkHoverIn(\''+this.id+'\')"' +
             ' onmouseleave="datalinkHoverOut()">' +
             '</div>';
@@ -117,7 +81,7 @@ class Datalink{
 
     createDatalingSpline(x1, y1, x2, y2){
         let classname_add = '';
-        if(selected_datalink === this)
+        if(editor.selected_datalink === this)
             classname_add = '_selected';
 
         let html = '<div class="we_datalink'+classname_add+'" id="'+this.id+'">';

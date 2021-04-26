@@ -427,7 +427,7 @@ class Block{
 
     getBlockHtml(){
         let html = '';
-        html += '<div id="blockdiv_'+this.getUID()+'" class="'+this.getBlockHtmlClass()+'" onmousedown="anyClick(event, \''+this.getUID()+'\');" onmouseup="one_elem_check_disabling_propagation=false;" oncontextmenu="return false;">';
+        html += '<div id="blockdiv_'+this.getUID()+'" class="'+this.getBlockHtmlClass()+'" onmousedown="anyClick(event, \''+this.getUID()+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;" oncontextmenu="return false;">';
 
         html += this.getBlockHtmlContent();
 
@@ -500,7 +500,7 @@ class Block{
 
         let items = menu_record.getItems();
         for(let i=0;i<items.length;i++) {
-            html += '<div class="block_menu_item" onclick="editor.getBlockByUID(\''+this.getUID()+'\').modificationQuery(\''+items[i].getKeyword()+'\', \''+items[i].getValue()+'\');" onmousedown="one_elem_check_disabling_propagation=true;" onmouseup="one_elem_check_disabling_propagation=false;">'+items[i].getText()+'</div>';
+            html += '<div class="block_menu_item" onclick="editor.getBlockByUID(\''+this.getUID()+'\').modificationQuery(\''+items[i].getKeyword()+'\', \''+items[i].getValue()+'\');" onmousedown="editor.one_elem_check_disabling_propagation=true;" onmouseup="editor.one_elem_check_disabling_propagation=false;">'+items[i].getText()+'</div>';
         }
 
         return html;

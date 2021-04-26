@@ -4,30 +4,16 @@
     <link rel="stylesheet" href="./StyleWE.css">
     <link rel="stylesheet" href="./StyleWE_blocks.css">
     <link rel="stylesheet" href="./StyleMyQuery.css">
+
+    <script type="text/javascript" src="src/Init.js"></script>
     <script type="text/javascript">
-        let editor;// The Workflow Editor instance
-
-        let example_id = 0;// Global defining optional example
-
-        let selected_block = null;// Global for work with selected block (instance)
-        let selected_slot_1 = null;// Global for connecting slots
-        let selected_slot_2 = null;// Global for connecting slots
-        let selected_datalink = null;// Global for work with selected datalink (instance)
-        let selected_slot_ext = null;// Global for work with selected dataslot (instance)
-
-        let one_elem_check_disabling_propagation = false;
-
         <?php
         if(isset($_GET['example_id'])){
             echo 'example_id = '.intval($_GET['example_id']).';';
         }
         ?>
-
-        let loaded_json = null;
     </script>
-
     <script type="text/javascript" src="src/example_metadata.js"></script>
-
     <script type="text/javascript" src="src/myQuery.js"></script>
     <script type="text/javascript" src="src/mupifData.js"></script>
     <script type="text/javascript" src="src/helpers.js"></script>
@@ -52,7 +38,7 @@
     ?>
 
 </head>
-<body onload="main()" oncontextmenu="return false;" onkeydown="keyPress(event);">
+<body onload="main(true)" oncontextmenu="return false;" onkeydown="keyPress(event);">
 <div id="myQuery_container">
     <div id="myQuery_curtain" onclick="myQuery_hide();"></div>
     <div id="myQuery_input"></div>
@@ -87,12 +73,11 @@
                         <div class="melem" onclick="editor.menu_download_class_code();">Generate Python Class code</div>
                     </div>
                 </div>
-<!--                <div class="melem_separator">actions:</div>-->
-<!--                <div class="melem elem_1" onclick="editor.menu_add_datalink();">Add datalink</div>-->
+
             </div>
         </td>
         <td>
-            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="one_elem_check_disabling_propagation=false;">
+            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
                 <div id="workflowSubContainer">
 
                 </div>
@@ -109,8 +94,6 @@
             <div id="outerMessageContainer"><div id="messageContainer"></div></div>
         </td>
     </tr>
-
 </table>
-
 </body>
 </html>
