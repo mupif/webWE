@@ -10,8 +10,33 @@ module.exports = {
                         "classname": {"type": "string"},
                         "uuid": {"type": "string"},
                         "parent_uuid": {"type": "string"},
+                        "slot_uids": {"type": "object"},
+                        "metadata": {
+                            "type": "object",
+                            "properties": {
+                                "ClassName": {"type": "string"},
+                                "ModuleName": {"type": "string"},
+                                "Name": {"type": "string"},
+                                "ID": {"type": "string"},
+                                "Inputs": {"type": "array"},
+                                "Outputs": {"type": "array"},
+                            },
+                            "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs"]
+                        },
+                        "model_input_file_name": {"type": "string"},
+                        "model_input_file_directory": {"type": "string"},
                     },
-                    "required": ["classname", "uuid", "parent_uuid"]
+                    "required": ["classname", "uuid", "parent_uuid", "slot_uids"],
+                    "anyOf": [
+                        {
+                            "not": {
+                                "properties": {
+                                    "classname": { "const": "BlockModel" }
+                                }
+                            }
+                        },
+                        { "required": ["metadata", "model_input_file_name", "model_input_file_directory"] }
+                    ]
                 }
             },
             "datalinks": {

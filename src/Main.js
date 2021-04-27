@@ -292,12 +292,12 @@ function main(visual=false)
     editor.visual = visual;
 
     if(visual) {
-        loadMetaDataFromJSONOnServer('md1.json');
-        loadMetaDataFromJSONOnServer('md2.json');
-        loadMetaDataFromJSONOnServer('md3.json');
-        loadMetaDataFromJSONOnServer('md4.json');
-        loadMetaDataFromJSONOnServer('md5.json');
-        loadMetaDataFromJSONOnServer('md6.json');
+        loadMetaDataFromJSONOnServer('examples/metadata/md01.json');
+        loadMetaDataFromJSONOnServer('examples/metadata/md02.json');
+        loadMetaDataFromJSONOnServer('examples/metadata/md03.json');
+        loadMetaDataFromJSONOnServer('examples/metadata/md04.json');
+        loadMetaDataFromJSONOnServer('examples/metadata/md05.json');
+        loadMetaDataFromJSONOnServer('examples/metadata/md06.json');
     }
 
     if(loaded_json != null){
