@@ -8,8 +8,8 @@ module.exports = {
                     "type": "object",
                     "properties": {
                         "classname": {"type": "string"},
-                        "uuid": {"type": "string"},
-                        "parent_uuid": {"type": "string"},
+                        "uid": {"type": "string"},
+                        "parent_uid": {"type": "string"},
                         "slot_uids": {"type": "object"},
                         "metadata": {
                             "type": "object",
@@ -18,15 +18,40 @@ module.exports = {
                                 "ModuleName": {"type": "string"},
                                 "Name": {"type": "string"},
                                 "ID": {"type": "string"},
-                                "Inputs": {"type": "array"},
-                                "Outputs": {"type": "array"},
+                                "Inputs": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "Name": {"type": "string"},
+                                            "Type_ID": {"type": "string"},
+                                            "Type": {"type": "string"},
+                                            "Obj_ID": {},
+                                            "Required": {"type": "boolean"}
+                                        },
+                                        "required": ["Name", "Type_ID", "Type", "Obj_ID", "Required"]
+                                    }
+                                },
+                                "Outputs": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "Name": {"type": "string"},
+                                            "Type_ID": {"type": "string"},
+                                            "Type": {"type": "string"},
+                                            "Obj_ID": {}
+                                        },
+                                        "required": ["Name", "Type_ID", "Type", "Obj_ID"]
+                                    }
+                                },
                             },
                             "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs"]
                         },
                         "model_input_file_name": {"type": "string"},
                         "model_input_file_directory": {"type": "string"},
                     },
-                    "required": ["classname", "uuid", "parent_uuid", "slot_uids"],
+                    "required": ["classname", "uid", "parent_uid", "slot_uids"],
                     "anyOf": [
                         {
                             "not": {

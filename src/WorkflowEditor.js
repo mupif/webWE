@@ -112,7 +112,7 @@ class WorkflowEditor{
         let slot;
 
         if(json_data['classname']==='BlockWorkflow'){
-            this.workflowblock.code_name = json_data['uuid'];
+            this.workflowblock.code_name = json_data['uid'];
 
             let inout = '';
             for(let i=0;i<json_data['ext_slots'].length;i++){
@@ -133,27 +133,27 @@ class WorkflowEditor{
                         slots[i].id = json_data['slot_uids'][key];
         }
         if(json_data['classname']==='BlockConstPhysicalQuantity'){
-            parent_block = this.getBlockByUID(json_data['parent_uuid']);
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockPhysicalQuantity(this, parent_block, json_data['value'], json_data['units']);
-            new_block.code_name = json_data['uuid'];
+            new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
         if(json_data['classname']==='BlockConstProperty'){
-            parent_block = this.getBlockByUID(json_data['parent_uuid']);
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockProperty(this, parent_block, json_data['value'], json_data['propID'], json_data['valueType'], json_data['units'], json_data['objectID']);
-            new_block.code_name = json_data['uuid'];
+            new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
         if(json_data['classname']==='BlockTimeloop'){
-            parent_block = this.getBlockByUID(json_data['parent_uuid']);
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockTimeloop(this, parent_block);
-            new_block.code_name = json_data['uuid'];
+            new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
         if(json_data['classname']==='BlockModel'){
-            parent_block = this.getBlockByUID(json_data['parent_uuid']);
-            new_block = new BlockModel(this, parent_block, json_data['metadata']);
-            new_block.code_name = json_data['uuid'];
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_input_file_name'], json_data['model_input_file_directory']);
+            new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
 
@@ -389,9 +389,9 @@ class WorkflowEditor{
 
     menu_download_json(){
         let code = this.getJSON();
-        this.download("project.json", JSON.stringify(code));
+        this.download("project.json", JSON.stringify(code, null, 4));
         // console.log(code);
-        logToMyConsole(JSON.stringify(code), 'white', 12);
+        // logToMyConsole(JSON.stringify(code), 'white', 12);
     }
 
     download_ith_metadata(md_id){

@@ -1,10 +1,10 @@
 class BlockModel extends Block {
-    constructor(editor, parent_block, md = {}) {
+    constructor(editor, parent_block, md = {}, input_file_name="", input_file_directory="") {
         super(editor, parent_block);
         // this.md = md;
 
-        this.input_file_name = "";
-        this.input_file_directory = "";
+        this.input_file_name = input_file_name;
+        this.input_file_directory = input_file_directory;
 
         this.exec_type = "";
         this.exec_settings_jobmanagername = "";

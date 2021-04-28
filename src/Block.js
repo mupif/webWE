@@ -380,8 +380,8 @@ class Block{
 
         return {
             'classname': this.getClassName(),
-            'uuid': this.getUID(),
-            'parent_uuid': this.parent_block.getUID(),
+            'uid': this.getUID(),
+            'parent_uid': this.parent_block.getUID(),
             'slot_uids': slot_dict
         };
     }

@@ -385,8 +385,8 @@ class BlockWorkflow extends Block{
 
         let elem_self = {
             'classname': this.getClassName(),
-            'uuid': this.getUID(),
-            'parent_uuid': 'None',
+            'uid': this.getUID(),
+            'parent_uid': 'None',
             'slot_uids': slot_dict,
             'ext_slots': ext_slots
         };

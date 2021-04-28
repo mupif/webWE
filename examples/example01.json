@@ -1,0 +1,192 @@
+{
+    "blocks": [
+        {
+            "classname": "BlockWorkflow",
+            "uid": "workflow",
+            "parent_uid": "None",
+            "slot_uids": {},
+            "ext_slots": []
+        },
+        {
+            "classname": "BlockConstPhysicalQuantity",
+            "uid": "constant_physical_quantity_1",
+            "parent_uid": "workflow",
+            "slot_uids": {
+                "0": "slot_1"
+            },
+            "value": "0.0",
+            "units": "s"
+        },
+        {
+            "classname": "BlockConstPhysicalQuantity",
+            "uid": "constant_physical_quantity_2",
+            "parent_uid": "workflow",
+            "slot_uids": {
+                "0": "slot_2"
+            },
+            "value": "10.0",
+            "units": "s"
+        },
+        {
+            "classname": "BlockConstPhysicalQuantity",
+            "uid": "constant_physical_quantity_3",
+            "parent_uid": "workflow",
+            "slot_uids": {
+                "0": "slot_3"
+            },
+            "value": "0.5",
+            "units": "s"
+        },
+        {
+            "classname": "BlockConstProperty",
+            "uid": "constant_property_1",
+            "parent_uid": "workflow",
+            "slot_uids": {
+                "0": "slot_4"
+            },
+            "value": "(10.0,)",
+            "units": "degC",
+            "propID": "mupif.PropertyID.PID_Temperature",
+            "valueType": "mupif.ValueType.Scalar",
+            "objectID": 0
+        },
+        {
+            "classname": "BlockTimeloop",
+            "uid": "timeloop_1",
+            "parent_uid": "workflow",
+            "slot_uids": {
+                "0": "slot_5",
+                "1": "slot_6",
+                "2": "slot_7"
+            }
+        },
+        {
+            "classname": "BlockModel",
+            "uid": "model_1",
+            "parent_uid": "timeloop_1",
+            "slot_uids": {
+                "0": "slot_8",
+                "1": "slot_9",
+                "2": "slot_10",
+                "3": "slot_11",
+                "4": "slot_12",
+                "5": "slot_13",
+                "6": "slot_14",
+                "7": "slot_15",
+                "8": "slot_16"
+            },
+            "metadata": {
+                "ClassName": "ThermalNonstatModel",
+                "ModuleName": "models",
+                "Name": "Non-stationary thermal problem",
+                "ID": "ThermalNonstatModel-1",
+                "Description": "Non-stationary heat conduction using finite elements on a rectangular domain",
+                "Version_date": "1.0.0, Feb 2019",
+                "Representation": "Finite volumes",
+                "Geometry": "2D rectangle",
+                "Boundary_conditions": "Dirichlet, Neumann",
+                "Inputs": [
+                    {
+                        "Name": "edge temperature",
+                        "Type": "mupif.Property",
+                        "Required": false,
+                        "Type_ID": "mupif.PropertyID.PID_Temperature",
+                        "Obj_ID": [
+                            "Cauchy top",
+                            "Cauchy bottom",
+                            "Cauchy left",
+                            "Cauchy right",
+                            "Dirichlet top",
+                            "Dirichlet bottom",
+                            "Dirichlet left",
+                            "Dirichlet right"
+                        ]
+                    }
+                ],
+                "Outputs": [
+                    {
+                        "Name": "temperature",
+                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type": "mupif.Field",
+                        "Required": false,
+                        "Obj_ID": [
+                            0
+                        ]
+                    }
+                ]
+            },
+            "model_input_file_name": "inputT13.in",
+            "model_input_file_directory": ""
+        },
+        {
+            "classname": "BlockModel",
+            "uid": "model_2",
+            "parent_uid": "timeloop_1",
+            "slot_uids": {
+                "0": "slot_17",
+                "1": "slot_18"
+            },
+            "metadata": {
+                "ClassName": "MechanicalModel",
+                "ModuleName": "models",
+                "Name": "Plane stress linear elastic",
+                "ID": "MechanicalModel-1",
+                "Description": "Plane stress problem with linear elastic thermo-elastic material",
+                "Version_date": "1.0.0, Feb 2019",
+                "Geometry": "2D rectangle",
+                "Boundary_conditions": "Dirichlet",
+                "Inputs": [
+                    {
+                        "Name": "temperature",
+                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type": "mupif.Field",
+                        "Required": true,
+                        "Obj_ID": [
+                            0
+                        ]
+                    }
+                ],
+                "Outputs": [
+                    {
+                        "Name": "displacement",
+                        "Type_ID": "mupif.FieldID.FID_Displacement",
+                        "Type": "mupif.Field",
+                        "Required": false,
+                        "Obj_ID": [
+                            0
+                        ]
+                    }
+                ]
+            },
+            "model_input_file_name": "inputM13.in",
+            "model_input_file_directory": ""
+        }
+    ],
+    "datalinks": [
+        {
+            "ds1_uid": "slot_1",
+            "ds2_uid": "slot_5"
+        },
+        {
+            "ds1_uid": "slot_2",
+            "ds2_uid": "slot_6"
+        },
+        {
+            "ds1_uid": "slot_3",
+            "ds2_uid": "slot_7"
+        },
+        {
+            "ds1_uid": "slot_4",
+            "ds2_uid": "slot_8"
+        },
+        {
+            "ds1_uid": "slot_16",
+            "ds2_uid": "slot_17"
+        }
+    ],
+    "settings": {
+        "settings_project_name": "My unnamed project",
+        "settings_project_classname": "MyUnnamedProject",
+        "settings_project_id": "my_unnamed_project_01"
+    }
+}

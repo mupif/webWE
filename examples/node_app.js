@@ -1,5 +1,5 @@
 
-const project_json_schema = require('./project_json_schema');
+const project_json_schema = require('../project_json_schema');
 
 const process = require('process');
 
@@ -7,7 +7,7 @@ if(process.argv.length >= 3) {
 
     const fs = require('fs');
 
-    eval(fs.readFileSync('project.js') + '');
+    eval(fs.readFileSync('../project.js') + '');
 
     let editor = main();
 
@@ -16,7 +16,7 @@ if(process.argv.length >= 3) {
 
     let Validator = require('jsonschema').Validator;
     let v = new Validator();
-    let res = v.validate(json_data, project_json_schema.schema);//, {required: true}
+    let res = v.validate(json_data, project_json_schema.schema);
 
     if(res.valid) {
         console.log('Successful validation of JSON against schema.');
