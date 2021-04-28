@@ -7,7 +7,7 @@ function deepEqual(x, y) {
         }, true) : (x === y);
 }
 
-const project_json_schema = require("../project_json_schema");
+const project_json_schema = require(__dirname + "/../project_json_schema");
 
 const process = require("process");
 
@@ -23,12 +23,12 @@ if(process.argv.length >= 3) {
 
     const fs = require("fs");
 
-    eval(fs.readFileSync("../project.js") + "");
+    eval(fs.readFileSync(__dirname + "/../project.js") + "");
 
     let editor = main();
 
     console.log("Loading JSON file '" + filename_base + ".json'");
-    let json_data = JSON.parse(fs.readFileSync(filename_base + ".json"));
+    let json_data = JSON.parse(fs.readFileSync(__dirname + "/" + filename_base + ".json"));
 
     let Validator = require("jsonschema").Validator;
     let v = new Validator();
@@ -42,7 +42,7 @@ if(process.argv.length >= 3) {
         let code = editor.getExecutionCode();
 
         console.log("Writing generated code to file '" + filename_base + ".py'");
-        fs.writeFile(filename_base + ".py", code, err => {
+        fs.writeFile(__dirname + "/" + filename_base + ".py", code, err => {
             if (err) {
                 console.error(err);
                 return;
@@ -52,7 +52,7 @@ if(process.argv.length >= 3) {
         let json_str = JSON.stringify(editor.getJSON(), null, 4);
 
         console.log("Writing generated JSON to file '" + filename_base + "_copy.json'");
-        fs.writeFile(filename_base + "_copy.json", json_str, err => {
+        fs.writeFile(__dirname + "/" + filename_base + "_copy.json", json_str, err => {
             if (err) {
                 console.error(err);
                 return;

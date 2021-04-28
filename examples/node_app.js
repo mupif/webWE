@@ -1,5 +1,5 @@
 
-const project_json_schema = require('../project_json_schema');
+const project_json_schema = require(__dirname + '/../project_json_schema');
 
 const process = require('process');
 
@@ -7,7 +7,7 @@ if(process.argv.length >= 3) {
 
     const fs = require('fs');
 
-    eval(fs.readFileSync('../project.js') + '');
+    eval(fs.readFileSync(__dirname + '/../project.js') + '');
 
     let editor = main();
 
