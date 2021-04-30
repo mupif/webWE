@@ -1,6 +1,6 @@
 {
-    "ClassName": "thermal",
-    "ModuleName": "models",
+    "ClassName": "ThermalModel",
+    "ModuleName": "mupif_examples_models",
     "Name": "Stationary thermal problem",
     "ID": "Thermo-1",
     "Description": "Stationary heat conduction using finite elements on rectangular domain",

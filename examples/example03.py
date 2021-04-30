@@ -1,18 +1,18 @@
 import mupif
 import copy
-import mupif_examples_models
+import example02
 import logging
 log = logging.getLogger()
 
 
-class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
+class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
     
     def __init__(self, metadata={}):
         MD = {
-            "ClassName": "ThermoMechanicalExecutionWorkflow_01",
-            "ModuleName": "example01",
+            "ClassName": "ThermoMechanicalExecutionWorkflow_02",
+            "ModuleName": "example03",
             "Name": "Thermo-mechanical execution workflow",
-            "ID": "thermomechanical_exec_workflow_01",
+            "ID": "thermomechanical_exec_workflow_02",
             "Description": "",
             "Inputs": [
             ],
@@ -34,18 +34,11 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         # __init__ code of constant_property_1 (Property)
         self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
         
-        # __init__ code of constant_property_2 (Property)
-        self.constant_property_2 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
-        
-        # __init__ code of model_1 (Non-stationary thermal problem)
-        self.model_1 = mupif_examples_models.ThermalNonstatModel()
-        
-        # __init__ code of model_2 (Plane stress linear elastic)
-        self.model_2 = mupif_examples_models.MechanicalModel()
+        # __init__ code of model_1 (Thermo-mechanical class workflow)
+        self.model_1 = example02.ThermoMechanicalClassWorkflow_01()
 
         self.setMetadata('Model_refs_ID', [])
         self.registerModel(self.model_1)
-        self.registerModel(self.model_2)
     
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
         
@@ -59,18 +52,14 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
             }
         }
         
-        # initialization code of model_1 (Non-stationary thermal problem)
-        self.model_1.initialize(file='inputT.in', workdir='', metadata=execMD)
-        
-        # initialization code of model_2 (Plane stress linear elastic)
-        self.model_2.initialize(file='inputM.in', workdir='', metadata=execMD)
+        # initialization code of model_1 (Thermo-mechanical class workflow)
+        self.model_1.initialize(file='', workdir='', metadata=execMD)
         
         mupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)
     
     def terminate(self):
         pass
         self.model_1.terminate()
-        self.model_2.terminate()
     
     def solve(self, runInBackground=False):
         pass
@@ -83,7 +72,7 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         while timeloop_1_compute:
             timeloop_1_time_step_number += 1
         
-            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep()])
+            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep()])
             timeloop_1_time = min(timeloop_1_time.inUnitsOf('s').getValue()+timeloop_1_dt.inUnitsOf('s').getValue(), timeloop_1_target_time.inUnitsOf('s').getValue())*mupif.U.s
         
             if timeloop_1_time.inUnitsOf('s').getValue() + 1.e-6 > timeloop_1_target_time.inUnitsOf('s').getValue():
@@ -91,20 +80,14 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
             
             timeloop_1_time_step = mupif.timestep.TimeStep(time=timeloop_1_time, dt=timeloop_1_dt, targetTime=timeloop_1_target_time, number=timeloop_1_time_step_number)
             
-            # execution code of model_1 (Non-stationary thermal problem)
-            self.model_1.set(self.constant_property_1, 'Cauchy top')
-            self.model_1.set(self.constant_property_2, 'Dirichlet left')
-            self.model_1.set(self.constant_property_2, 'Dirichlet right')
+            # execution code of model_1 (Thermo-mechanical class workflow)
+            self.model_1.set(self.constant_property_1, 'top_temperature')
             self.model_1.solveStep(timeloop_1_time_step)
-            
-            # execution code of model_2 (Plane stress linear elastic)
-            self.model_2.set(self.model_1.get(mupif.FieldID.FID_Temperature, timeloop_1_time_step.getTime(), 0), 0)
-            self.model_2.solveStep(timeloop_1_time_step)
         
 
 
 if __name__ == '__main__':
-    problem = ThermoMechanicalExecutionWorkflow_01()
+    problem = ThermoMechanicalExecutionWorkflow_02()
     
     md = {
         'Execution': {

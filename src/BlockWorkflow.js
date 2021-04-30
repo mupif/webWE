@@ -5,6 +5,7 @@ class BlockWorkflow extends Block{
 
         this.settings_project_name = 'My unnamed project';
         this.settings_project_classname = 'MyUnnamedProject';
+        this.settings_project_modulename = 'MyModuleName';
         this.settings_project_id = 'my_unnamed_project_01';
 
     }
@@ -76,81 +77,61 @@ class BlockWorkflow extends Block{
         code.push("\tdef __init__(self, metadata={}):");
 
         code.push("\t\tMD = {");
-        // code.push("\t\t\t'Inputs': [");
-        //
-        // code.push("\t\t\t],");
-        code.push("\t\t\t'Inputs': [],");
-        // code.push("\t\t\t'Outputs': [");
-        //
-        // code.push("\t\t\t],");
-        code.push("\t\t\t'Outputs': [],");
+        code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
+        code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
+        code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
+        code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
+        code.push("\t\t\t\"Description\": \"\",");
+
+
+        let slots;
+        let params;
+        let s;
+        code.push("\t\t\t\"Inputs\": [");
+        slots = this.getAllExternalDataSlots("out");
+        for (let i=0;i<slots.length;i++) {
+            s = slots[i];
+            if (s.connected()) {
+                num_of_external_input_dataslots += 1;
+                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                    "\"Required\": True, \"description\": \"\", " +
+                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                    "\"Units\": \"\"";
+                code.push("\t\t\t\t{" + params + "},");
+            }
+        }
+        code.push("\t\t\t],");
+
+        code.push("\t\t\t\"Outputs\": [");
+        slots = this.getAllExternalDataSlots("in");
+        for (let i=0;i<slots.length;i++) {
+            s = slots[i];
+            if (s.connected()) {
+                num_of_external_input_dataslots += 1;
+                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                    "\"description\": \"\", " +
+                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                    "\"Units\": \"\"";
+                code.push("\t\t\t\t{" + params + "},");
+            }
+        }
+        code.push("\t\t\t],");
+
         code.push("\t\t}");
 
         code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
         // metadata
-        code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
-        code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
-        code.push("\t\tself.setMetadata('Description', '')");
+        // code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
+        // code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
+        // code.push("\t\tself.setMetadata('Description', '')");
 
         code.push("\t\tself.updateMetadata(metadata)");
 
         let code_add;
-        let params;
-        let slots;
-        let s;
-        let linked_slot;
         if(class_code) {
-
-            code.push("\t\tself.updateMetadata({'Inputs': [");
-            params = "";
-            slots = this.getAllExternalDataSlots("out");
-            for (let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if (s.connected()) {
-                    if(params !== ""){
-                        code.push("\t\t\t{" + params + "},");
-                        params = "";
-                    }
-                    num_of_external_input_dataslots += 1;
-                    params = "'Name': '" + s.name + "', 'Type': '" + s.type + "', " +
-                        "'Required': True, 'description': '', " +
-                        "'Type_ID': '" + s.getLinkedDataSlot().getObjType() + "', " +
-                        "'Obj_ID': ['" + s.getObjID() + "'], " +
-                        "'Units': ''";
-                }
-            }
-            if(params !== ""){
-                code.push("\t\t\t{" + params + "}");
-                params = "";
-            }
-            code.push("\t\t]})");
-
-            code.push("\t\tself.updateMetadata({'Outputs': [");
-            params = "";
-            slots = this.getAllExternalDataSlots("in");
-            for (let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected()) {
-                    if(params !== ""){
-                        code.push("\t\t\t{" + params + "},");
-                        params = "";
-                    }
-                    linked_slot = s.getLinkedDataSlot();
-                    params = "'Name': '" + s.name + "', 'Type': '" + linked_slot.type + "', " +
-                        "'Required': False, 'description': '', " +
-                        "'Type_ID': '" + linked_slot.getObjType() + "', " +
-                        "'Obj_ID': ['" + s.getObjID() + "'], " +
-                        "'Units': ''";
-                }
-            }
-            if(params !== ""){
-                code.push("\t\t\t{" + params + "},");
-                params = "";
-            }
-            code.push("\t\t]})");
-
-
             // initialization of workflow inputs
             slots = this.getAllExternalDataSlots("out");
             for (let i=0;i<slots.length;i++) {
@@ -175,13 +156,11 @@ class BlockWorkflow extends Block{
         // TODO temporarily disabled in master branch
         let model;
         code.push("\t\tself.setMetadata('Model_refs_ID', [])");
-        let dev2 = false;
-        if(dev2) {//dev2 branch -> true
-            for (let i=0;i<all_model_blocks.length;i++) {
-                model = all_model_blocks[i];
-                if(model.exec_type === "Local")
-                    code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
-            }
+
+        for (let i=0;i<all_model_blocks.length;i++) {
+            model = all_model_blocks[i];
+            if(model.exec_type === "Local")
+                code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
         }
 
         // initialize function
@@ -405,6 +384,7 @@ class BlockWorkflow extends Block{
         let settings = {
             'settings_project_name': this.settings_project_name,
             'settings_project_classname': this.settings_project_classname,
+            'settings_project_modulename': this.settings_project_modulename,
             'settings_project_id': this.settings_project_id
         };
 

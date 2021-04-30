@@ -1,6 +1,6 @@
 let metaDataThermalStat = {
     'ClassName': 'ThermalModel',
-    'ModuleName': 'models',
+    'ModuleName': 'mupif_examples_models',
     'Name': 'Stationary thermal problem',
     'ID': 'ThermalModel-1',
     'Description': 'Stationary heat conduction using finite elements on rectangular domain',
@@ -37,7 +37,7 @@ let metaDataThermalStat = {
 
 let metaDataThermalNonStat = {
     'ClassName': 'ThermalNonstatModel',
-    'ModuleName': 'models',
+    'ModuleName': 'mupif_examples_models',
     'Name': 'Non-stationary thermal problem',
     'ID': 'ThermalNonstatModel-1',
     'Description': 'Non-stationary heat conduction using finite elements on a rectangular domain',
@@ -75,7 +75,7 @@ let metaDataThermalNonStat = {
 
 let metaDataMechanical = {
     'ClassName': 'MechanicalModel',
-    'ModuleName': 'models',
+    'ModuleName': 'mupif_examples_models',
     'Name': 'Plane stress linear elastic',
     'ID': 'MechanicalModel-1',
     'Description': 'Plane stress problem with linear elastic thermo-elastic material',
@@ -194,7 +194,7 @@ let metaData_LAMMPS = {
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_DESIGNATION", "Name": "FILLER DESIGNATION", "Description": "FILLER DESIGNATION", "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CROSSLINKONG_DENSITY", "Name": "CROSSLINKONG DENSITY", "Description": "CROSSLINKONG DENSITY",  "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_CONCENTRATION", "Name": "FILLER CONCENTRATION", "Description": "FILLER CONCENTRATION",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "degC", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "deg_C", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PRESSURE", "Name": "PRESSURE", "Description": "TEMPERATURE",  "Units":  "atm", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_POLYDISPERSITY_INDEX", "Name": "POLYDISPERSITY INDEX", "Description": "POLYDISPERSITY INDEX",  "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE", "Name": "SMILE MODIFIER MOLECULAR STRUCTURE", "Description": "SMILE MODIFIER MOLECULAR STRUCTURE",  "Units":  "None", "Origin": "Simulated", "Required": true},

@@ -303,6 +303,6 @@ let mupif_Units = [
     'Bq',
     'Gy',
     'Sv',
-    'degC',
+    'deg_C',
     'degF',
 ];

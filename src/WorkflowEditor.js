@@ -190,6 +190,10 @@ class WorkflowEditor{
                     this.workflowblock.settings_project_classname = json_data['settings']['settings_project_classname'];
                 else
                     console.log('Project classname was not in settings.');
+                if('settings_project_modulename' in json_data['settings'])
+                    this.workflowblock.settings_project_modulename = json_data['settings']['settings_project_modulename'];
+                else
+                    console.log('Project modulename was not in settings.');
                 if('settings_project_id' in json_data['settings'])
                     this.workflowblock.settings_project_id = json_data['settings']['settings_project_id'];
                 else
@@ -208,6 +212,10 @@ class WorkflowEditor{
 
     setProjectClassName(val){
         this.workflowblock.settings_project_classname = val;
+    }
+
+    setProjectModuleName(val){
+        this.workflowblock.settings_project_modulename = val;
     }
 
     setProjectID(val){
@@ -246,6 +254,17 @@ class WorkflowEditor{
         html += '<tr>';
         html += '<td><i></i></td>';
         html += '<td><input type="text" value="'+this.workflowblock.settings_project_classname+'" id="new_project_classname"></b></td>';
+        html += '</tr>';
+
+        html += '<tr><td colspan="10" style="height:10px;"></td>';
+
+        html += '<tr>';
+        html += '<td>ModuleName:</td>';
+        html += '<td><b>'+this.workflowblock.settings_project_modulename+'</b></td>';
+        html += '</tr>';
+        html += '<tr>';
+        html += '<td><i></i></td>';
+        html += '<td><input type="text" value="'+this.workflowblock.settings_project_modulename+'" id="new_project_modulename"></b></td>';
         html += '</tr>';
 
         html += '<tr><td colspan="10" style="height:10px;"></td>';
@@ -350,6 +369,8 @@ class WorkflowEditor{
         this.setProjectName(val);
         val = document.getElementById('new_project_classname').value;
         this.setProjectClassName(val);
+        val = document.getElementById('new_project_modulename').value;
+        this.setProjectModuleName(val);
         val = document.getElementById('new_project_id').value;
         this.setProjectID(val);
         this.updateHtmlOfProjectSettings();
@@ -368,7 +389,7 @@ class WorkflowEditor{
     }
 
     menu_download_exec_code(){
-        this.download("execution_code.py", this.getExecutionCode());
+        this.download(this.workflowblock.settings_project_modulename + ".py", this.getExecutionCode());
         let code = this.getExecutionCode();
         // console.log(code);
         let code_html = replaceAllInStr(code, '\t', '    ');
@@ -378,7 +399,7 @@ class WorkflowEditor{
     }
 
     menu_download_class_code(){
-        this.download("class_code.py", this.getClassCode());
+        this.download(this.workflowblock.settings_project_modulename + ".py", this.getClassCode());
         let code = this.getClassCode();
         // console.log(code);
         let code_html = replaceAllInStr(code, '\t', ' ');

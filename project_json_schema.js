@@ -26,7 +26,7 @@ module.exports = {
                                             "Name": {"type": "string"},
                                             "Type_ID": {"type": "string"},
                                             "Type": {"type": "string"},
-                                            "Obj_ID": {},
+                                            "Obj_ID": {"type": ["array", "string", "number"]},
                                             "Required": {"type": "boolean"}
                                         },
                                         "required": ["Name", "Type_ID", "Type", "Obj_ID", "Required"]
@@ -40,13 +40,14 @@ module.exports = {
                                             "Name": {"type": "string"},
                                             "Type_ID": {"type": "string"},
                                             "Type": {"type": "string"},
-                                            "Obj_ID": {}
+                                            "Obj_ID": {"type": ["array", "string", "number"]}
                                         },
                                         "required": ["Name", "Type_ID", "Type", "Obj_ID"]
                                     }
                                 },
+                                "Execution_type": {"type": "string", "enum": ["Local", "Distributed"]}
                             },
-                            "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs"]
+                            "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs"]//, "Execution_type"
                         },
                         "model_input_file_name": {"type": "string"},
                         "model_input_file_directory": {"type": "string"},

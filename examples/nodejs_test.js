@@ -11,7 +11,9 @@ const project_json_schema = require(__dirname + "/../project_json_schema");
 
 const process = require("process");
 
-if(process.argv.length >= 3) {
+if(process.argv.length >= 4) {
+
+    let workflow_type = process.argv[3];
 
     let ex_number = parseInt(process.argv[2]);
 
@@ -39,9 +41,13 @@ if(process.argv.length >= 3) {
 
         editor.loadFromJsonData(json_data);
 
-        let code = editor.getExecutionCode();
+        let code;
+        if(workflow_type === 'exec')
+            code = editor.getExecutionCode();
+        else
+            code = editor.getClassCode();
 
-        console.log("Writing generated code to file '" + filename_base + ".py'");
+        console.log("Writing generated " + workflow_type + " code to file '" + filename_base + ".py'");
         fs.writeFile(__dirname + "/" + filename_base + ".py", code, err => {
             if (err) {
                 console.error(err);

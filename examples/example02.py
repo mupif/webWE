@@ -1,33 +1,46 @@
 import mupif
 import copy
-import models
+import mupif_examples_models
 import logging
 log = logging.getLogger()
 
 
-class MyUnnamedProject(mupif.workflow.Workflow):
+class ThermoMechanicalClassWorkflow_01(mupif.workflow.Workflow):
     
     def __init__(self, metadata={}):
         MD = {
-            'Inputs': [],
-            'Outputs': [],
+            "ClassName": "ThermoMechanicalClassWorkflow_01",
+            "ModuleName": "example02",
+            "Name": "Thermo-mechanical class workflow",
+            "ID": "thermomechanical_class_workflow_01",
+            "Description": "",
+            "Inputs": [
+                {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.PropertyID.PID_Temperature", "Obj_ID": ["top_temperature"], "Units": ""},
+            ],
+            "Outputs": [
+                {"Name": "temperature", "Type": "mupif.Field", "description": "", "Type_ID": "mupif.FieldID.FID_Temperature", "Obj_ID": ["temperature"], "Units": ""},
+                {"Name": "displacement", "Type": "mupif.Field", "description": "", "Type_ID": "mupif.FieldID.FID_Displacement", "Obj_ID": ["displacement"], "Units": ""},
+            ],
         }
         mupif.workflow.Workflow.__init__(self, metadata=MD)
-        self.setMetadata('Name', 'My unnamed project')
-        self.setMetadata('ID', 'my_unnamed_project_01')
-        self.setMetadata('Description', '')
         self.updateMetadata(metadata)
+    
+        # initialization code of external input
+        self.external_input_1 = None
+        # It should be defined from outside using set() method.
         
         # __init__ code of constant_property_1 (Property)
-        self.constant_property_1 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit='degC', time=None, objectID=0)
+        self.constant_property_1 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
         
         # __init__ code of model_1 (Non-stationary thermal problem)
-        self.model_1 = models.ThermalNonstatModel()
+        self.model_1 = mupif_examples_models.ThermalNonstatModel()
         
         # __init__ code of model_2 (Plane stress linear elastic)
-        self.model_2 = models.MechanicalModel()
+        self.model_2 = mupif_examples_models.MechanicalModel()
 
         self.setMetadata('Model_refs_ID', [])
+        self.registerModel(self.model_1)
+        self.registerModel(self.model_2)
     
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
         
@@ -42,47 +55,62 @@ class MyUnnamedProject(mupif.workflow.Workflow):
         }
         
         # initialization code of model_1 (Non-stationary thermal problem)
-        self.model_1.initialize(file='inputT13.in', workdir='', metadata=execMD)
+        self.model_1.initialize(file='inputT.in', workdir='', metadata=execMD)
         
         # initialization code of model_2 (Plane stress linear elastic)
-        self.model_2.initialize(file='inputM13.in', workdir='', metadata=execMD)
+        self.model_2.initialize(file='inputM.in', workdir='', metadata=execMD)
         
         mupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)
+    
+    def getCriticalTimeStep(self):
+        return min([self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep()])
+    
+    # set method for all external inputs
+    def set(self, obj, objectID=0):
+            
+        # in case of Property
+        if isinstance(obj, mupif.property.Property):
+            pass
+            if objectID == 'top_temperature':
+                self.external_input_1 = obj
+            
+        # in case of Field
+        if isinstance(obj, mupif.field.Field):
+            pass
+    
+    # get method for all external outputs
+    def get(self, objectType, time=None, objectID=0):
+            
+        # in case of Property
+        if isinstance(objectType, mupif.PropertyID):
+            pass
+            
+        # in case of Field
+        if isinstance(objectType, mupif.FieldID):
+            pass
+            if objectID == 'temperature':
+                return self.model_1.get(mupif.FieldID.FID_Temperature, time, 0)
+            if objectID == 'displacement':
+                return self.model_2.get(mupif.FieldID.FID_Displacement, time, 0)
+        
+        return None
     
     def terminate(self):
         pass
         self.model_1.terminate()
         self.model_2.terminate()
     
-    def solve(self, runInBackground=False):
+    def solveStep(self, tstep, stageID=0, runInBackground=False):
         pass
         
         # execution code of model_1 (Non-stationary thermal problem)
-        model_1_virtual_timestep = mupif.timestep.TimeStep(time=0*mupif.Q.s, dt=1*mupif.Q.s, targetTime=1*mupif.Q.s)
         self.model_1.set(self.external_input_1, 'Cauchy top')
         self.model_1.set(self.constant_property_1, 'Dirichlet bottom')
         self.model_1.set(self.constant_property_1, 'Dirichlet left')
-        self.model_1.solveStep(model_1_virtual_timestep)
+        self.model_1.solveStep(tstep)
         
         # execution code of model_2 (Plane stress linear elastic)
-        model_2_virtual_timestep = mupif.timestep.TimeStep(time=0*mupif.Q.s, dt=1*mupif.Q.s, targetTime=1*mupif.Q.s)
-        self.model_2.set(self.model_1.get(mupif.FieldID.FID_Temperature, model_2_virtual_timestep.getTime(), 0), 0)
-        self.model_2.solveStep(model_2_virtual_timestep)
+        self.model_2.set(self.model_1.get(mupif.FieldID.FID_Temperature, tstep.getTime(), 0), 0)
+        self.model_2.solveStep(tstep)
 
-
-if __name__ == '__main__':
-    problem = MyUnnamedProject()
-    
-    md = {
-        'Execution': {
-            'ID': 'N/A',
-            'Use_case_ID': 'N/A',
-            'Task_ID': 'N/A'
-        }
-    }
-    problem.initialize(metadata=md)
-    problem.solve()
-    problem.terminate()
-    
-    print('Simulation has finished.')
 

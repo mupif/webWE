@@ -21,7 +21,7 @@ class BlockProperty extends Block{
 
     getInitCode(indent=0){
         let code = super.getInitCode();
-        code.push("self."+this.code_name+" = mupif.property.ConstantProperty(value="+this.value+", propID="+this.property_id+", valueType="+this.value_type+", unit='"+this.units+"', time=None, objectID="+this.object_id+")");
+        code.push("self."+this.code_name+" = mupif.property.ConstantProperty(value="+this.value+", propID="+this.property_id+", valueType="+this.value_type+", unit=mupif.U."+this.units+", time=None, objectID="+this.object_id+")");
         return push_indents_before_each_line(code, indent);
     }
 

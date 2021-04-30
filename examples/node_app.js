@@ -3,7 +3,7 @@ const project_json_schema = require(__dirname + '/../project_json_schema');
 
 const process = require('process');
 
-if(process.argv.length >= 3) {
+if(process.argv.length >= 4) {
 
     const fs = require('fs');
 

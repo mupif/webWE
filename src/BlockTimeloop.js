@@ -82,7 +82,7 @@ class BlockTimeloop extends Block{
 
         while_code.push("");
         while_code.push(dt_code);
-        while_code.push("\t" + var_time + " = min(" + var_time + "+" + var_dt + ", " + var_target_time + ")");
+        while_code.push("\t" + var_time + " = min(" + var_time + ".inUnitsOf('s').getValue()+" + var_dt + ".inUnitsOf('s').getValue(), " + var_target_time + ".inUnitsOf('s').getValue())*mupif.U.s");
         while_code.push("");
 
         while_code.push("\tif " + var_time + ".inUnitsOf('s').getValue() + 1.e-6 > " + var_target_time + ".inUnitsOf('s').getValue():");

@@ -45,7 +45,20 @@
                 "0": "slot_4"
             },
             "value": "(10.0,)",
-            "units": "degC",
+            "units": "deg_C",
+            "propID": "mupif.PropertyID.PID_Temperature",
+            "valueType": "mupif.ValueType.Scalar",
+            "objectID": 0
+        },
+        {
+            "classname": "BlockConstProperty",
+            "uid": "constant_property_2",
+            "parent_uid": "workflow",
+            "slot_uids": {
+                "0": "slot_5"
+            },
+            "value": "(0.0,)",
+            "units": "deg_C",
             "propID": "mupif.PropertyID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar",
             "objectID": 0
@@ -55,9 +68,9 @@
             "uid": "timeloop_1",
             "parent_uid": "workflow",
             "slot_uids": {
-                "0": "slot_5",
-                "1": "slot_6",
-                "2": "slot_7"
+                "0": "slot_6",
+                "1": "slot_7",
+                "2": "slot_8"
             }
         },
         {
@@ -65,19 +78,19 @@
             "uid": "model_1",
             "parent_uid": "timeloop_1",
             "slot_uids": {
-                "0": "slot_8",
-                "1": "slot_9",
-                "2": "slot_10",
-                "3": "slot_11",
-                "4": "slot_12",
-                "5": "slot_13",
-                "6": "slot_14",
-                "7": "slot_15",
-                "8": "slot_16"
+                "0": "slot_9",
+                "1": "slot_10",
+                "2": "slot_11",
+                "3": "slot_12",
+                "4": "slot_13",
+                "5": "slot_14",
+                "6": "slot_15",
+                "7": "slot_16",
+                "8": "slot_17"
             },
             "metadata": {
                 "ClassName": "ThermalNonstatModel",
-                "ModuleName": "models",
+                "ModuleName": "mupif_examples_models",
                 "Name": "Non-stationary thermal problem",
                 "ID": "ThermalNonstatModel-1",
                 "Description": "Non-stationary heat conduction using finite elements on a rectangular domain",
@@ -113,9 +126,10 @@
                             0
                         ]
                     }
-                ]
+                ],
+                "Execution_type": "Local"
             },
-            "model_input_file_name": "inputT13.in",
+            "model_input_file_name": "inputT.in",
             "model_input_file_directory": ""
         },
         {
@@ -123,12 +137,12 @@
             "uid": "model_2",
             "parent_uid": "timeloop_1",
             "slot_uids": {
-                "0": "slot_17",
-                "1": "slot_18"
+                "0": "slot_18",
+                "1": "slot_19"
             },
             "metadata": {
                 "ClassName": "MechanicalModel",
-                "ModuleName": "models",
+                "ModuleName": "mupif_examples_models",
                 "Name": "Plane stress linear elastic",
                 "ID": "MechanicalModel-1",
                 "Description": "Plane stress problem with linear elastic thermo-elastic material",
@@ -156,37 +170,47 @@
                             0
                         ]
                     }
-                ]
+                ],
+                "Execution_type": "Local"
             },
-            "model_input_file_name": "inputM13.in",
+            "model_input_file_name": "inputM.in",
             "model_input_file_directory": ""
         }
     ],
     "datalinks": [
         {
             "ds1_uid": "slot_1",
-            "ds2_uid": "slot_5"
-        },
-        {
-            "ds1_uid": "slot_2",
             "ds2_uid": "slot_6"
         },
         {
-            "ds1_uid": "slot_3",
+            "ds1_uid": "slot_2",
             "ds2_uid": "slot_7"
         },
         {
-            "ds1_uid": "slot_4",
+            "ds1_uid": "slot_3",
             "ds2_uid": "slot_8"
         },
         {
-            "ds1_uid": "slot_16",
-            "ds2_uid": "slot_17"
+            "ds1_uid": "slot_4",
+            "ds2_uid": "slot_9"
+        },
+        {
+            "ds1_uid": "slot_17",
+            "ds2_uid": "slot_18"
+        },
+        {
+            "ds1_uid": "slot_5",
+            "ds2_uid": "slot_15"
+        },
+        {
+            "ds1_uid": "slot_5",
+            "ds2_uid": "slot_16"
         }
     ],
     "settings": {
-        "settings_project_name": "My unnamed project",
-        "settings_project_classname": "MyUnnamedProject",
-        "settings_project_id": "my_unnamed_project_01"
+        "settings_project_name": "Thermo-mechanical execution workflow",
+        "settings_project_classname": "ThermoMechanicalExecutionWorkflow_01",
+        "settings_project_modulename": "example01",
+        "settings_project_id": "thermomechanical_exec_workflow_01"
     }
 }

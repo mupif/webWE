@@ -1,6 +1,6 @@
 {
-    "ClassName": "mechanical",
-    "ModuleName": "models",
+    "ClassName": "MechanicalModel",
+    "ModuleName": "mupif_examples_models",
     "Name": "Plane stress linear elastic",
     "ID": "Mechanical-1",
     "Description": "Plane stress problem with linear elastic thermo-elastic material",

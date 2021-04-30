@@ -1,6 +1,6 @@
 {
-    "ClassName": "thermal_nonstat",
-    "ModuleName": "models",
+    "ClassName": "ThermalNonstatModel",
+    "ModuleName": "mupif_examples_models",
     "Name": "Non-stationary thermal problem",
     "ID": "NonStatThermo-1",
     "Description": "Non-stationary heat conduction using finite elements on a rectangular domain",

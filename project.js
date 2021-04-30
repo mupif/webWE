@@ -943,7 +943,7 @@ class BlockPhysicalQuantity extends Block{
 
     getInitCode(indent=0){
         let code = super.getInitCode();
-        code.push("self."+this.code_name+" = mupif.physics.physicalquantities.PhysicalQuantity(value="+this.value+", unit='"+this.units+"')");
+        code.push("self."+this.code_name+" = "+this.value+"*mupif.U."+this.units+"");
         return push_indents_before_each_line(code, indent);
     }
 
@@ -1069,7 +1069,7 @@ class BlockProperty extends Block{
 
     getInitCode(indent=0){
         let code = super.getInitCode();
-        code.push("self."+this.code_name+" = mupif.property.ConstantProperty(value="+this.value+", propID="+this.property_id+", valueType="+this.value_type+", unit='"+this.units+"', time=None, objectID="+this.object_id+")");
+        code.push("self."+this.code_name+" = mupif.property.ConstantProperty(value="+this.value+", propID="+this.property_id+", valueType="+this.value_type+", unit=mupif.U."+this.units+", time=None, objectID="+this.object_id+")");
         return push_indents_before_each_line(code, indent);
     }
 
@@ -1323,7 +1323,7 @@ class BlockTimeloop extends Block{
 
         while_code.push("");
         while_code.push(dt_code);
-        while_code.push("\t" + var_time + " = min(" + var_time + "+" + var_dt + ", " + var_target_time + ")");
+        while_code.push("\t" + var_time + " = min(" + var_time + ".inUnitsOf('s').getValue()+" + var_dt + ".inUnitsOf('s').getValue(), " + var_target_time + ".inUnitsOf('s').getValue())*mupif.U.s");
         while_code.push("");
 
         while_code.push("\tif " + var_time + ".inUnitsOf('s').getValue() + 1.e-6 > " + var_target_time + ".inUnitsOf('s').getValue():");
@@ -1376,6 +1376,7 @@ class BlockWorkflow extends Block{
 
         this.settings_project_name = 'My unnamed project';
         this.settings_project_classname = 'MyUnnamedProject';
+        this.settings_project_modulename = 'MyModuleName';
         this.settings_project_id = 'my_unnamed_project_01';
 
     }
@@ -1447,81 +1448,61 @@ class BlockWorkflow extends Block{
         code.push("\tdef __init__(self, metadata={}):");
 
         code.push("\t\tMD = {");
-        // code.push("\t\t\t'Inputs': [");
-        //
-        // code.push("\t\t\t],");
-        code.push("\t\t\t'Inputs': [],");
-        // code.push("\t\t\t'Outputs': [");
-        //
-        // code.push("\t\t\t],");
-        code.push("\t\t\t'Outputs': [],");
+        code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
+        code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
+        code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
+        code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
+        code.push("\t\t\t\"Description\": \"\",");
+
+
+        let slots;
+        let params;
+        let s;
+        code.push("\t\t\t\"Inputs\": [");
+        slots = this.getAllExternalDataSlots("out");
+        for (let i=0;i<slots.length;i++) {
+            s = slots[i];
+            if (s.connected()) {
+                num_of_external_input_dataslots += 1;
+                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                    "\"Required\": True, \"description\": \"\", " +
+                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                    "\"Units\": \"\"";
+                code.push("\t\t\t\t{" + params + "},");
+            }
+        }
+        code.push("\t\t\t],");
+
+        code.push("\t\t\t\"Outputs\": [");
+        slots = this.getAllExternalDataSlots("in");
+        for (let i=0;i<slots.length;i++) {
+            s = slots[i];
+            if (s.connected()) {
+                num_of_external_input_dataslots += 1;
+                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                    "\"description\": \"\", " +
+                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                    "\"Units\": \"\"";
+                code.push("\t\t\t\t{" + params + "},");
+            }
+        }
+        code.push("\t\t\t],");
+
         code.push("\t\t}");
 
         code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
         // metadata
-        code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
-        code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
-        code.push("\t\tself.setMetadata('Description', '')");
+        // code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
+        // code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
+        // code.push("\t\tself.setMetadata('Description', '')");
 
         code.push("\t\tself.updateMetadata(metadata)");
 
         let code_add;
-        let params;
-        let slots;
-        let s;
-        let linked_slot;
         if(class_code) {
-
-            code.push("\t\tself.updateMetadata({'Inputs': [");
-            params = "";
-            slots = this.getAllExternalDataSlots("out");
-            for (let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if (s.connected()) {
-                    if(params !== ""){
-                        code.push("\t\t\t{" + params + "},");
-                        params = "";
-                    }
-                    num_of_external_input_dataslots += 1;
-                    params = "'Name': '" + s.name + "', 'Type': '" + s.type + "', " +
-                        "'Required': True, 'description': '', " +
-                        "'Type_ID': '" + s.getLinkedDataSlot().getObjType() + "', " +
-                        "'Obj_ID': ['" + s.getObjID() + "'], " +
-                        "'Units': ''";
-                }
-            }
-            if(params !== ""){
-                code.push("\t\t\t{" + params + "}");
-                params = "";
-            }
-            code.push("\t\t]})");
-
-            code.push("\t\tself.updateMetadata({'Outputs': [");
-            params = "";
-            slots = this.getAllExternalDataSlots("in");
-            for (let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected()) {
-                    if(params !== ""){
-                        code.push("\t\t\t{" + params + "},");
-                        params = "";
-                    }
-                    linked_slot = s.getLinkedDataSlot();
-                    params = "'Name': '" + s.name + "', 'Type': '" + linked_slot.type + "', " +
-                        "'Required': False, 'description': '', " +
-                        "'Type_ID': '" + linked_slot.getObjType() + "', " +
-                        "'Obj_ID': ['" + s.getObjID() + "'], " +
-                        "'Units': ''";
-                }
-            }
-            if(params !== ""){
-                code.push("\t\t\t{" + params + "},");
-                params = "";
-            }
-            code.push("\t\t]})");
-
-
             // initialization of workflow inputs
             slots = this.getAllExternalDataSlots("out");
             for (let i=0;i<slots.length;i++) {
@@ -1546,13 +1527,11 @@ class BlockWorkflow extends Block{
         // TODO temporarily disabled in master branch
         let model;
         code.push("\t\tself.setMetadata('Model_refs_ID', [])");
-        let dev2 = false;
-        if(dev2) {//dev2 branch -> true
-            for (let i=0;i<all_model_blocks.length;i++) {
-                model = all_model_blocks[i];
-                if(model.exec_type === "Local")
-                    code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
-            }
+
+        for (let i=0;i<all_model_blocks.length;i++) {
+            model = all_model_blocks[i];
+            if(model.exec_type === "Local")
+                code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
         }
 
         // initialize function
@@ -1776,6 +1755,7 @@ class BlockWorkflow extends Block{
         let settings = {
             'settings_project_name': this.settings_project_name,
             'settings_project_classname': this.settings_project_classname,
+            'settings_project_modulename': this.settings_project_modulename,
             'settings_project_id': this.settings_project_id
         };
 
@@ -1956,7 +1936,7 @@ class Datalink{
 
 let metaDataThermalStat = {
     'ClassName': 'ThermalModel',
-    'ModuleName': 'models',
+    'ModuleName': 'mupif_examples_models',
     'Name': 'Stationary thermal problem',
     'ID': 'ThermalModel-1',
     'Description': 'Stationary heat conduction using finite elements on rectangular domain',
@@ -1993,7 +1973,7 @@ let metaDataThermalStat = {
 
 let metaDataThermalNonStat = {
     'ClassName': 'ThermalNonstatModel',
-    'ModuleName': 'models',
+    'ModuleName': 'mupif_examples_models',
     'Name': 'Non-stationary thermal problem',
     'ID': 'ThermalNonstatModel-1',
     'Description': 'Non-stationary heat conduction using finite elements on a rectangular domain',
@@ -2031,7 +2011,7 @@ let metaDataThermalNonStat = {
 
 let metaDataMechanical = {
     'ClassName': 'MechanicalModel',
-    'ModuleName': 'models',
+    'ModuleName': 'mupif_examples_models',
     'Name': 'Plane stress linear elastic',
     'ID': 'MechanicalModel-1',
     'Description': 'Plane stress problem with linear elastic thermo-elastic material',
@@ -2150,7 +2130,7 @@ let metaData_LAMMPS = {
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_DESIGNATION", "Name": "FILLER DESIGNATION", "Description": "FILLER DESIGNATION", "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CROSSLINKONG_DENSITY", "Name": "CROSSLINKONG DENSITY", "Description": "CROSSLINKONG DENSITY",  "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_CONCENTRATION", "Name": "FILLER CONCENTRATION", "Description": "FILLER CONCENTRATION",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "degC", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "deg_C", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PRESSURE", "Name": "PRESSURE", "Description": "TEMPERATURE",  "Units":  "atm", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_POLYDISPERSITY_INDEX", "Name": "POLYDISPERSITY INDEX", "Description": "POLYDISPERSITY INDEX",  "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE", "Name": "SMILE MODIFIER MOLECULAR STRUCTURE", "Description": "SMILE MODIFIER MOLECULAR STRUCTURE",  "Units":  "None", "Origin": "Simulated", "Required": true},
@@ -2723,6 +2703,17 @@ function loadMetaDataFromJSONOnServer(filename){
 
 }
 
+function loadTextFileFromServer(filename){
+    let result = null;
+    let xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", filename, false);
+    xmlhttp.send();
+    if (xmlhttp.status===200) {
+        result = xmlhttp.responseText;
+    }
+    return result;
+}
+
 function checkMetaDataValidity(md){
     if(!("ClassName" in md))
         return false;
@@ -2774,397 +2765,16 @@ function main(visual=false)
     }
     else {
         if (example_id === 1) {
-            let b_pq1 = new BlockPhysicalQuantity(editor, workflow, '0.0', 's');
-            workflow.addBlock(b_pq1);
-            let b_pq2 = new BlockPhysicalQuantity(editor, workflow, '10.0', 's');
-            workflow.addBlock(b_pq2);
-            let b_pq3 = new BlockPhysicalQuantity(editor, workflow, '0.5', 's');
-            workflow.addBlock(b_pq3);
-            let b_pr1 = new BlockProperty(editor, workflow, '(10.0,)', 'mupif.PropertyID.PID_Temperature', 'mupif.ValueType.Scalar', 'degC', 0);
-            workflow.addBlock(b_pr1);
-
-            let b_tl = new BlockTimeloop(editor, workflow);
-            workflow.addBlock(b_tl);
-
-            let b_m1 = new BlockModel(editor, b_tl, metaDataThermalNonStat);
-            b_m1.input_file_name = 'inputT13.in';
-            b_tl.addBlock(b_m1);
-            let b_m2 = new BlockModel(editor, b_tl, metaDataMechanical);
-            b_m2.input_file_name = 'inputM13.in';
-            b_tl.addBlock(b_m2);
-
-            let s1;
-            let s2;
-
-            s1 = b_pq1.output_slots[0];
-            s2 = b_tl.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_pq2.output_slots[0];
-            s2 = b_tl.input_slots[1];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_pq3.output_slots[0];
-            s2 = b_tl.input_slots[2];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_pr1.output_slots[0];
-            s2 = b_m1.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[0];
-            s2 = b_m2.input_slots[0];
-            editor.addDatalink(s1, s2);
-
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example01.json'));
+            editor.loadFromJsonData(json_data);
         }
         if (example_id === 2) {
-            workflow.addExternalDataSlot('in', 'top_temperature', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'temperature', 'mupif.Field');
-            workflow.addExternalDataSlot('out', 'displacement', 'mupif.Field');
-
-            let b_pr1 = new BlockProperty(editor, workflow, '(0.0,)', 'mupif.PropertyID.PID_Temperature', 'mupif.ValueType.Scalar', 'degC', 0);
-            workflow.addBlock(b_pr1);
-
-            let b_m1 = new BlockModel(editor, workflow, metaDataThermalNonStat);
-            b_m1.input_file_name = 'inputT13.in';
-            workflow.addBlock(b_m1);
-            let b_m2 = new BlockModel(editor, workflow, metaDataMechanical);
-            b_m2.input_file_name = 'inputM13.in';
-            workflow.addBlock(b_m2);
-
-            let s1;
-            let s2;
-
-            s1 = b_pr1.output_slots[0];
-            s2 = b_m1.input_slots[5];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_pr1.output_slots[0];
-            s2 = b_m1.input_slots[6];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[0];
-            s2 = b_m2.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[0];
-            s2 = workflow.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[0];
-            s2 = workflow.input_slots[1];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.input_slots[0];
-            s2 = workflow.output_slots[0];
-            editor.addDatalink(s1, s2);
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example02.json'));
+            editor.loadFromJsonData(json_data);
         }
-        if (example_id === 3) {
-
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_SMILE_MOLECULAR_STRUCTURE', 'Name': 'monomerMolStructure',
-            //     'Description': 'Monomer molecular structure (SMILE representation)', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_MOLECULAR_WEIGHT', 'Name': 'polymerMolWeight',
-            //     'Description': 'Polymer molecular weight', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_CROSSLINKER_TYPE', 'Name': 'crosslinkerType',
-            //     'Description': 'Crosslinker type (SMILE representation)', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_FILLER_DESIGNATION', 'Name': 'fillerDesignation',
-            //     'Description': 'Filler designation', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_CROSSLINKONG_DENSITY', 'Name': 'crosslinkingDens',
-            //     'Description': 'Crosslinking density', 'Units': '%', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_FILLER_CONCENTRATION', 'Name': 'fillerConc',
-            //     'Description': 'Filler concentration', 'Units': '%w/w', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_TEMPERATURE', 'Name': 'temperature',
-            //     'Description': 'Temperature', 'Units': '°C', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_PRESSURE', 'Name': 'pressure',
-            //     'Description': 'Pressure', 'Units': 'atm', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_POLYDISPERSITY_INDEX', 'Name': 'polyIndex',
-            //     'Description': 'Polydispersity index', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE', 'Name': 'fillerModMolStructure',
-            //     'Description': 'Polymer/Filler compatibilizer molecular structure (SMILE representation)', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_SMILE_FILLER_MOLECULAR_STRUCTURE', 'Name': 'polFilCompatibilizerMolStructure',
-            //     'Description': 'Filler modifier molecular structure (SMILE representation)', 'Units': 'None', 'Required': True},
-            // {'Type': 'mupif.Property', 'Type_ID': 'mupif.PropertyID.PID_DENSITY_OF_FUNCTIONALIZATION', 'Name': 'functionalizationDens',
-            //     'Description': 'Density of functionalization', 'Units': 'n/nm**2', 'Required': True}
-
-            workflow.addExternalDataSlot('in', 'monomerMolStructure', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'polymerMolWeight', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'crosslinkerType', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'fillerDesignation', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'crosslinkingDens', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'fillerConc', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'temperature', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'pressure', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'polyIndex', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'fillerModMolStructure', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'polFilCompatibilizerMolStructure', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'functionalizationDens', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'E_i', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'nu_i', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'aspectratio', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'vof', 'mupif.Property');
-            workflow.addExternalDataSlot('in', 'rho_i', 'mupif.Property');
-
-
-            workflow.addExternalDataSlot('out', 'E_m', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'nu_m', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'rho_m', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'cond_m', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'T_c_m', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'E_axial', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'E_plane', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'G_plane', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'G_transverse', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'nu_plane', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'nu_transverse', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'rho_c', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'Stiffness', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'Mass', 'mupif.Property');
-            workflow.addExternalDataSlot('out', 'maxStress', 'mupif.Property');
-
-            // let b_pr1 = new BlockProperty(editor, workflow, '(0.0,)', 'mupif.PropertyID.PID_Temperature', 'mupif.ValueType.Scalar', 'degC', 0);
-            // workflow.addBlock(b_pr1);
-
-            let b_m1 = new BlockModel(editor, workflow, metaData_LAMMPS);
-            workflow.addBlock(b_m1);
-
-            let b_m2 = new BlockModel(editor, workflow, metaData_DIGIMAT);
-            workflow.addBlock(b_m2);
-
-            let b_m3 = new BlockModel(editor, workflow, metaData_ABAQUS);
-            workflow.addBlock(b_m3);
-
-            let s1;
-            let s2;
-
-            // ------------------------------
-            // external inputs
-            for(let i=0;i<=11;i++) {
-                s1 = workflow.output_slots[i];
-                s2 = b_m1.input_slots[i];
-                editor.addDatalink(s1, s2);
-            }
-
-            s1 = workflow.output_slots[15];
-            s2 = b_m2.input_slots[5];
-            editor.addDatalink(s1, s2);
-
-            s1 = workflow.output_slots[12];
-            s2 = b_m2.input_slots[1];
-            editor.addDatalink(s1, s2);
-
-            s1 = workflow.output_slots[13];
-            s2 = b_m2.input_slots[3];
-            editor.addDatalink(s1, s2);
-
-            s1 = workflow.output_slots[16];
-            s2 = b_m2.input_slots[6];
-            editor.addDatalink(s1, s2);
-
-            s1 = workflow.output_slots[14];
-            s2 = b_m2.input_slots[4];
-            editor.addDatalink(s1, s2);
-
-            // ------------------------------
-            // external outputs
-            s1 = b_m1.output_slots[1];
-            s2 = workflow.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[4];
-            s2 = workflow.input_slots[1];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[0];
-            s2 = workflow.input_slots[2];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[2];
-            s2 = workflow.input_slots[3];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[3];
-            s2 = workflow.input_slots[4];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[0];
-            s2 = workflow.input_slots[5];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[1];
-            s2 = workflow.input_slots[6];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[2];
-            s2 = workflow.input_slots[7];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[3];
-            s2 = workflow.input_slots[8];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[4];
-            s2 = workflow.input_slots[9];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[5];
-            s2 = workflow.input_slots[10];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[6];
-            s2 = workflow.input_slots[11];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m3.output_slots[1];
-            s2 = workflow.input_slots[13];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m3.output_slots[0];
-            s2 = workflow.input_slots[12];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m3.output_slots[2];
-            s2 = workflow.input_slots[14];
-            editor.addDatalink(s1, s2);
-
-
-
-            // ------------------------------
-            // linking inside
-            s1 = b_m1.output_slots[1];
-            s2 = b_m2.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[4];
-            s2 = b_m2.input_slots[2];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[0];
-            s2 = b_m2.input_slots[7];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[0];
-            s2 = b_m3.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[1];
-            s2 = b_m3.input_slots[1];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[1];
-            s2 = b_m3.input_slots[2];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[2];
-            s2 = b_m3.input_slots[8];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[3];
-            s2 = b_m3.input_slots[7];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[3];
-            s2 = b_m3.input_slots[6];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[4];
-            s2 = b_m3.input_slots[5];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[5];
-            s2 = b_m3.input_slots[3];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[5];
-            s2 = b_m3.input_slots[4];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[6];
-            s2 = b_m3.input_slots[9];
-            editor.addDatalink(s1, s2);
-
-            // s1 = b_pr1.output_slots[0];
-            // s2 = b_m1.input_slots[6];
-            // editor.addDatalink(s1, s2);
-            //
-            // s1 = b_m1.output_slots[0];
-            // s2 = b_m2.input_slots[0];
-            // editor.addDatalink(s1, s2);
-            //
-            // s1 = b_m1.output_slots[0];
-            // s2 = workflow.input_slots[0];
-            // editor.addDatalink(s1, s2);
-            //
-            // s1 = b_m2.output_slots[0];
-            // s2 = workflow.input_slots[1];
-            // editor.addDatalink(s1, s2);
-            //
-            // s1 = b_m1.input_slots[0];
-            // s2 = workflow.output_slots[0];
-            // editor.addDatalink(s1, s2);
-        }
-        if (example_id === 4) {
-            workflow.settings_project_name = 'User Case 1';
-            workflow.settings_project_classname = 'UserCase1Workflow';
-            workflow.settings_project_id = 'user_case_1';
-            workflow.child_block_sort = 'vertical';
-
-            workflow.addExternalDataSlot('in', 'atomic_set', 'mupif.AtomicSet');
-            workflow.addExternalDataSlot('out', 'atomic_set', 'mupif.AtomicSet');
-            workflow.addExternalDataSlot('out', 'hopping_sites', 'mupif.HoppingSites');
-            workflow.addExternalDataSlot('out', 'neighbor_list', 'mupif.NeighborList');
-
-            //
-
-            let b_it = new BlockDoWhile(editor, workflow);
-            workflow.addBlock(b_it);
-            b_it.child_block_sort = 'vertical';
-
-            let b_m1 = new BlockModel(editor, b_it, md_p1);
-            b_it.addBlock(b_m1);
-
-            let b_m2 = new BlockModel(editor, b_it, md_p2);
-            b_it.addBlock(b_m2);
-
-            let b_m3 = new BlockModel(editor, workflow, md_p3);
-            workflow.addBlock(b_m3);
-
-            let b_m4 = new BlockModel(editor, workflow, md_p4);
-            workflow.addBlock(b_m4);
-
-            let s1, s2;
-
-            s1 = b_m1.output_slots[0];
-            s2 = b_m2.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m1.output_slots[0];
-            s2 = b_m3.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m3.output_slots[0];
-            s2 = b_m4.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m2.output_slots[0];
-            s2 = b_it.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = workflow.output_slots[0];
-            s2 = b_m1.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m4.output_slots[0];
-            s2 = workflow.input_slots[0];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m4.output_slots[1];
-            s2 = workflow.input_slots[1];
-            editor.addDatalink(s1, s2);
-
-            s1 = b_m4.output_slots[2];
-            s2 = workflow.input_slots[2];
-            editor.addDatalink(s1, s2);
-
+        if(example_id === 3){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example03.json'));
+            editor.loadFromJsonData(json_data);
         }
     }
 
@@ -3591,7 +3201,7 @@ let mupif_Units = [
     'Bq',
     'Gy',
     'Sv',
-    'degC',
+    'deg_C',
     'degF',
 ];
 
@@ -3959,6 +3569,10 @@ class WorkflowEditor{
                     this.workflowblock.settings_project_classname = json_data['settings']['settings_project_classname'];
                 else
                     console.log('Project classname was not in settings.');
+                if('settings_project_modulename' in json_data['settings'])
+                    this.workflowblock.settings_project_modulename = json_data['settings']['settings_project_modulename'];
+                else
+                    console.log('Project modulename was not in settings.');
                 if('settings_project_id' in json_data['settings'])
                     this.workflowblock.settings_project_id = json_data['settings']['settings_project_id'];
                 else
@@ -3977,6 +3591,10 @@ class WorkflowEditor{
 
     setProjectClassName(val){
         this.workflowblock.settings_project_classname = val;
+    }
+
+    setProjectModuleName(val){
+        this.workflowblock.settings_project_modulename = val;
     }
 
     setProjectID(val){
@@ -4015,6 +3633,17 @@ class WorkflowEditor{
         html += '<tr>';
         html += '<td><i></i></td>';
         html += '<td><input type="text" value="'+this.workflowblock.settings_project_classname+'" id="new_project_classname"></b></td>';
+        html += '</tr>';
+
+        html += '<tr><td colspan="10" style="height:10px;"></td>';
+
+        html += '<tr>';
+        html += '<td>ModuleName:</td>';
+        html += '<td><b>'+this.workflowblock.settings_project_modulename+'</b></td>';
+        html += '</tr>';
+        html += '<tr>';
+        html += '<td><i></i></td>';
+        html += '<td><input type="text" value="'+this.workflowblock.settings_project_modulename+'" id="new_project_modulename"></b></td>';
         html += '</tr>';
 
         html += '<tr><td colspan="10" style="height:10px;"></td>';
@@ -4119,6 +3748,8 @@ class WorkflowEditor{
         this.setProjectName(val);
         val = document.getElementById('new_project_classname').value;
         this.setProjectClassName(val);
+        val = document.getElementById('new_project_modulename').value;
+        this.setProjectModuleName(val);
         val = document.getElementById('new_project_id').value;
         this.setProjectID(val);
         this.updateHtmlOfProjectSettings();
@@ -4137,7 +3768,7 @@ class WorkflowEditor{
     }
 
     menu_download_exec_code(){
-        this.download("execution_code.py", this.getExecutionCode());
+        this.download(this.workflowblock.settings_project_modulename + ".py", this.getExecutionCode());
         let code = this.getExecutionCode();
         // console.log(code);
         let code_html = replaceAllInStr(code, '\t', '    ');
@@ -4147,7 +3778,7 @@ class WorkflowEditor{
     }
 
     menu_download_class_code(){
-        this.download("class_code.py", this.getClassCode());
+        this.download(this.workflowblock.settings_project_modulename + ".py", this.getClassCode());
         let code = this.getClassCode();
         // console.log(code);
         let code_html = replaceAllInStr(code, '\t', ' ');

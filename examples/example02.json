@@ -47,7 +47,7 @@
                 "0": "slot_1"
             },
             "value": "(0.0,)",
-            "units": "degC",
+            "units": "deg_C",
             "propID": "mupif.PropertyID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar",
             "objectID": 0
@@ -69,7 +69,7 @@
             },
             "metadata": {
                 "ClassName": "ThermalNonstatModel",
-                "ModuleName": "models",
+                "ModuleName": "mupif_examples_models",
                 "Name": "Non-stationary thermal problem",
                 "ID": "ThermalNonstatModel-1",
                 "Description": "Non-stationary heat conduction using finite elements on a rectangular domain",
@@ -105,9 +105,10 @@
                             0
                         ]
                     }
-                ]
+                ],
+                "Execution_type": "Local"
             },
-            "model_input_file_name": "inputT13.in",
+            "model_input_file_name": "inputT.in",
             "model_input_file_directory": ""
         },
         {
@@ -120,7 +121,7 @@
             },
             "metadata": {
                 "ClassName": "MechanicalModel",
-                "ModuleName": "models",
+                "ModuleName": "mupif_examples_models",
                 "Name": "Plane stress linear elastic",
                 "ID": "MechanicalModel-1",
                 "Description": "Plane stress problem with linear elastic thermo-elastic material",
@@ -148,9 +149,10 @@
                             0
                         ]
                     }
-                ]
+                ],
+                "Execution_type": "Local"
             },
-            "model_input_file_name": "inputM13.in",
+            "model_input_file_name": "inputM.in",
             "model_input_file_directory": ""
         }
     ],
@@ -181,8 +183,9 @@
         }
     ],
     "settings": {
-        "settings_project_name": "My unnamed project",
-        "settings_project_classname": "MyUnnamedProject",
-        "settings_project_id": "my_unnamed_project_01"
+        "settings_project_name": "Thermo-mechanical class workflow",
+        "settings_project_classname": "ThermoMechanicalClassWorkflow_01",
+        "settings_project_modulename": "example02",
+        "settings_project_id": "thermomechanical_class_workflow_01"
     }
 }
