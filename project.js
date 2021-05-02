@@ -19,7 +19,7 @@ class Block{
         this.menu_items = [];
         this.menu_record = new VisualMenu();
 
-        this.child_block_sort = 'horizontal';
+        this.child_block_sort = 'vertical';
 
         this.defines_timestep = false;
     }
@@ -362,14 +362,6 @@ class Block{
         return null;
     }
 
-    setDataSlotText(slot, val){
-        let text = val;
-        if(slot.inout === 'out')
-            text = val+' --';
-        slot.text = text;
-        this.graph.model.setValue(slot.instance, slot.text);
-    }
-
     getUID(){
         return this.getCodeName();
     }
@@ -383,7 +375,6 @@ class Block{
         let slots = this.getSlots();
         for (let i = 0; i < slots.length; i++)
             slot_dict[i] = slots[i].getUID();
-        // slot_dict[slots[i].getName()] = slots[i].getUID();
 
         return {
             'classname': this.getClassName(),
@@ -962,11 +953,6 @@ class BlockPhysicalQuantity extends Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_units', '', 'Units'), 'Set');
     }
 
-    setValue(val){
-        this.value = val;
-        this.setDataSlotText(this.output_slots[0], "value = "+this.value);
-    }
-
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_value') {
             this.value = document.getElementById('myQuery_temp_val').value;
@@ -1089,11 +1075,6 @@ class BlockProperty extends Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_property_id', '', 'Property&nbsp;ID'), 'Set');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value_type', '', 'Value&nbsp;type'), 'Set');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_obj_id', '', 'Object&nbsp;ID'), 'Set');
-    }
-
-    setValue(val){
-        this.value = val;
-        this.setDataSlotText(this.output_slots[0], "value = "+this.value);
     }
 
     myquery_proceed(action, p1=null, p2=null){
@@ -1353,6 +1334,12 @@ class BlockTimeloop extends Block{
 
     getClassName() {
         return 'BlockTimeloop';
+    }
+
+    getDictForJSON() {
+        let dict = super.getDictForJSON();
+        dict['child_block_sort'] = this.child_block_sort;
+        return dict;
     }
 
     // #########################
@@ -1738,7 +1725,8 @@ class BlockWorkflow extends Block{
             'uid': this.getUID(),
             'parent_uid': 'None',
             'slot_uids': slot_dict,
-            'ext_slots': ext_slots
+            'ext_slots': ext_slots,
+            'child_block_sort': this.child_block_sort
         };
 
         data_blocks.push(elem_self);
@@ -3492,6 +3480,8 @@ class WorkflowEditor{
 
         if(json_data['classname']==='BlockWorkflow'){
             this.workflowblock.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                this.workflowblock.child_block_sort = json_data['child_block_sort'];
 
             let inout = '';
             for(let i=0;i<json_data['ext_slots'].length;i++){
@@ -3527,6 +3517,8 @@ class WorkflowEditor{
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockTimeloop(this, parent_block);
             new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
             parent_block.addBlock(new_block);
         }
         if(json_data['classname']==='BlockModel'){

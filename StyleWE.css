@@ -64,7 +64,7 @@ div#modelListContainer, div#projectSettingsContainer{
 div#workflowContainer{
     margin:0 auto 0 20px;
     position:relative;
-    text-align:center;
+    text-align:left;
 
     background-color: #9a9b9c;
 
@@ -122,14 +122,14 @@ div#mainpage_all{
 }
 
 table.mainpage_list_examples{
-    font-size:20px;
+    font-size:14px;
     border:1px solid white;
     margin:20px auto 10px auto;
 }
 
 table.mainpage_list_examples td{
     padding:0;
-    text-align:center;
+    text-align:left;
 }
 
 table.mainpage_list_examples td.caption{
@@ -140,8 +140,8 @@ table.mainpage_list_examples td.caption{
 table.mainpage_list_examples td a{
     display:block;
     padding:5px 10px 5px 10px;
-    width:300px;
-    /*height:100%;*/
+    width:700px;
+    cursor: pointer;
 }
 
 
@@ -225,6 +225,15 @@ div#menu_new .melem .msubmenu .melem .msubmenu{
 
 div#menu_new .melem .msubmenu .melem:hover .msubmenu{
     display: block;
+}
+
+a.link_file{
+    color:lightblue;
+}
+
+a.link_file:hover{
+    color: #75e682;
+    cursor: pointer;
 }
 
 div#block_list_of_models{

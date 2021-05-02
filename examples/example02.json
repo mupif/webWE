@@ -37,7 +37,8 @@
                     "inout": "out",
                     "uid": "external_input_1"
                 }
-            ]
+            ],
+            "child_block_sort": "vertical"
         },
         {
             "classname": "BlockConstProperty",

@@ -114,6 +114,12 @@ class BlockTimeloop extends Block{
         return 'BlockTimeloop';
     }
 
+    getDictForJSON() {
+        let dict = super.getDictForJSON();
+        dict['child_block_sort'] = this.child_block_sort;
+        return dict;
+    }
+
     // #########################
     // ########## NEW ##########
     // #########################

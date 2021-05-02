@@ -37,11 +37,6 @@ class BlockPhysicalQuantity extends Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_units', '', 'Units'), 'Set');
     }
 
-    setValue(val){
-        this.value = val;
-        this.setDataSlotText(this.output_slots[0], "value = "+this.value);
-    }
-
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_value') {
             this.value = document.getElementById('myQuery_temp_val').value;

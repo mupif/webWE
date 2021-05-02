@@ -12,7 +12,7 @@ class Block{
         this.menu_items = [];
         this.menu_record = new VisualMenu();
 
-        this.child_block_sort = 'horizontal';
+        this.child_block_sort = 'vertical';
 
         this.defines_timestep = false;
     }
@@ -355,14 +355,6 @@ class Block{
         return null;
     }
 
-    setDataSlotText(slot, val){
-        let text = val;
-        if(slot.inout === 'out')
-            text = val+' --';
-        slot.text = text;
-        this.graph.model.setValue(slot.instance, slot.text);
-    }
-
     getUID(){
         return this.getCodeName();
     }
@@ -376,7 +368,6 @@ class Block{
         let slots = this.getSlots();
         for (let i = 0; i < slots.length; i++)
             slot_dict[i] = slots[i].getUID();
-        // slot_dict[slots[i].getName()] = slots[i].getUID();
 
         return {
             'classname': this.getClassName(),

@@ -1,6 +1,7 @@
 import mupif
 import copy
 import example02
+import field_export
 import logging
 log = logging.getLogger()
 
@@ -36,9 +37,17 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         
         # __init__ code of model_1 (Thermo-mechanical class workflow)
         self.model_1 = example02.ThermoMechanicalClassWorkflow_01()
+        
+        # __init__ code of model_2 (Field export to image)
+        self.model_2 = field_export.field_export_to_image()
+        
+        # __init__ code of model_3 (Field export to image)
+        self.model_3 = field_export.field_export_to_image()
 
         self.setMetadata('Model_refs_ID', [])
         self.registerModel(self.model_1)
+        self.registerModel(self.model_2)
+        self.registerModel(self.model_3)
     
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
         
@@ -55,11 +64,19 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         # initialization code of model_1 (Thermo-mechanical class workflow)
         self.model_1.initialize(file='', workdir='', metadata=execMD)
         
+        # initialization code of model_2 (Field export to image)
+        self.model_2.initialize(file='', workdir='', metadata=execMD)
+        
+        # initialization code of model_3 (Field export to image)
+        self.model_3.initialize(file='', workdir='', metadata=execMD)
+        
         mupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)
     
     def terminate(self):
         pass
         self.model_1.terminate()
+        self.model_2.terminate()
+        self.model_3.terminate()
     
     def solve(self, runInBackground=False):
         pass
@@ -72,7 +89,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         while timeloop_1_compute:
             timeloop_1_time_step_number += 1
         
-            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep()])
+            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep(), self.model_3.getCriticalTimeStep()])
             timeloop_1_time = min(timeloop_1_time.inUnitsOf('s').getValue()+timeloop_1_dt.inUnitsOf('s').getValue(), timeloop_1_target_time.inUnitsOf('s').getValue())*mupif.U.s
         
             if timeloop_1_time.inUnitsOf('s').getValue() + 1.e-6 > timeloop_1_target_time.inUnitsOf('s').getValue():
@@ -83,6 +100,14 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
             # execution code of model_1 (Thermo-mechanical class workflow)
             self.model_1.set(self.constant_property_1, 'top_temperature')
             self.model_1.solveStep(timeloop_1_time_step)
+            
+            # execution code of model_2 (Field export to image)
+            self.model_2.set(self.model_1.get(mupif.FieldID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), 0)
+            self.model_2.solveStep(timeloop_1_time_step)
+            
+            # execution code of model_3 (Field export to image)
+            self.model_3.set(self.model_1.get(mupif.FieldID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), 0)
+            self.model_3.solveStep(timeloop_1_time_step)
         
 
 

@@ -113,6 +113,8 @@ class WorkflowEditor{
 
         if(json_data['classname']==='BlockWorkflow'){
             this.workflowblock.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                this.workflowblock.child_block_sort = json_data['child_block_sort'];
 
             let inout = '';
             for(let i=0;i<json_data['ext_slots'].length;i++){
@@ -148,6 +150,8 @@ class WorkflowEditor{
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockTimeloop(this, parent_block);
             new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
             parent_block.addBlock(new_block);
         }
         if(json_data['classname']==='BlockModel'){

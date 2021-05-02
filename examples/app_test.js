@@ -42,7 +42,7 @@ if(process.argv.length >= 4) {
         editor.loadFromJsonData(json_data);
 
         let code;
-        if(workflow_type === 'exec')
+        if(workflow_type === "exec")
             code = editor.getExecutionCode();
         else
             code = editor.getClassCode();

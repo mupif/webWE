@@ -367,7 +367,8 @@ class BlockWorkflow extends Block{
             'uid': this.getUID(),
             'parent_uid': 'None',
             'slot_uids': slot_dict,
-            'ext_slots': ext_slots
+            'ext_slots': ext_slots,
+            'child_block_sort': this.child_block_sort
         };
 
         data_blocks.push(elem_self);

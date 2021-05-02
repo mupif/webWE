@@ -321,7 +321,7 @@ class ThermalModel(mupif.model.Model):
         return False
 
     def solveStep(self, tstep, stageID=0, runInBackground=False):
-        print("Calling solveStep of ThermalModel")
+        print("Calling solveStep of ThermalModel (t = %f s)" % tstep.getTime().inUnitsOf('s').getValue())
         self.prepareTask()
         mesh = self.mesh
         self.volume = 0.0
@@ -624,7 +624,7 @@ class ThermalModel(mupif.model.Model):
             raise mupif.apierror.APIError('Unknown property ID')
 
     def getCriticalTimeStep(self):
-        return 100*mp.U.s
+        return 100.*mp.U.s
 
     def getAssemblyTime(self, tstep):
         return tstep.getTime()
@@ -725,7 +725,7 @@ class ThermalNonstatModel(ThermalModel):
         return
 
     def getCriticalTimeStep(self):
-        return 100*mp.U.s
+        return 1.0*mp.U.s
 
     def getAssemblyTime(self, tstep):
         return tstep.getTime() - tstep.getTimeIncrement() * self.Tau
@@ -768,7 +768,7 @@ class ThermalNonstatModel(ThermalModel):
         return A_e
 
     def solveStep(self, tstep, stageID=0, runInBackground=False):
-        print("Calling solveStep of ThermalNonstatModel")
+        print("Calling solveStep of ThermalNonstatModel (t = %f s)" % tstep.getTime().inUnitsOf('s').getValue())
         self.prepareTask()
         mesh = self.mesh
         self.volume = 0.0
@@ -1039,7 +1039,7 @@ class MechanicalModel(mupif.model.Model):
             self.readInput()
 
     def getCriticalTimeStep(self):
-        return .4*mp.U.s
+        return 100.*mp.U.s
 
     def getAssemblyTime(self, tstep):
         return tstep.getTime()
@@ -1186,7 +1186,7 @@ class MechanicalModel(mupif.model.Model):
             self.temperatureField = field
 
     def solveStep(self, tstep, stageID=0, runInBackground=False):
-        print("Calling solveStep of MechanicalModel")
+        print("Calling solveStep of MechanicalModel (t = %f s)" % tstep.getTime().inUnitsOf('s').getValue())
         # self.readInput()
         self.prepareTask()
         mesh = self.mesh
