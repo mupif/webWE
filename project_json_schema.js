@@ -68,18 +68,7 @@ module.exports = {
                         "model_input_file_name": {"type": "string"},
                         "model_input_file_directory": {"type": "string"},
                     },
-                    "required": ["classname", "uid", "parent_uid", "slot_in_uids", "slot_out_uids"],
-                    // "anyOf": [
-                    //     {
-                    //         "not": {
-                    //             "properties": {
-                    //                 "classname": { "const": "BlockModel" }
-                    //             }
-                    //         }
-                    //     },
-                    //     { "required": ["metadata", "model_input_file_name", "model_input_file_directory"] }
-                    // ],
-
+                    "required": ["classname", "uid", "parent_uid"],
                     "allOf": [
                         {
                             "anyOf": [
@@ -91,6 +80,16 @@ module.exports = {
                                     }
                                 },
                                 { "required": ["ext_slots"] }
+                            ]
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "properties": {
+                                        "classname": { "const": "BlockWorkflow" }
+                                    }
+                                },
+                                { "required": ["slot_in_uids", "slot_out_uids"] }
                             ]
                         },
                         {

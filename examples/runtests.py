@@ -21,5 +21,15 @@ for test_number in range(1, 4):
     if result:
         print("Files %s and %s are identical." % (f1, f2))
     else:
-        print("ERROR: Files %s and %s are NOT identical!" % (f1, f2))
+        print("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2))
+
+    f1 = "%sexample%02d.py" % (dirname, test_number)
+    f2 = "%sexample%02d_ref.py" % (dirname, test_number)
+
+    result = filecmp.cmp(f1, f2, shallow=False)
+    if result:
+        print("Files %s and %s are identical." % (f1, f2))
+    else:
+        print("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2))
+
     print("----------\n")

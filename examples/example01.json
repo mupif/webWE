@@ -4,8 +4,6 @@
             "classname": "BlockWorkflow",
             "uid": "workflow",
             "parent_uid": "None",
-            "slot_in_uids": [],
-            "slot_out_uids": [],
             "ext_slots": [],
             "child_block_sort": "vertical"
         },

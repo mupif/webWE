@@ -364,8 +364,6 @@ class BlockWorkflow extends Block{
             'classname': this.getClassName(),
             'uid': this.getUID(),
             'parent_uid': 'None',
-            'slot_in_uids': [],
-            'slot_out_uids': [],
             'ext_slots': ext_slots,
             'child_block_sort': this.child_block_sort
         };
