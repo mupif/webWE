@@ -10,7 +10,23 @@ module.exports = {
                         "classname": {"type": "string"},
                         "uid": {"type": "string"},
                         "parent_uid": {"type": "string"},
-                        "slot_uids": {"type": "object"},
+                        "slot_in_uids": {"type": "array", "items": {"type": "string"}},
+                        "slot_out_uids": {"type": "array", "items": {"type": "string"}},
+                        "ext_slots": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "type": {"type": "string"},
+                                    "obj_type": {"type": "string"},
+                                    "obj_id": {"type": "string"},
+                                    "inout": {"type": "string"},
+                                    "uid": {"type": "string"}
+                                },
+                                "required": ["name", "type", "obj_type", "obj_id", "inout", "uid"]
+                            }
+                        },
                         "metadata": {
                             "type": "object",
                             "properties": {
@@ -52,16 +68,43 @@ module.exports = {
                         "model_input_file_name": {"type": "string"},
                         "model_input_file_directory": {"type": "string"},
                     },
-                    "required": ["classname", "uid", "parent_uid", "slot_uids"],
-                    "anyOf": [
+                    "required": ["classname", "uid", "parent_uid", "slot_in_uids", "slot_out_uids"],
+                    // "anyOf": [
+                    //     {
+                    //         "not": {
+                    //             "properties": {
+                    //                 "classname": { "const": "BlockModel" }
+                    //             }
+                    //         }
+                    //     },
+                    //     { "required": ["metadata", "model_input_file_name", "model_input_file_directory"] }
+                    // ],
+
+                    "allOf": [
                         {
-                            "not": {
-                                "properties": {
-                                    "classname": { "const": "BlockModel" }
-                                }
-                            }
+                            "anyOf": [
+                                {
+                                    "not": {
+                                        "properties": {
+                                            "classname": { "const": "BlockWorkflow" }
+                                        }
+                                    }
+                                },
+                                { "required": ["ext_slots"] }
+                            ]
                         },
-                        { "required": ["metadata", "model_input_file_name", "model_input_file_directory"] }
+                        {
+                            "anyOf": [
+                                {
+                                    "not": {
+                                        "properties": {
+                                            "classname": { "const": "BlockModel" }
+                                        }
+                                    }
+                                },
+                                { "required": ["metadata", "model_input_file_name", "model_input_file_directory"] }
+                            ],
+                        }
                     ]
                 }
             },

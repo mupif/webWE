@@ -90,12 +90,12 @@ class Block{
         if(inout === 'out') {
             if(name === null)
                 name = 'external_output';
-            this.addInputSlot(new SlotExt(this, 'in', name, name, type, true, obj_type));
+            this.addInputSlot(new SlotExt(this, 'in', name, name, type, true, obj_type, uid));
         }
         if(inout === 'in') {
             if(name === null)
                 name = 'external_input';
-            this.addOutputSlot(new SlotExt(this, 'out', name, name, type, true, obj_type));
+            this.addOutputSlot(new SlotExt(this, 'out', name, name, type, true, obj_type, uid));
         }
 
     }
@@ -364,16 +364,25 @@ class Block{
     }
 
     getDictForJSON(){
-        let slot_dict = {};
-        let slots = this.getSlots();
+        let slots;
+        let slot_in_array = [];
+        let slot_out_array = [];
+
+        slots = this.getSlots('in');
         for (let i = 0; i < slots.length; i++)
-            slot_dict[i] = slots[i].getUID();
+            slot_in_array.push(slots[i].getUID());
+
+        slots = this.getSlots('out');
+        for (let i = 0; i < slots.length; i++)
+            slot_out_array.push(slots[i].getUID());
 
         return {
             'classname': this.getClassName(),
             'uid': this.getUID(),
             'parent_uid': this.parent_block.getUID(),
-            'slot_uids': slot_dict
+            'slot_in_uids': slot_in_array,
+            'slot_out_uids': slot_out_array
+
         };
     }
 
@@ -404,16 +413,6 @@ class Block{
         html += this.getBlockHtml_footer();
         html += this.getBlockHtml_menu();
         return html;
-
-        // let html = '';
-        // html += this.getBlockHtml_header();
-        // html += this.getBlockHtml_params();
-        // html += this.getBlockHtml_slots_input();
-        // html += this.getBlockHtml_slots_output();
-        // html += this.getBlockHtml_content();
-        // html += this.getBlockHtml_footer();
-        // html += this.getBlockHtml_menu();
-        // return html;
     }
 
     getBlockHtml(){

@@ -97,12 +97,12 @@ class Block{
         if(inout === 'out') {
             if(name === null)
                 name = 'external_output';
-            this.addInputSlot(new SlotExt(this, 'in', name, name, type, true, obj_type));
+            this.addInputSlot(new SlotExt(this, 'in', name, name, type, true, obj_type, uid));
         }
         if(inout === 'in') {
             if(name === null)
                 name = 'external_input';
-            this.addOutputSlot(new SlotExt(this, 'out', name, name, type, true, obj_type));
+            this.addOutputSlot(new SlotExt(this, 'out', name, name, type, true, obj_type, uid));
         }
 
     }
@@ -371,16 +371,25 @@ class Block{
     }
 
     getDictForJSON(){
-        let slot_dict = {};
-        let slots = this.getSlots();
+        let slots;
+        let slot_in_array = [];
+        let slot_out_array = [];
+
+        slots = this.getSlots('in');
         for (let i = 0; i < slots.length; i++)
-            slot_dict[i] = slots[i].getUID();
+            slot_in_array.push(slots[i].getUID());
+
+        slots = this.getSlots('out');
+        for (let i = 0; i < slots.length; i++)
+            slot_out_array.push(slots[i].getUID());
 
         return {
             'classname': this.getClassName(),
             'uid': this.getUID(),
             'parent_uid': this.parent_block.getUID(),
-            'slot_uids': slot_dict
+            'slot_in_uids': slot_in_array,
+            'slot_out_uids': slot_out_array
+
         };
     }
 
@@ -411,16 +420,6 @@ class Block{
         html += this.getBlockHtml_footer();
         html += this.getBlockHtml_menu();
         return html;
-
-        // let html = '';
-        // html += this.getBlockHtml_header();
-        // html += this.getBlockHtml_params();
-        // html += this.getBlockHtml_slots_input();
-        // html += this.getBlockHtml_slots_output();
-        // html += this.getBlockHtml_content();
-        // html += this.getBlockHtml_footer();
-        // html += this.getBlockHtml_menu();
-        // return html;
     }
 
     getBlockHtml(){
@@ -1712,11 +1711,9 @@ class BlockWorkflow extends Block{
         let ext_slots = [];
         let data_blocks = [];
         let data_datalinks = [];
-        let slot_dict = {};
-        let slots = this.getSlots();
-        for (let i = 0; i < slots.length; i++)
-            slot_dict[slots[i].getName()] = slots[i].getUID();
+        let slots;
 
+        slots = this.getSlots();
         for(let i=0;i<slots.length;i++)
             ext_slots.push(slots[i].getDictForJSON());
 
@@ -1724,7 +1721,8 @@ class BlockWorkflow extends Block{
             'classname': this.getClassName(),
             'uid': this.getUID(),
             'parent_uid': 'None',
-            'slot_uids': slot_dict,
+            'slot_in_uids': [],
+            'slot_out_uids': [],
             'ext_slots': ext_slots,
             'child_block_sort': this.child_block_sort
         };
@@ -2782,7 +2780,6 @@ function main(visual=false)
     return editor;
 }
 
-
 class VisualMenu {
     constructor(name="") {
         this.name = name;
@@ -3235,8 +3232,10 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid=''){
         this.id = generateNewSlotID();
+        if(uid !== '')
+            this.id = uid;
 
         this.name = name;
         this.text = text;
@@ -3343,8 +3342,8 @@ class Slot{
 }
 
 class SlotExt extends Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type='None'){
-        super(parent_block, inout, name, text, type, required, obj_type, name);
+    constructor(parent_block, inout, name, text, type, required=true, obj_type='None', uid=''){
+        super(parent_block, inout, name, text, type, required, obj_type, name, uid);
         this.external = true;
     }
 
@@ -3394,8 +3393,9 @@ class WorkflowEditor{
                         if (s1.parent_block !== s2.parent_block) {
                             if (s1.external === true || s2.external === true) {
                                 if (s1.external === true && s2.external === true) {
-
-                                    myQuery_show_error('Two external slots can not be connected.');
+                                    console.log('Two external slots can not be connected.');
+                                    if(this.visual)
+                                        myQuery_show_error('Two external slots can not be connected.');
                                     return null;
                                 }
 
@@ -3411,18 +3411,26 @@ class WorkflowEditor{
                             let dl = new Datalink(s1, s2);
                             this.datalinks.push(dl);
                             return dl;
-                        } else
-                            myQuery_show_error('Slots within one block can not be connected.');
+                        } else {
+                            console.log('Slots within one block can not be connected.');
+                            if(this.visual)
+                                myQuery_show_error('Slots within one block can not be connected.');
+                        }
                     } else {
                         let slot_naming = '';
                         if (s1.getNumConnections() === s1.max_connections)
                             slot_naming += '<br>(' + s1.name + ')';
                         if (s2.getNumConnections() === s2.max_connections)
                             slot_naming += '<br>(' + s2.name + ')';
-                        myQuery_show_error('One of the slots can not accept more connections.' + slot_naming);
+                        console.log('One of the slots can not accept more connections.' + slot_naming);
+                        if(this.visual)
+                            myQuery_show_error('One of the slots can not accept more connections.' + slot_naming);
                     }
-                } else
-                    myQuery_show_error('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
+                } else {
+                    console.log('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
+                    if(this.visual)
+                        myQuery_show_error('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
+                }
             }
         }
         return null;
@@ -3477,6 +3485,7 @@ class WorkflowEditor{
         let parent_block;
         let new_block = null;
         let slot;
+        let slots;
 
         if(json_data['classname']==='BlockWorkflow'){
             this.workflowblock.code_name = json_data['uid'];
@@ -3491,15 +3500,9 @@ class WorkflowEditor{
                         inout = 'out';
                     if(slot['inout']==='out')
                         inout = 'in';
-                    this.workflowblock.addExternalDataSlot(inout, slot['name'], slot['type'], slot['obj_type']);
+                    this.workflowblock.addExternalDataSlot(inout, slot['name'], slot['type'], slot['obj_type'], slot['uid']);
                 }
             }
-
-            let slots = this.workflowblock.getSlots();
-            for(let key in json_data['slot_uids'])
-                for(let i=0;i<slots.length;i++)
-                    if(slots[i].name === key)
-                        slots[i].id = json_data['slot_uids'][key];
         }
         if(json_data['classname']==='BlockConstPhysicalQuantity'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
@@ -3529,10 +3532,13 @@ class WorkflowEditor{
         }
 
         if(new_block != null){
-            let slots = new_block.getSlots();
-            for(let i=0;i<slots.length;i++){
-                slots[i].id = json_data['slot_uids'][i];
-            }
+            slots = new_block.getSlots('in');
+            for(let i=0;i<slots.length && i<json_data['slot_in_uids'].length;i++)
+                slots[i].id = json_data['slot_in_uids'][i];
+
+            slots = new_block.getSlots('out');
+            for(let i=0;i<slots.length && i<json_data['slot_out_uids'].length;i++)
+                slots[i].id = json_data['slot_out_uids'][i];
         }
 
     }

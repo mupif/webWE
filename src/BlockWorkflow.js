@@ -354,11 +354,9 @@ class BlockWorkflow extends Block{
         let ext_slots = [];
         let data_blocks = [];
         let data_datalinks = [];
-        let slot_dict = {};
-        let slots = this.getSlots();
-        for (let i = 0; i < slots.length; i++)
-            slot_dict[slots[i].getName()] = slots[i].getUID();
+        let slots;
 
+        slots = this.getSlots();
         for(let i=0;i<slots.length;i++)
             ext_slots.push(slots[i].getDictForJSON());
 
@@ -366,7 +364,8 @@ class BlockWorkflow extends Block{
             'classname': this.getClassName(),
             'uid': this.getUID(),
             'parent_uid': 'None',
-            'slot_uids': slot_dict,
+            'slot_in_uids': [],
+            'slot_out_uids': [],
             'ext_slots': ext_slots,
             'child_block_sort': this.child_block_sort
         };

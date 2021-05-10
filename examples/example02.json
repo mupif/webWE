@@ -4,11 +4,8 @@
             "classname": "BlockWorkflow",
             "uid": "workflow",
             "parent_uid": "None",
-            "slot_uids": {
-                "temperature": "external_output_1",
-                "displacement": "external_output_2",
-                "top_temperature": "external_input_1"
-            },
+            "slot_in_uids": [],
+            "slot_out_uids": [],
             "ext_slots": [
                 {
                     "classname": "SlotExt",
@@ -44,9 +41,10 @@
             "classname": "BlockConstProperty",
             "uid": "constant_property_1",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_1"
-            },
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_1"
+            ],
             "value": "(0.0,)",
             "units": "deg_C",
             "propID": "mupif.PropertyID.PID_Temperature",
@@ -57,17 +55,19 @@
             "classname": "BlockModel",
             "uid": "model_1",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_2",
-                "1": "slot_3",
-                "2": "slot_4",
-                "3": "slot_5",
-                "4": "slot_6",
-                "5": "slot_7",
-                "6": "slot_8",
-                "7": "slot_9",
-                "8": "slot_10"
-            },
+            "slot_in_uids": [
+                "slot_2",
+                "slot_3",
+                "slot_4",
+                "slot_5",
+                "slot_6",
+                "slot_7",
+                "slot_8",
+                "slot_9"
+            ],
+            "slot_out_uids": [
+                "slot_10"
+            ],
             "metadata": {
                 "ClassName": "ThermalNonstatModel",
                 "ModuleName": "mupif_examples_models",
@@ -116,10 +116,12 @@
             "classname": "BlockModel",
             "uid": "model_2",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_11",
-                "1": "slot_12"
-            },
+            "slot_in_uids": [
+                "slot_11"
+            ],
+            "slot_out_uids": [
+                "slot_12"
+            ],
             "metadata": {
                 "ClassName": "MechanicalModel",
                 "ModuleName": "mupif_examples_models",

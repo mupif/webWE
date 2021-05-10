@@ -5,8 +5,10 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid=''){
         this.id = generateNewSlotID();
+        if(uid !== '')
+            this.id = uid;
 
         this.name = name;
         this.text = text;
@@ -113,8 +115,8 @@ class Slot{
 }
 
 class SlotExt extends Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type='None'){
-        super(parent_block, inout, name, text, type, required, obj_type, name);
+    constructor(parent_block, inout, name, text, type, required=true, obj_type='None', uid=''){
+        super(parent_block, inout, name, text, type, required, obj_type, name, uid);
         this.external = true;
     }
 

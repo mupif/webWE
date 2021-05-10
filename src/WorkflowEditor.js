@@ -27,8 +27,9 @@ class WorkflowEditor{
                         if (s1.parent_block !== s2.parent_block) {
                             if (s1.external === true || s2.external === true) {
                                 if (s1.external === true && s2.external === true) {
-
-                                    myQuery_show_error('Two external slots can not be connected.');
+                                    console.log('Two external slots can not be connected.');
+                                    if(this.visual)
+                                        myQuery_show_error('Two external slots can not be connected.');
                                     return null;
                                 }
 
@@ -44,18 +45,26 @@ class WorkflowEditor{
                             let dl = new Datalink(s1, s2);
                             this.datalinks.push(dl);
                             return dl;
-                        } else
-                            myQuery_show_error('Slots within one block can not be connected.');
+                        } else {
+                            console.log('Slots within one block can not be connected.');
+                            if(this.visual)
+                                myQuery_show_error('Slots within one block can not be connected.');
+                        }
                     } else {
                         let slot_naming = '';
                         if (s1.getNumConnections() === s1.max_connections)
                             slot_naming += '<br>(' + s1.name + ')';
                         if (s2.getNumConnections() === s2.max_connections)
                             slot_naming += '<br>(' + s2.name + ')';
-                        myQuery_show_error('One of the slots can not accept more connections.' + slot_naming);
+                        console.log('One of the slots can not accept more connections.' + slot_naming);
+                        if(this.visual)
+                            myQuery_show_error('One of the slots can not accept more connections.' + slot_naming);
                     }
-                } else
-                    myQuery_show_error('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
+                } else {
+                    console.log('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
+                    if(this.visual)
+                        myQuery_show_error('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
+                }
             }
         }
         return null;
@@ -110,6 +119,7 @@ class WorkflowEditor{
         let parent_block;
         let new_block = null;
         let slot;
+        let slots;
 
         if(json_data['classname']==='BlockWorkflow'){
             this.workflowblock.code_name = json_data['uid'];
@@ -124,15 +134,9 @@ class WorkflowEditor{
                         inout = 'out';
                     if(slot['inout']==='out')
                         inout = 'in';
-                    this.workflowblock.addExternalDataSlot(inout, slot['name'], slot['type'], slot['obj_type']);
+                    this.workflowblock.addExternalDataSlot(inout, slot['name'], slot['type'], slot['obj_type'], slot['uid']);
                 }
             }
-
-            let slots = this.workflowblock.getSlots();
-            for(let key in json_data['slot_uids'])
-                for(let i=0;i<slots.length;i++)
-                    if(slots[i].name === key)
-                        slots[i].id = json_data['slot_uids'][key];
         }
         if(json_data['classname']==='BlockConstPhysicalQuantity'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
@@ -162,10 +166,13 @@ class WorkflowEditor{
         }
 
         if(new_block != null){
-            let slots = new_block.getSlots();
-            for(let i=0;i<slots.length;i++){
-                slots[i].id = json_data['slot_uids'][i];
-            }
+            slots = new_block.getSlots('in');
+            for(let i=0;i<slots.length && i<json_data['slot_in_uids'].length;i++)
+                slots[i].id = json_data['slot_in_uids'][i];
+
+            slots = new_block.getSlots('out');
+            for(let i=0;i<slots.length && i<json_data['slot_out_uids'].length;i++)
+                slots[i].id = json_data['slot_out_uids'][i];
         }
 
     }

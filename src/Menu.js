@@ -1,4 +1,3 @@
-
 class VisualMenu {
     constructor(name="") {
         this.name = name;

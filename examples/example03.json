@@ -4,7 +4,8 @@
             "classname": "BlockWorkflow",
             "uid": "workflow",
             "parent_uid": "None",
-            "slot_uids": {},
+            "slot_in_uids": [],
+            "slot_out_uids": [],
             "ext_slots": [],
             "child_block_sort": "vertical"
         },
@@ -12,9 +13,10 @@
             "classname": "BlockConstPhysicalQuantity",
             "uid": "constant_physical_quantity_1",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_1"
-            },
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_1"
+            ],
             "value": "0.0",
             "units": "s"
         },
@@ -22,9 +24,10 @@
             "classname": "BlockConstPhysicalQuantity",
             "uid": "constant_physical_quantity_2",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_2"
-            },
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_2"
+            ],
             "value": "10.0",
             "units": "s"
         },
@@ -32,9 +35,10 @@
             "classname": "BlockConstPhysicalQuantity",
             "uid": "constant_physical_quantity_3",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_3"
-            },
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_3"
+            ],
             "value": "0.5",
             "units": "s"
         },
@@ -42,9 +46,10 @@
             "classname": "BlockConstProperty",
             "uid": "constant_property_1",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_4"
-            },
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_4"
+            ],
             "value": "(10.0,)",
             "units": "deg_C",
             "propID": "mupif.PropertyID.PID_Temperature",
@@ -55,22 +60,25 @@
             "classname": "BlockTimeloop",
             "uid": "timeloop_1",
             "parent_uid": "workflow",
-            "slot_uids": {
-                "0": "slot_5",
-                "1": "slot_6",
-                "2": "slot_7"
-            },
+            "slot_in_uids": [
+                "slot_5",
+                "slot_6",
+                "slot_7"
+            ],
+            "slot_out_uids": [],
             "child_block_sort": "vertical"
         },
         {
             "classname": "BlockModel",
             "uid": "model_1",
             "parent_uid": "timeloop_1",
-            "slot_uids": {
-                "0": "slot_8",
-                "1": "slot_9",
-                "2": "slot_10"
-            },
+            "slot_in_uids": [
+                "slot_8"
+            ],
+            "slot_out_uids": [
+                "slot_9",
+                "slot_10"
+            ],
             "metadata": {
                 "ClassName": "ThermoMechanicalClassWorkflow_01",
                 "ModuleName": "example02",
@@ -122,9 +130,10 @@
             "classname": "BlockModel",
             "uid": "model_2",
             "parent_uid": "timeloop_1",
-            "slot_uids": {
-                "0": "slot_11"
-            },
+            "slot_in_uids": [
+                "slot_11"
+            ],
+            "slot_out_uids": [],
             "metadata": {
                 "ClassName": "field_export_to_image",
                 "ModuleName": "field_export",
@@ -152,9 +161,10 @@
             "classname": "BlockModel",
             "uid": "model_3",
             "parent_uid": "timeloop_1",
-            "slot_uids": {
-                "0": "slot_12"
-            },
+            "slot_in_uids": [
+                "slot_12"
+            ],
+            "slot_out_uids": [],
             "metadata": {
                 "ClassName": "field_export_to_image",
                 "ModuleName": "field_export",
