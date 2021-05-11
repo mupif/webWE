@@ -14,6 +14,9 @@ class ThermoMechanicalClassWorkflow_01(mupif.workflow.Workflow):
             "Name": "Thermo-mechanical class workflow",
             "ID": "thermomechanical_class_workflow_01",
             "Description": "",
+            "Execution_settings": {
+                "Type": "Local",
+            }
             "Inputs": [
                 {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.PropertyID.PID_Temperature", "Obj_ID": ["top_temperature"], "Units": ""},
             ],

@@ -45,5 +45,6 @@
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_effective_conductivity", "Name": "Thermal Conductivity", "Description": "Thermal Conductivity", "Units": "W/m.??C", "Origin": "Simulated"},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TRANSITION_TEMPERATURE", "Name": "Glass Transition Temperature", "Description": "Glass Transition Temperature", "Units": "K", "Origin": "Simulated"},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio", "Name": "Poisson Ratio", "Description": "Poisson Ratio", "Units": "None", "Origin": "Simulated"}
-    ]
+    ],
+    "Execution_settings": {"Type": "Local"}
 }

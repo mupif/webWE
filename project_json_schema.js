@@ -61,9 +61,25 @@ module.exports = {
                                         "required": ["Name", "Type_ID", "Type", "Obj_ID"]
                                     }
                                 },
-                                "Execution_type": {"type": "string", "enum": ["Local", "Distributed"]}
+                                "Execution_settings": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Type": {"type": "string", "enum": ["Local", "Distributed"]},
+                                        "nshost": {"type": "string"},
+                                        "nsport": {"type": "string"},
+                                        "jobManName": {"type": "string"}
+                                    },
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "Type": { "const": "Local" }
+                                            }
+                                        },
+                                        { "required": ["nshost", "nsport", "jobManName"] }
+                                    ]
+                                }
                             },
-                            "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs"]//, "Execution_type"
+                            "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs", "Execution_settings"]
                         },
                         "model_input_file_name": {"type": "string"},
                         "model_input_file_directory": {"type": "string"},

@@ -32,6 +32,5 @@
     "refPoint": "none",
     "componentID": "none",
     "geomUnit": "",
-    "Execution_type": "Distributed",
-    "Execution_settings_jobManagerName": "Abaqus@Mupif.LIST"
+    "Execution_settings": {"Type": "Local"}
 }

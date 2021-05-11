@@ -622,6 +622,8 @@ class BlockModel extends Block {
 
         this.exec_type = "";
         this.exec_settings_jobmanagername = "";
+        this.exec_settings_nsport = "";
+        this.exec_settings_nshost = "";
 
         // this.loadDataFromMetadata();
         this.setMetadata(md);
@@ -647,15 +649,21 @@ class BlockModel extends Block {
         }
         if ('ModuleName' in this.md)
             this.model_module = this.md['ModuleName'];
-        if ('Execution_type' in this.md)
-            if(this.md['Execution_type'] === 'Distributed'){
-                this.exec_type = this.md['Execution_type'];
-                if('Execution_settings_jobManagerName' in this.md)
-                    this.exec_settings_jobmanagername = this.md['Execution_settings_jobManagerName'];
-            }else{
-                this.exec_type = 'Local';
-            }
 
+        this.exec_type = 'Local';
+        if ('Execution_settings' in this.md) {
+            if ('Type' in this.md['Execution_settings']) {
+                if (this.md['Execution_settings']['Type'] === 'Distributed') {
+                    this.exec_type = this.md['Execution_settings']['Type'];
+                    if ('nshost' in this.md['Execution_settings'])
+                        this.exec_settings_nshost = this.md['Execution_settings']['nshost'];
+                    if ('nsport' in this.md['Execution_settings'])
+                        this.exec_settings_nsport = this.md['Execution_settings']['nsport'];
+                    if ('jobManName' in this.md['Execution_settings'])
+                        this.exec_settings_jobmanagername = this.md['Execution_settings']['jobManName'];
+                }
+            }
+        }
     }
 
     constructSlots() {
@@ -707,14 +715,20 @@ class BlockModel extends Block {
         super.generateCodeName(all_blocks, base_name);
     }
 
-    getJobmanagerName(){
-        return this.code_name+"_jobman"
-    }
-
     getInitCode(indent = 0) {
         let code = super.getInitCode();
         if(this.exec_type === "Distributed"){
             code.push("self." + this.code_name + " = None");
+            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + this.exec_settings_nshost + "', " + this.exec_settings_nsport + ")");
+            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
+            code.push("try:");
+            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
+            code.push("\tlog.info(self." + this.code_name + ")");
+            code.push("except Exception as e:");
+            code.push("\tlog.exception(e)");
+
+
+
         }else {
             if (this.model_module !== "undefined" && this.model_module !== "")
                 code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
@@ -726,28 +740,30 @@ class BlockModel extends Block {
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
         let code = super.getInitializationCode();
-        if(this.exec_type === "Distributed"){
-            code.push("ns = mupif.PyroUtil.connectNameServer('172.30.0.1', 9090, 'mupif-secret-key')");
-            code.push("self."+this.getJobmanagerName()+" = mupif.PyroUtil.connectJobManager(ns, '"+this.exec_settings_jobmanagername+"', 'mupif-secret-key')");
-            code.push("try:");
-            code.push("\tself."+this.code_name+" = mupif.PyroUtil.allocateApplicationWithJobManager( ns, self."+this.getJobmanagerName()+", None, 'mupif-secret-key')");
-            code.push("\tlog.info('Created "+this.name+" job')");
-            code.push("except Exception as e:");
-            code.push("\tlog.exception(e)");
-            code.push("else:");
-            code.push("\tif self."+this.code_name+" is not None:");
-            code.push("\t\tsignature = self."+this.code_name+".getApplicationSignature()");
-            code.push("\t\tlog.info('Working "+this.name+" solver on server ' + signature)");
-            code.push("\telse:");
-            code.push("\t\tlog.debug('Connection to server failed, exiting')");
-        }
+        // if(this.exec_type === "Distributed"){
+        //     code.push("ns = mupif.PyroUtil.connectNameServer('172.30.0.1', 9090, 'mupif-secret-key')");
+        //     code.push("self."+this.code_name+"_jobman = mupif.PyroUtil.connectJobManager(ns, '"+this.exec_settings_jobmanagername+"', 'mupif-secret-key')");
+        //     code.push("try:");
+        //     code.push("\tself."+this.code_name+" = mupif.PyroUtil.allocateApplicationWithJobManager( ns, self."+this.code_name+"_jobman, None, 'mupif-secret-key')");
+        //     code.push("\tlog.info('Created "+this.name+" job')");
+        //     code.push("except Exception as e:");
+        //     code.push("\tlog.exception(e)");
+        //     code.push("else:");
+        //     code.push("\tif self."+this.code_name+" is not None:");
+        //     code.push("\t\tsignature = self."+this.code_name+".getApplicationSignature()");
+        //     code.push("\t\tlog.info('Working "+this.name+" solver on server ' + signature)");
+        //     code.push("\telse:");
+        //     code.push("\t\tlog.debug('Connection to server failed, exiting')");
+        // }
 
-        if(this.exec_type === "Distributed"){
-            code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
-            code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metadata=" + metaDataStr + ")");
-        }else{
-            code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
-        }
+        // if(this.exec_type === "Distributed"){
+        //     code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
+        //     code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metadata=" + metaDataStr + ")");
+        // }else{
+        //     code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
+        // }
+
+        code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
 
         return push_indents_before_each_line(code, indent)
     }
@@ -1365,6 +1381,12 @@ class BlockWorkflow extends Block{
         this.settings_project_modulename = 'MyModuleName';
         this.settings_project_id = 'my_unnamed_project_01';
 
+
+        this.exec_type = "Local";
+        this.exec_settings_jobmanagername = "";
+        this.exec_settings_nsport = "";
+        this.exec_settings_nshost = "";
+
     }
 
     getAllExternalDataSlots(inout){
@@ -1440,6 +1462,17 @@ class BlockWorkflow extends Block{
         code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
         code.push("\t\t\t\"Description\": \"\",");
 
+        if(class_code){
+            code.push("\t\t\t\"Execution_settings\": {");
+            code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
+            if(this.exec_type === 'Distributed') {
+                code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
+                code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
+                code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
+            }
+            code.push("\t\t\t}");
+        }
+
 
         let slots;
         let params;
@@ -1480,11 +1513,6 @@ class BlockWorkflow extends Block{
 
         code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
-        // metadata
-        // code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
-        // code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
-        // code.push("\t\tself.setMetadata('Description', '')");
-
         code.push("\t\tself.updateMetadata(metadata)");
 
         let code_add;
@@ -1510,14 +1538,13 @@ class BlockWorkflow extends Block{
 
         code.push("");
 
-        // TODO temporarily disabled in master branch
         let model;
         code.push("\t\tself.setMetadata('Model_refs_ID', [])");
 
         for (let i=0;i<all_model_blocks.length;i++) {
             model = all_model_blocks[i];
-            if(model.exec_type === "Local")
-                code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
+            // if(model.exec_type === "Local")
+            code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
         }
 
         // initialize function

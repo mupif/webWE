@@ -33,5 +33,5 @@
             "Required": false
         }
     ],
-    "Execution_type": "Local"
+    "Execution_settings": {"Type": "Local"}
 }

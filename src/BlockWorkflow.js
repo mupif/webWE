@@ -8,6 +8,12 @@ class BlockWorkflow extends Block{
         this.settings_project_modulename = 'MyModuleName';
         this.settings_project_id = 'my_unnamed_project_01';
 
+
+        this.exec_type = "Local";
+        this.exec_settings_jobmanagername = "";
+        this.exec_settings_nsport = "";
+        this.exec_settings_nshost = "";
+
     }
 
     getAllExternalDataSlots(inout){
@@ -83,6 +89,17 @@ class BlockWorkflow extends Block{
         code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
         code.push("\t\t\t\"Description\": \"\",");
 
+        if(class_code){
+            code.push("\t\t\t\"Execution_settings\": {");
+            code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
+            if(this.exec_type === 'Distributed') {
+                code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
+                code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
+                code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
+            }
+            code.push("\t\t\t}");
+        }
+
 
         let slots;
         let params;
@@ -123,11 +140,6 @@ class BlockWorkflow extends Block{
 
         code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
-        // metadata
-        // code.push("\t\tself.setMetadata('Name', '" + this.settings_project_name + "')");
-        // code.push("\t\tself.setMetadata('ID', '" + this.settings_project_id + "')");
-        // code.push("\t\tself.setMetadata('Description', '')");
-
         code.push("\t\tself.updateMetadata(metadata)");
 
         let code_add;
@@ -153,14 +165,13 @@ class BlockWorkflow extends Block{
 
         code.push("");
 
-        // TODO temporarily disabled in master branch
         let model;
         code.push("\t\tself.setMetadata('Model_refs_ID', [])");
 
         for (let i=0;i<all_model_blocks.length;i++) {
             model = all_model_blocks[i];
-            if(model.exec_type === "Local")
-                code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
+            // if(model.exec_type === "Local")
+            code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
         }
 
         // initialize function

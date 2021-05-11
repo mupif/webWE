@@ -136,7 +136,9 @@
                         ]
                     }
                 ],
-                "Execution_type": "Local"
+                "Execution_settings": {
+                    "Type": "Local"
+                }
             },
             "model_input_file_name": "inputT.in",
             "model_input_file_directory": ""
@@ -182,7 +184,9 @@
                         ]
                     }
                 ],
-                "Execution_type": "Local"
+                "Execution_settings": {
+                    "Type": "Local"
+                }
             },
             "model_input_file_name": "inputM.in",
             "model_input_file_directory": ""
@@ -213,7 +217,9 @@
                     }
                 ],
                 "Outputs": [],
-                "Execution_type": "Local"
+                "Execution_settings": {
+                    "Type": "Local"
+                }
             },
             "model_input_file_name": "",
             "model_input_file_directory": ""
@@ -244,7 +250,9 @@
                     }
                 ],
                 "Outputs": [],
-                "Execution_type": "Local"
+                "Execution_settings": {
+                    "Type": "Local"
+                }
             },
             "model_input_file_name": "",
             "model_input_file_directory": ""

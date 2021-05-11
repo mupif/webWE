@@ -31,6 +31,5 @@
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
         {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
     ],
-    "Execution_type": "Distributed",
-    "Execution_settings_jobManagerName": "eX_DigimatMF_JobManager"
+    "Execution_settings": {"Type": "Local"}
 }
