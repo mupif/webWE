@@ -370,7 +370,7 @@ class WorkflowEditor{
             slot.name = document.getElementById('out_slot_'+i+'_name').value;
         }
 
-        logToMyConsole('External data slots saved','green');
+        console.log('External data slots saved');
         this.generateWorkflowHtml();
     }
 
@@ -385,7 +385,7 @@ class WorkflowEditor{
         val = document.getElementById('new_project_id').value;
         this.setProjectID(val);
         this.updateHtmlOfProjectSettings();
-        logToMyConsole('Project settings saved','green');
+        console.log('Project settings saved');
         this.generateWorkflowHtml();
     }
 
@@ -400,30 +400,20 @@ class WorkflowEditor{
     }
 
     menu_download_exec_code(){
-        this.download(this.workflowblock.settings_project_modulename + ".py", this.getExecutionCode());
         let code = this.getExecutionCode();
-        // console.log(code);
-        let code_html = replaceAllInStr(code, '\t', '    ');
-        code_html = replaceAllInStr(code_html, ' ', '&nbsp;&nbsp;');
-        code_html = replaceAllInStr(code_html, '\n', '<br>');
-        logToMyConsole(code_html, 'white', 12);
+        if(code !== '')
+            this.download(this.workflowblock.settings_project_modulename + ".py", code);
     }
 
     menu_download_class_code(){
-        this.download(this.workflowblock.settings_project_modulename + ".py", this.getClassCode());
         let code = this.getClassCode();
-        // console.log(code);
-        let code_html = replaceAllInStr(code, '\t', ' ');
-        code_html = replaceAllInStr(code_html, ' ', '&nbsp;&nbsp;');
-        code_html = replaceAllInStr(code_html, '\n', '<br>');
-        logToMyConsole(code_html, 'white', 12);
+        if(code !== '')
+            this.download(this.workflowblock.settings_project_modulename + ".py", code);
     }
 
     menu_download_json(){
         let code = this.getJSON();
         this.download("project.json", JSON.stringify(code, null, 4));
-        // console.log(code);
-        // logToMyConsole(JSON.stringify(code), 'white', 12);
     }
 
     download_ith_metadata(md_id){

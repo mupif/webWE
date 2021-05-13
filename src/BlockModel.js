@@ -104,18 +104,8 @@ class BlockModel extends Block {
     getInitCode(indent = 0) {
         let code = super.getInitCode();
         if(this.exec_type === "Distributed"){
-            code.push("self." + this.code_name + " = None");
-            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + this.exec_settings_nshost + "', " + this.exec_settings_nsport + ")");
-            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
-            code.push("try:");
-            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
-            code.push("\tlog.info(self." + this.code_name + ")");
-            code.push("except Exception as e:");
-            code.push("\tlog.exception(e)");
-
-
-
-        }else {
+            code.push("self." + this.code_name + " = None  # instances of distributed models are created in initialize function");
+        }else{
             if (this.model_module !== "undefined" && this.model_module !== "")
                 code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
             else
@@ -126,21 +116,6 @@ class BlockModel extends Block {
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
         let code = super.getInitializationCode();
-        // if(this.exec_type === "Distributed"){
-        //     code.push("ns = mupif.PyroUtil.connectNameServer('172.30.0.1', 9090, 'mupif-secret-key')");
-        //     code.push("self."+this.code_name+"_jobman = mupif.PyroUtil.connectJobManager(ns, '"+this.exec_settings_jobmanagername+"', 'mupif-secret-key')");
-        //     code.push("try:");
-        //     code.push("\tself."+this.code_name+" = mupif.PyroUtil.allocateApplicationWithJobManager( ns, self."+this.code_name+"_jobman, None, 'mupif-secret-key')");
-        //     code.push("\tlog.info('Created "+this.name+" job')");
-        //     code.push("except Exception as e:");
-        //     code.push("\tlog.exception(e)");
-        //     code.push("else:");
-        //     code.push("\tif self."+this.code_name+" is not None:");
-        //     code.push("\t\tsignature = self."+this.code_name+".getApplicationSignature()");
-        //     code.push("\t\tlog.info('Working "+this.name+" solver on server ' + signature)");
-        //     code.push("\telse:");
-        //     code.push("\t\tlog.debug('Connection to server failed, exiting')");
-        // }
 
         // if(this.exec_type === "Distributed"){
         //     code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
@@ -148,6 +123,16 @@ class BlockModel extends Block {
         // }else{
         //     code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
         // }
+
+        if(this.exec_type === "Distributed"){
+            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + this.exec_settings_nshost + "', " + this.exec_settings_nsport + ")");
+            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
+            code.push("try:");
+            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
+            code.push("\tlog.info(self." + this.code_name + ")");
+            code.push("except Exception as e:");
+            code.push("\tlog.exception(e)");
+        }
 
         code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
 
@@ -200,11 +185,11 @@ class BlockModel extends Block {
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_input_file') {
             this.input_file_name = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Input file was set to "'+this.input_file_name+'"', 'green');
+            console.log('Input file was set to "'+this.input_file_name+'"');
         }
         if(action==='set_work_dir') {
             this.input_file_directory = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Working directory was set to "'+this.input_file_directory+'"', 'green');
+            console.log('Working directory was set to "'+this.input_file_directory+'"');
         }
         if(action==='set_md') {
             let md_list = this.editor.list_of_model_metadata;

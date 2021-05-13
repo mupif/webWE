@@ -7,10 +7,11 @@ dirname = "%s%s" % (os.path.dirname(rp), os.path.sep)
 workflow_types = [
     "exec",
     "class",
+    "exec",
     "exec"
 ]
 
-for test_number in range(1, 4):
+for test_number in range(1, 5):
     print("Running example number %d\n----------" % test_number)
     os.system("node %sapp_test.js %d %s" % (dirname, test_number, workflow_types[test_number-1]))
 

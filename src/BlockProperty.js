@@ -46,23 +46,23 @@ class BlockProperty extends Block{
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_value') {
             this.value = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Value set to "'+this.value+'"', 'green');
+            console.log('Value set to "'+this.value+'"');
         }
         if(action==='set_units') {
             this.units = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Units set to "'+this.units+'"', 'green');
+            console.log('Units set to "'+this.units+'"');
         }
         if(action==='set_property_id') {
             this.property_id = 'mupif.PropertyID.'+document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Property ID set to "'+this.property_id+'"', 'green');
+            console.log('Property ID set to "'+this.property_id+'"');
         }
         if(action==='set_value_type') {
             this.value_type = 'mupif.ValueType.'+document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Value type set to "'+this.value_type+'"', 'green');
+            console.log('Value type set to "'+this.value_type+'"');
         }
         if(action==='set_obj_id') {
             this.object_id = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Object ID set to "'+this.object_id+'"', 'green');
+            console.log('Object ID set to "'+this.object_id+'"');
         }
         super.myquery_proceed(action, p1, p2);
     }

@@ -8,7 +8,8 @@ class field_export_to_image(mupif.model.Model):
             "ModuleName": "field_export",
             "Name": "Field export to image",
             "ID": "field_export_to_image",
-            "Description": "",
+            "Description": "Exports MuPIF Field into an image file",
+            "Version_date": "1.0.0, Jan 2021",
             "Inputs": [
                 {"Name": "field", "Type": "mupif.Field", "Required": False, "Type_ID": "mupif.FieldID.FID_Temperature", "Obj_ID": ""}
             ],

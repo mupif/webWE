@@ -137,7 +137,10 @@
                     }
                 ],
                 "Execution_settings": {
-                    "Type": "Local"
+                    "Type": "Distributed",
+                    "nshost": "127.0.0.1",
+                    "nsport": "9090",
+                    "jobManName": "JobMan_ThermalNonstat"
                 }
             },
             "model_input_file_name": "inputT.in",
@@ -185,7 +188,10 @@
                     }
                 ],
                 "Execution_settings": {
-                    "Type": "Local"
+                    "Type": "Distributed",
+                    "nshost": "127.0.0.1",
+                    "nsport": "9090",
+                    "jobManName": "JobMan_ThermalNonstat"
                 }
             },
             "model_input_file_name": "inputM.in",

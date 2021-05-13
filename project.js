@@ -718,18 +718,8 @@ class BlockModel extends Block {
     getInitCode(indent = 0) {
         let code = super.getInitCode();
         if(this.exec_type === "Distributed"){
-            code.push("self." + this.code_name + " = None");
-            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + this.exec_settings_nshost + "', " + this.exec_settings_nsport + ")");
-            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
-            code.push("try:");
-            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
-            code.push("\tlog.info(self." + this.code_name + ")");
-            code.push("except Exception as e:");
-            code.push("\tlog.exception(e)");
-
-
-
-        }else {
+            code.push("self." + this.code_name + " = None  # instances of distributed models are created in initialize function");
+        }else{
             if (this.model_module !== "undefined" && this.model_module !== "")
                 code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
             else
@@ -740,21 +730,6 @@ class BlockModel extends Block {
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
         let code = super.getInitializationCode();
-        // if(this.exec_type === "Distributed"){
-        //     code.push("ns = mupif.PyroUtil.connectNameServer('172.30.0.1', 9090, 'mupif-secret-key')");
-        //     code.push("self."+this.code_name+"_jobman = mupif.PyroUtil.connectJobManager(ns, '"+this.exec_settings_jobmanagername+"', 'mupif-secret-key')");
-        //     code.push("try:");
-        //     code.push("\tself."+this.code_name+" = mupif.PyroUtil.allocateApplicationWithJobManager( ns, self."+this.code_name+"_jobman, None, 'mupif-secret-key')");
-        //     code.push("\tlog.info('Created "+this.name+" job')");
-        //     code.push("except Exception as e:");
-        //     code.push("\tlog.exception(e)");
-        //     code.push("else:");
-        //     code.push("\tif self."+this.code_name+" is not None:");
-        //     code.push("\t\tsignature = self."+this.code_name+".getApplicationSignature()");
-        //     code.push("\t\tlog.info('Working "+this.name+" solver on server ' + signature)");
-        //     code.push("\telse:");
-        //     code.push("\t\tlog.debug('Connection to server failed, exiting')");
-        // }
 
         // if(this.exec_type === "Distributed"){
         //     code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
@@ -762,6 +737,16 @@ class BlockModel extends Block {
         // }else{
         //     code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
         // }
+
+        if(this.exec_type === "Distributed"){
+            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + this.exec_settings_nshost + "', " + this.exec_settings_nsport + ")");
+            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
+            code.push("try:");
+            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
+            code.push("\tlog.info(self." + this.code_name + ")");
+            code.push("except Exception as e:");
+            code.push("\tlog.exception(e)");
+        }
 
         code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
 
@@ -814,11 +799,11 @@ class BlockModel extends Block {
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_input_file') {
             this.input_file_name = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Input file was set to "'+this.input_file_name+'"', 'green');
+            console.log('Input file was set to "'+this.input_file_name+'"');
         }
         if(action==='set_work_dir') {
             this.input_file_directory = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Working directory was set to "'+this.input_file_directory+'"', 'green');
+            console.log('Working directory was set to "'+this.input_file_directory+'"');
         }
         if(action==='set_md') {
             let md_list = this.editor.list_of_model_metadata;
@@ -971,11 +956,11 @@ class BlockPhysicalQuantity extends Block{
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_value') {
             this.value = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Value set to "'+this.value+'"', 'green');
+            console.log('Value set to "'+this.value+'"');
         }
         if(action==='set_units') {
             this.units = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Units set to "'+this.units+'"', 'green');
+            console.log('Units set to "'+this.units+'"');
         }
         super.myquery_proceed(action, p1, p2);
     }
@@ -1095,23 +1080,23 @@ class BlockProperty extends Block{
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_value') {
             this.value = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Value set to "'+this.value+'"', 'green');
+            console.log('Value set to "'+this.value+'"');
         }
         if(action==='set_units') {
             this.units = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Units set to "'+this.units+'"', 'green');
+            console.log('Units set to "'+this.units+'"');
         }
         if(action==='set_property_id') {
             this.property_id = 'mupif.PropertyID.'+document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Property ID set to "'+this.property_id+'"', 'green');
+            console.log('Property ID set to "'+this.property_id+'"');
         }
         if(action==='set_value_type') {
             this.value_type = 'mupif.ValueType.'+document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Value type set to "'+this.value_type+'"', 'green');
+            console.log('Value type set to "'+this.value_type+'"');
         }
         if(action==='set_obj_id') {
             this.object_id = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Object ID set to "'+this.object_id+'"', 'green');
+            console.log('Object ID set to "'+this.object_id+'"');
         }
         super.myquery_proceed(action, p1, p2);
     }
@@ -1397,6 +1382,31 @@ class BlockWorkflow extends Block{
         return slot.getCodeRepresentation();
     }
 
+    canGenerateCode(type){
+        if(type === 'exec'){
+            let result = true;
+            if(this.getSlots().length) {
+                result = false;
+                console.log('Execution code cannot be generated with external inputs.');
+                if(this.editor.visual)
+                    myQuery_show_error('Execution code cannot be generated with external inputs.');
+            }
+            let blocks = this.getBlocksRecursive(BlockTimeloop);
+            if(!blocks.length) {
+                result = false;
+                console.log('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
+                if(this.editor.visual)
+                    myQuery_show_error('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
+            }
+            return result;
+        }
+        if(type === 'class'){
+            return true;
+        }
+        console.log('Type of code is not valid!');
+        return false;
+    }
+
     generateAllElementCodeNames(){
         this.code_name = 'workflow';
         let blocks = this.getBlocksRecursive();
@@ -1421,304 +1431,318 @@ class BlockWorkflow extends Block{
 
     generateCode(class_code){
         console.log('Generating Python code.');
+        if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
 
-        let num_of_external_input_dataslots = 0;
+            let num_of_external_input_dataslots = 0;
 
-        this.generateAllElementCodeNames();
+            this.generateAllElementCodeNames();
 
-        let all_model_blocks = this.getBlocksRecursive(BlockModel);
-        let child_blocks = this.getBlocks();
+            let all_model_blocks = this.getBlocksRecursive(BlockModel);
+            let child_blocks = this.getBlocks();
 
-        let code = ["import mupif", "import copy"];
+            let code = ["import mupif", "import copy"];
 
-        let model_blocks = this.getBlocksRecursive(BlockModel);
-        let imported_modules = [];
-        for(let i=0;i<model_blocks.length;i++) {
-            if(model_blocks[i].model_module !== "") {
-                if (!imported_modules.includes(model_blocks[i].model_module)) {
-                    code.push("import " + model_blocks[i].model_module);
-                    imported_modules.push(model_blocks[i].model_module);
+            let model_blocks = this.getBlocksRecursive(BlockModel);
+            let imported_modules = [];
+            for (let i = 0; i < model_blocks.length; i++) {
+                if (model_blocks[i].model_module !== "") {
+                    if (!imported_modules.includes(model_blocks[i].model_module)) {
+                        code.push("import " + model_blocks[i].model_module);
+                        imported_modules.push(model_blocks[i].model_module);
+                    }
                 }
             }
-        }
 
-        code.push("import logging");
+            code.push("import logging");
 
-        code.push("log = logging.getLogger()");
+            code.push("log = logging.getLogger()");
 
-        code.push("");
-        code.push("");
-        code.push("class " + this.settings_project_classname + "(mupif.workflow.Workflow):");
-
-        // __init__ function
-
-        code.push("\t");
-        code.push("\tdef __init__(self, metadata={}):");
-
-        code.push("\t\tMD = {");
-        code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
-        code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
-        code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
-        code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
-        code.push("\t\t\t\"Description\": \"\",");
-
-        if(class_code){
-            code.push("\t\t\t\"Execution_settings\": {");
-            code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
-            if(this.exec_type === 'Distributed') {
-                code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
-                code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
-                code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
-            }
-            code.push("\t\t\t}");
-        }
-
-
-        let slots;
-        let params;
-        let s;
-        code.push("\t\t\t\"Inputs\": [");
-        slots = this.getAllExternalDataSlots("out");
-        for (let i=0;i<slots.length;i++) {
-            s = slots[i];
-            if (s.connected()) {
-                num_of_external_input_dataslots += 1;
-                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
-                    "\"Required\": True, \"description\": \"\", " +
-                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
-                    "\"Units\": \"\"";
-                code.push("\t\t\t\t{" + params + "},");
-            }
-        }
-        code.push("\t\t\t],");
-
-        code.push("\t\t\t\"Outputs\": [");
-        slots = this.getAllExternalDataSlots("in");
-        for (let i=0;i<slots.length;i++) {
-            s = slots[i];
-            if (s.connected()) {
-                num_of_external_input_dataslots += 1;
-                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
-                    "\"description\": \"\", " +
-                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
-                    "\"Units\": \"\"";
-                code.push("\t\t\t\t{" + params + "},");
-            }
-        }
-        code.push("\t\t\t],");
-
-        code.push("\t\t}");
-
-        code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
-
-        code.push("\t\tself.updateMetadata(metadata)");
-
-        let code_add;
-        if(class_code) {
-            // initialization of workflow inputs
-            slots = this.getAllExternalDataSlots("out");
-            for (let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected()) {
-                    code.push("\t");
-                    code.push("\t\t# initialization code of external input");
-                    code.push("\t\t" + s.getCodeRepresentation() + " = None");
-                    code.push("\t\t# It should be defined from outside using set() method.");
-                }
-            }
-        }
-
-        // init codes of child blocks
-
-        let allBlocksRecursive = this.getBlocksRecursive();
-        for(let i=0;i<allBlocksRecursive.length;i++)
-            extend_array(code, allBlocksRecursive[i].getInitCode(2));
-
-        code.push("");
-
-        let model;
-        code.push("\t\tself.setMetadata('Model_refs_ID', [])");
-
-        for (let i=0;i<all_model_blocks.length;i++) {
-            model = all_model_blocks[i];
-            // if(model.exec_type === "Local")
-            code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
-        }
-
-        // initialize function
-
-        code.push("\t");
-        code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
-
-        code.push("\t\t");
-
-        code.push("\t\tself.updateMetadata(dictionary=metadata)");
-
-        code.push("\t\t");
-        code.push("\t\texecMD = {");
-        code.push("\t\t\t'Execution': {");
-        code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
-        code.push("\t\t\t\t'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),");
-        code.push("\t\t\t\t'Task_ID': self.getMetadata('Execution.Task_ID')");
-        code.push("\t\t\t}");
-        code.push("\t\t}");
-
-        for (let i=0;i<all_model_blocks.length;i++) {
-            extend_array(code, all_model_blocks[i].getInitializationCode(2, "execMD"));
-        }
-
-        code.push("\t\t");
-
-        code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
-
-        // get critical time step function
-
-        if(class_code) {
-            code.push("\t");
-            code.push("\tdef getCriticalTimeStep(self):");
-            code_add = "";
-            let ii = 0;
-            for (let i=0;i<child_blocks.length;i++) {
-                model = child_blocks[i];
-                if(model instanceof BlockModel) {
-                    if (ii)
-                        code_add += ", ";
-                    code_add += "self." + model.code_name + ".getCriticalTimeStep()";
-                    ii += 1;
-                }
-            }
-            code.push("\t\treturn min([" + code_add + "])");
-
-            //
-            //
-            // set method
-
-            code.push("\t");
-            code.push("\t# set method for all external inputs");
-            code.push("\tdef set(self, obj, objectID=0):");
-
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Property");
-            code.push("\t\tif isinstance(obj, mupif.property.Property):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("out");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if (s.connected())
-                    if (s.type === 'mupif.Property') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                    }
-            }
-
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Field");
-            code.push("\t\tif isinstance(obj, mupif.field.Field):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("out");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if (s.connected())
-                    if (s.type === 'mupif.Field') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                    }
-            }
-
-            //
-            //
-            // get method
-
-            code.push("\t");
-            code.push("\t# get method for all external outputs");
-            code.push("\tdef get(self, objectType, time=None, objectID=0):");
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Property");
-            code.push("\t\tif isinstance(objectType, mupif.PropertyID):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("in");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected())
-                    if(s.type === 'mupif.Property') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\treturn self." + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                    }
-            }
-
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Field");
-            code.push("\t\tif isinstance(objectType, mupif.FieldID):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("in");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected())
-                    if(s.type === 'mupif.Field') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                    }
-            }
-
-            code.push("\t\t");
-            code.push("\t\treturn None");
-        }
-
-        // terminate method
-
-        code.push("\t");
-        code.push("\tdef terminate(self):");
-        code.push("\t\tpass");
-        for(let i=0;i<all_model_blocks.length;i++) {
-            model = all_model_blocks[i];
-            code.push("\t\tself." + model.code_name + ".terminate()");
-        }
-        code.push("\t");
-
-        // solve or solveStep function
-
-        if(class_code)
-            code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
-        else
-            code.push("\tdef solve(self, runInBackground=False):");
-
-        code.push("\t\tpass");
-
-        for(let i=0;i<child_blocks.length;i++) {
-            model = child_blocks[i];
-            if(class_code)
-                code = code.concat(model.getExecutionCode(2, "tstep", false));
-            else
-                code = code.concat(model.getExecutionCode(2, "", true));
-        }
-
-        code.push("");
-        code.push("");
-
-        // execution
-
-        if(!class_code || num_of_external_input_dataslots === 0) {
-            code.push("if __name__ == '__main__':");
-            code.push("\tproblem = " + this.settings_project_classname + "()");
-            code.push("\t");
-            code.push("\tmd = {");
-            code.push("\t\t'Execution': {");
-            code.push("\t\t\t'ID': 'N/A',");
-            code.push("\t\t\t'Use_case_ID': 'N/A',");
-            code.push("\t\t\t'Task_ID': 'N/A'");
-            code.push("\t\t}");
-            code.push("\t}");
-            code.push("\tproblem.initialize(metadata=md)");
-            code.push("\tproblem.solve()");
-            code.push("\tproblem.terminate()");
-            code.push("\t");
-            code.push("\tprint('Simulation has finished.')");
             code.push("");
-        }
+            code.push("");
+            code.push("class " + this.settings_project_classname + "(mupif.workflow.Workflow):");
 
-        return replace_tabs_with_spaces_for_each_line(code);
+            // --------------------------------------------------
+            // __init__ function
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef __init__(self, metadata={}):");
+
+            code.push("\t\tMD = {");
+            code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
+            code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
+            code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
+            code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
+            code.push("\t\t\t\"Description\": \"\",");
+
+            if (class_code) {
+                code.push("\t\t\t\"Execution_settings\": {");
+                code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
+                if (this.exec_type === 'Distributed') {
+                    code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
+                    code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
+                    code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
+                }
+                code.push("\t\t\t}");
+            }
+
+
+            let slots;
+            let params;
+            let s;
+            code.push("\t\t\t\"Inputs\": [");
+            slots = this.getAllExternalDataSlots("out");
+            for (let i = 0; i < slots.length; i++) {
+                s = slots[i];
+                if (s.connected()) {
+                    num_of_external_input_dataslots += 1;
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                        "\"Required\": True, \"description\": \"\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                        "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                        "\"Units\": \"\"";
+                    code.push("\t\t\t\t{" + params + "},");
+                }
+            }
+            code.push("\t\t\t],");
+
+            code.push("\t\t\t\"Outputs\": [");
+            slots = this.getAllExternalDataSlots("in");
+            for (let i = 0; i < slots.length; i++) {
+                s = slots[i];
+                if (s.connected()) {
+                    num_of_external_input_dataslots += 1;
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                        "\"description\": \"\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                        "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                        "\"Units\": \"\"";
+                    code.push("\t\t\t\t{" + params + "},");
+                }
+            }
+            code.push("\t\t\t],");
+
+            code.push("\t\t}");
+
+            code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
+
+            code.push("\t\tself.updateMetadata(metadata)");
+
+            let code_add;
+            if (class_code) {
+                // initialization of workflow inputs
+                slots = this.getAllExternalDataSlots("out");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected()) {
+                        code.push("");
+                        code.push("\t\t# initialization code of external input");
+                        code.push("\t\t" + s.getCodeRepresentation() + " = None");
+                        code.push("\t\t# It should be defined from outside using set() method.");
+                    }
+                }
+            }
+
+            // init codes of child blocks
+
+            let allBlocksRecursive = this.getBlocksRecursive();
+            for (let i = 0; i < allBlocksRecursive.length; i++)
+                extend_array(code, allBlocksRecursive[i].getInitCode(2));
+            
+            code.push("");
+            
+            // --------------------------------------------------
+            // initialize function
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
+
+            code.push("");
+
+            code.push("\t\tself.updateMetadata(dictionary=metadata)");
+
+            code.push("");
+            code.push("\t\texecMD = {");
+            code.push("\t\t\t'Execution': {");
+            code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
+            code.push("\t\t\t\t'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),");
+            code.push("\t\t\t\t'Task_ID': self.getMetadata('Execution.Task_ID')");
+            code.push("\t\t\t}");
+            code.push("\t\t}");
+
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                extend_array(code, all_model_blocks[i].getInitializationCode(2, "execMD"));
+            }
+
+            code.push("");
+
+            for (let i = 0; i < all_model_blocks.length; i++)
+                code.push("\t\tself.registerModel(self." + all_model_blocks[i].getCodeName() + ", \"" + all_model_blocks[i].getCodeName() + "\")");
+            
+            code.push("\t\tself.generateMetadataModelRefsID()");
+
+            code.push("");
+
+            code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+
+            // --------------------------------------------------
+            // get critical time step function
+            // --------------------------------------------------
+
+            let model;
+            if (class_code) {
+                code.push("");
+                code.push("\tdef getCriticalTimeStep(self):");
+                code_add = "";
+                let ii = 0;
+                for (let i = 0; i < child_blocks.length; i++) {
+                    model = child_blocks[i];
+                    if (model instanceof BlockModel) {
+                        if (ii)
+                            code_add += ", ";
+                        code_add += "self." + model.code_name + ".getCriticalTimeStep()";
+                        ii += 1;
+                    }
+                }
+                code.push("\t\treturn min([" + code_add + "])");
+                
+                // --------------------------------------------------
+                // set method
+                // --------------------------------------------------
+
+                code.push("");
+                code.push("\t# set method for all external inputs");
+                code.push("\tdef set(self, obj, objectID=0):");
+
+                code.push("\t\t");
+                code.push("\t\t# in case of Property");
+                code.push("\t\tif isinstance(obj, mupif.property.Property):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("out");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Property') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                        }
+                }
+
+                code.push("");
+                code.push("\t\t# in case of Field");
+                code.push("\t\tif isinstance(obj, mupif.field.Field):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("out");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Field') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                        }
+                }
+                
+                // --------------------------------------------------
+                // get method
+                // --------------------------------------------------
+
+                code.push("");
+                code.push("\t# get method for all external outputs");
+                code.push("\tdef get(self, objectType, time=None, objectID=0):");
+                code.push("");
+                code.push("\t\t# in case of Property");
+                code.push("\t\tif isinstance(objectType, mupif.PropertyID):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("in");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Property') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\treturn self." + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
+                        }
+                }
+
+                code.push("");
+                code.push("\t\t# in case of Field");
+                code.push("\t\tif isinstance(objectType, mupif.FieldID):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("in");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Field') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
+                        }
+                }
+
+                code.push("");
+                code.push("\t\treturn None");
+            }
+
+            // --------------------------------------------------
+            // terminate method
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef terminate(self):");
+            code.push("\t\tpass");
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                model = all_model_blocks[i];
+                code.push("\t\tself." + model.code_name + ".terminate()");
+            }
+            code.push("");
+
+            // --------------------------------------------------
+            // solve or solveStep function
+            // --------------------------------------------------
+
+            if (class_code)
+                code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
+            else
+                code.push("\tdef solve(self, runInBackground=False):");
+
+            code.push("\t\tpass");
+
+            for (let i = 0; i < child_blocks.length; i++) {
+                model = child_blocks[i];
+                if (class_code)
+                    code = code.concat(model.getExecutionCode(2, "tstep", false));
+                else
+                    code = code.concat(model.getExecutionCode(2, "", true));
+            }
+
+            code.push("");
+            code.push("");
+
+            // --------------------------------------------------
+            // execution part
+            // --------------------------------------------------
+
+            if (!class_code || num_of_external_input_dataslots === 0) {
+                code.push("if __name__ == '__main__':");
+                code.push("\tproblem = " + this.settings_project_classname + "()");
+                code.push("");
+                code.push("\tmd = {");
+                code.push("\t\t'Execution': {");
+                code.push("\t\t\t'ID': 'N/A',");
+                code.push("\t\t\t'Use_case_ID': 'N/A',");
+                code.push("\t\t\t'Task_ID': 'N/A'");
+                code.push("\t\t}");
+                code.push("\t}");
+                code.push("\tproblem.initialize(metadata=md)");
+                code.push("\tproblem.solve()");
+                code.push("\tproblem.terminate()");
+                code.push("");
+                code.push("\tprint('Simulation has finished.')");
+                code.push("");
+            }
+
+            return replace_tabs_with_spaces_for_each_line(code);
+        }
+        return '';
     }
 
     defineMenu() {
@@ -2430,17 +2454,6 @@ function formatCodeToText(code){
 function extend_array(arr, add){
     for(let i=0;i<add.length;i++)
         arr.push(add[i]);
-}
-
-function logToMyConsole(val, color=null, fontsize=null){
-    let elem = document.getElementById('messageContainer');
-    let color_add = '';
-    let fontsize_add = '';
-    if(color != null)
-        color_add = 'color:' + color + ';';
-    if(fontsize != null)
-        fontsize_add = 'font-size:' + fontsize + ';';
-    elem.innerHTML = '<b class="message" style="' + color_add + fontsize_add + '">' + val + '</b>' + '<br><br>' + elem.innerHTML;
 }
 
 function floatToStr(val){
@@ -3761,7 +3774,7 @@ class WorkflowEditor{
             slot.name = document.getElementById('out_slot_'+i+'_name').value;
         }
 
-        logToMyConsole('External data slots saved','green');
+        console.log('External data slots saved');
         this.generateWorkflowHtml();
     }
 
@@ -3776,7 +3789,7 @@ class WorkflowEditor{
         val = document.getElementById('new_project_id').value;
         this.setProjectID(val);
         this.updateHtmlOfProjectSettings();
-        logToMyConsole('Project settings saved','green');
+        console.log('Project settings saved');
         this.generateWorkflowHtml();
     }
 
@@ -3791,30 +3804,20 @@ class WorkflowEditor{
     }
 
     menu_download_exec_code(){
-        this.download(this.workflowblock.settings_project_modulename + ".py", this.getExecutionCode());
         let code = this.getExecutionCode();
-        // console.log(code);
-        let code_html = replaceAllInStr(code, '\t', '    ');
-        code_html = replaceAllInStr(code_html, ' ', '&nbsp;&nbsp;');
-        code_html = replaceAllInStr(code_html, '\n', '<br>');
-        logToMyConsole(code_html, 'white', 12);
+        if(code !== '')
+            this.download(this.workflowblock.settings_project_modulename + ".py", code);
     }
 
     menu_download_class_code(){
-        this.download(this.workflowblock.settings_project_modulename + ".py", this.getClassCode());
         let code = this.getClassCode();
-        // console.log(code);
-        let code_html = replaceAllInStr(code, '\t', ' ');
-        code_html = replaceAllInStr(code_html, ' ', '&nbsp;&nbsp;');
-        code_html = replaceAllInStr(code_html, '\n', '<br>');
-        logToMyConsole(code_html, 'white', 12);
+        if(code !== '')
+            this.download(this.workflowblock.settings_project_modulename + ".py", code);
     }
 
     menu_download_json(){
         let code = this.getJSON();
         this.download("project.json", JSON.stringify(code, null, 4));
-        // console.log(code);
-        // logToMyConsole(JSON.stringify(code), 'white', 12);
     }
 
     download_ith_metadata(md_id){

@@ -121,7 +121,23 @@
                 ],
                 "Execution_settings": {
                     "Type": "Local"
-                }
+                },
+                "Dependencies": [
+                    {
+                        "Label": "model_1",
+                        "Name": "Non-stationary thermal problem",
+                        "ID": "ThermalNonstatModel-1",
+                        "Version_date": "1.0.0, Feb 2019",
+                        "Type": "undefined"
+                    },
+                    {
+                        "Label": "model_2",
+                        "Name": "Plane stress linear elastic",
+                        "ID": "MechanicalModel-1",
+                        "Version_date": "1.0.0, Feb 2019",
+                        "Type": "undefined"
+                    }
+                ]
             },
             "model_input_file_name": "",
             "model_input_file_directory": ""
@@ -139,7 +155,8 @@
                 "ModuleName": "field_export",
                 "Name": "Field export to image",
                 "ID": "field_export_to_image",
-                "Description": "",
+                "Description": "Exports MuPIF Field into an image file",
+                "Version_date": "1.0.0, Jan 2021",
                 "Inputs": [
                     {
                         "Name": "field",
@@ -172,7 +189,8 @@
                 "ModuleName": "field_export",
                 "Name": "Field export to image",
                 "ID": "field_export_to_image",
-                "Description": "",
+                "Description": "Exports MuPIF Field into an image file",
+                "Version_date": "1.0.0, Jan 2021",
                 "Inputs": [
                     {
                         "Name": "field",

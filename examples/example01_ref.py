@@ -7,7 +7,7 @@ log = logging.getLogger()
 
 
 class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
-    
+
     def __init__(self, metadata={}):
         MD = {
             "ClassName": "ThermoMechanicalExecutionWorkflow_01",
@@ -50,16 +50,11 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         # __init__ code of model_4 (Field export to image)
         self.model_4 = field_export.field_export_to_image()
 
-        self.setMetadata('Model_refs_ID', [])
-        self.registerModel(self.model_1)
-        self.registerModel(self.model_2)
-        self.registerModel(self.model_3)
-        self.registerModel(self.model_4)
-    
+
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
-        
+
         self.updateMetadata(dictionary=metadata)
-        
+
         execMD = {
             'Execution': {
                 'ID': self.getMetadata('Execution.ID'),
@@ -79,16 +74,22 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         
         # initialization code of model_4 (Field export to image)
         self.model_4.initialize(file='', workdir='', metadata=execMD)
-        
+
+        self.registerModel(self.model_1, "model_1")
+        self.registerModel(self.model_2, "model_2")
+        self.registerModel(self.model_3, "model_3")
+        self.registerModel(self.model_4, "model_4")
+        self.generateMetadataModelRefsID()
+
         mupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)
-    
+
     def terminate(self):
         pass
         self.model_1.terminate()
         self.model_2.terminate()
         self.model_3.terminate()
         self.model_4.terminate()
-    
+
     def solve(self, runInBackground=False):
         pass
         
@@ -130,7 +131,7 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
 
 if __name__ == '__main__':
     problem = ThermoMechanicalExecutionWorkflow_01()
-    
+
     md = {
         'Execution': {
             'ID': 'N/A',
@@ -141,6 +142,6 @@ if __name__ == '__main__':
     problem.initialize(metadata=md)
     problem.solve()
     problem.terminate()
-    
+
     print('Simulation has finished.')
 

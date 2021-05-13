@@ -40,11 +40,11 @@ class BlockPhysicalQuantity extends Block{
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_value') {
             this.value = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Value set to "'+this.value+'"', 'green');
+            console.log('Value set to "'+this.value+'"');
         }
         if(action==='set_units') {
             this.units = document.getElementById('myQuery_temp_val').value;
-            logToMyConsole('Units set to "'+this.units+'"', 'green');
+            console.log('Units set to "'+this.units+'"');
         }
         super.myquery_proceed(action, p1, p2);
     }

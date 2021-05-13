@@ -24,6 +24,31 @@ class BlockWorkflow extends Block{
         return slot.getCodeRepresentation();
     }
 
+    canGenerateCode(type){
+        if(type === 'exec'){
+            let result = true;
+            if(this.getSlots().length) {
+                result = false;
+                console.log('Execution code cannot be generated with external inputs.');
+                if(this.editor.visual)
+                    myQuery_show_error('Execution code cannot be generated with external inputs.');
+            }
+            let blocks = this.getBlocksRecursive(BlockTimeloop);
+            if(!blocks.length) {
+                result = false;
+                console.log('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
+                if(this.editor.visual)
+                    myQuery_show_error('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
+            }
+            return result;
+        }
+        if(type === 'class'){
+            return true;
+        }
+        console.log('Type of code is not valid!');
+        return false;
+    }
+
     generateAllElementCodeNames(){
         this.code_name = 'workflow';
         let blocks = this.getBlocksRecursive();
@@ -48,304 +73,318 @@ class BlockWorkflow extends Block{
 
     generateCode(class_code){
         console.log('Generating Python code.');
+        if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
 
-        let num_of_external_input_dataslots = 0;
+            let num_of_external_input_dataslots = 0;
 
-        this.generateAllElementCodeNames();
+            this.generateAllElementCodeNames();
 
-        let all_model_blocks = this.getBlocksRecursive(BlockModel);
-        let child_blocks = this.getBlocks();
+            let all_model_blocks = this.getBlocksRecursive(BlockModel);
+            let child_blocks = this.getBlocks();
 
-        let code = ["import mupif", "import copy"];
+            let code = ["import mupif", "import copy"];
 
-        let model_blocks = this.getBlocksRecursive(BlockModel);
-        let imported_modules = [];
-        for(let i=0;i<model_blocks.length;i++) {
-            if(model_blocks[i].model_module !== "") {
-                if (!imported_modules.includes(model_blocks[i].model_module)) {
-                    code.push("import " + model_blocks[i].model_module);
-                    imported_modules.push(model_blocks[i].model_module);
+            let model_blocks = this.getBlocksRecursive(BlockModel);
+            let imported_modules = [];
+            for (let i = 0; i < model_blocks.length; i++) {
+                if (model_blocks[i].model_module !== "") {
+                    if (!imported_modules.includes(model_blocks[i].model_module)) {
+                        code.push("import " + model_blocks[i].model_module);
+                        imported_modules.push(model_blocks[i].model_module);
+                    }
                 }
             }
-        }
 
-        code.push("import logging");
+            code.push("import logging");
 
-        code.push("log = logging.getLogger()");
+            code.push("log = logging.getLogger()");
 
-        code.push("");
-        code.push("");
-        code.push("class " + this.settings_project_classname + "(mupif.workflow.Workflow):");
-
-        // __init__ function
-
-        code.push("\t");
-        code.push("\tdef __init__(self, metadata={}):");
-
-        code.push("\t\tMD = {");
-        code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
-        code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
-        code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
-        code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
-        code.push("\t\t\t\"Description\": \"\",");
-
-        if(class_code){
-            code.push("\t\t\t\"Execution_settings\": {");
-            code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
-            if(this.exec_type === 'Distributed') {
-                code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
-                code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
-                code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
-            }
-            code.push("\t\t\t}");
-        }
-
-
-        let slots;
-        let params;
-        let s;
-        code.push("\t\t\t\"Inputs\": [");
-        slots = this.getAllExternalDataSlots("out");
-        for (let i=0;i<slots.length;i++) {
-            s = slots[i];
-            if (s.connected()) {
-                num_of_external_input_dataslots += 1;
-                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
-                    "\"Required\": True, \"description\": \"\", " +
-                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
-                    "\"Units\": \"\"";
-                code.push("\t\t\t\t{" + params + "},");
-            }
-        }
-        code.push("\t\t\t],");
-
-        code.push("\t\t\t\"Outputs\": [");
-        slots = this.getAllExternalDataSlots("in");
-        for (let i=0;i<slots.length;i++) {
-            s = slots[i];
-            if (s.connected()) {
-                num_of_external_input_dataslots += 1;
-                params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
-                    "\"description\": \"\", " +
-                    "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                    "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
-                    "\"Units\": \"\"";
-                code.push("\t\t\t\t{" + params + "},");
-            }
-        }
-        code.push("\t\t\t],");
-
-        code.push("\t\t}");
-
-        code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
-
-        code.push("\t\tself.updateMetadata(metadata)");
-
-        let code_add;
-        if(class_code) {
-            // initialization of workflow inputs
-            slots = this.getAllExternalDataSlots("out");
-            for (let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected()) {
-                    code.push("\t");
-                    code.push("\t\t# initialization code of external input");
-                    code.push("\t\t" + s.getCodeRepresentation() + " = None");
-                    code.push("\t\t# It should be defined from outside using set() method.");
-                }
-            }
-        }
-
-        // init codes of child blocks
-
-        let allBlocksRecursive = this.getBlocksRecursive();
-        for(let i=0;i<allBlocksRecursive.length;i++)
-            extend_array(code, allBlocksRecursive[i].getInitCode(2));
-
-        code.push("");
-
-        let model;
-        code.push("\t\tself.setMetadata('Model_refs_ID', [])");
-
-        for (let i=0;i<all_model_blocks.length;i++) {
-            model = all_model_blocks[i];
-            // if(model.exec_type === "Local")
-            code.push("\t\tself.registerModel(self." + model.getCodeName() + ")");
-        }
-
-        // initialize function
-
-        code.push("\t");
-        code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
-
-        code.push("\t\t");
-
-        code.push("\t\tself.updateMetadata(dictionary=metadata)");
-
-        code.push("\t\t");
-        code.push("\t\texecMD = {");
-        code.push("\t\t\t'Execution': {");
-        code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
-        code.push("\t\t\t\t'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),");
-        code.push("\t\t\t\t'Task_ID': self.getMetadata('Execution.Task_ID')");
-        code.push("\t\t\t}");
-        code.push("\t\t}");
-
-        for (let i=0;i<all_model_blocks.length;i++) {
-            extend_array(code, all_model_blocks[i].getInitializationCode(2, "execMD"));
-        }
-
-        code.push("\t\t");
-
-        code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
-
-        // get critical time step function
-
-        if(class_code) {
-            code.push("\t");
-            code.push("\tdef getCriticalTimeStep(self):");
-            code_add = "";
-            let ii = 0;
-            for (let i=0;i<child_blocks.length;i++) {
-                model = child_blocks[i];
-                if(model instanceof BlockModel) {
-                    if (ii)
-                        code_add += ", ";
-                    code_add += "self." + model.code_name + ".getCriticalTimeStep()";
-                    ii += 1;
-                }
-            }
-            code.push("\t\treturn min([" + code_add + "])");
-
-            //
-            //
-            // set method
-
-            code.push("\t");
-            code.push("\t# set method for all external inputs");
-            code.push("\tdef set(self, obj, objectID=0):");
-
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Property");
-            code.push("\t\tif isinstance(obj, mupif.property.Property):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("out");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if (s.connected())
-                    if (s.type === 'mupif.Property') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                    }
-            }
-
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Field");
-            code.push("\t\tif isinstance(obj, mupif.field.Field):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("out");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if (s.connected())
-                    if (s.type === 'mupif.Field') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                    }
-            }
-
-            //
-            //
-            // get method
-
-            code.push("\t");
-            code.push("\t# get method for all external outputs");
-            code.push("\tdef get(self, objectType, time=None, objectID=0):");
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Property");
-            code.push("\t\tif isinstance(objectType, mupif.PropertyID):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("in");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected())
-                    if(s.type === 'mupif.Property') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\treturn self." + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                    }
-            }
-
-            code.push("\t\t\t");
-            code.push("\t\t# in case of Field");
-            code.push("\t\tif isinstance(objectType, mupif.FieldID):");
-            code.push("\t\t\tpass");
-            slots = this.getAllExternalDataSlots("in");
-            for(let i=0;i<slots.length;i++) {
-                s = slots[i];
-                if(s.connected())
-                    if(s.type === 'mupif.Field') {
-                        code.push("\t\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                    }
-            }
-
-            code.push("\t\t");
-            code.push("\t\treturn None");
-        }
-
-        // terminate method
-
-        code.push("\t");
-        code.push("\tdef terminate(self):");
-        code.push("\t\tpass");
-        for(let i=0;i<all_model_blocks.length;i++) {
-            model = all_model_blocks[i];
-            code.push("\t\tself." + model.code_name + ".terminate()");
-        }
-        code.push("\t");
-
-        // solve or solveStep function
-
-        if(class_code)
-            code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
-        else
-            code.push("\tdef solve(self, runInBackground=False):");
-
-        code.push("\t\tpass");
-
-        for(let i=0;i<child_blocks.length;i++) {
-            model = child_blocks[i];
-            if(class_code)
-                code = code.concat(model.getExecutionCode(2, "tstep", false));
-            else
-                code = code.concat(model.getExecutionCode(2, "", true));
-        }
-
-        code.push("");
-        code.push("");
-
-        // execution
-
-        if(!class_code || num_of_external_input_dataslots === 0) {
-            code.push("if __name__ == '__main__':");
-            code.push("\tproblem = " + this.settings_project_classname + "()");
-            code.push("\t");
-            code.push("\tmd = {");
-            code.push("\t\t'Execution': {");
-            code.push("\t\t\t'ID': 'N/A',");
-            code.push("\t\t\t'Use_case_ID': 'N/A',");
-            code.push("\t\t\t'Task_ID': 'N/A'");
-            code.push("\t\t}");
-            code.push("\t}");
-            code.push("\tproblem.initialize(metadata=md)");
-            code.push("\tproblem.solve()");
-            code.push("\tproblem.terminate()");
-            code.push("\t");
-            code.push("\tprint('Simulation has finished.')");
             code.push("");
-        }
+            code.push("");
+            code.push("class " + this.settings_project_classname + "(mupif.workflow.Workflow):");
 
-        return replace_tabs_with_spaces_for_each_line(code);
+            // --------------------------------------------------
+            // __init__ function
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef __init__(self, metadata={}):");
+
+            code.push("\t\tMD = {");
+            code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
+            code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
+            code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
+            code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
+            code.push("\t\t\t\"Description\": \"\",");
+
+            if (class_code) {
+                code.push("\t\t\t\"Execution_settings\": {");
+                code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
+                if (this.exec_type === 'Distributed') {
+                    code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
+                    code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
+                    code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
+                }
+                code.push("\t\t\t}");
+            }
+
+
+            let slots;
+            let params;
+            let s;
+            code.push("\t\t\t\"Inputs\": [");
+            slots = this.getAllExternalDataSlots("out");
+            for (let i = 0; i < slots.length; i++) {
+                s = slots[i];
+                if (s.connected()) {
+                    num_of_external_input_dataslots += 1;
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                        "\"Required\": True, \"description\": \"\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                        "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                        "\"Units\": \"\"";
+                    code.push("\t\t\t\t{" + params + "},");
+                }
+            }
+            code.push("\t\t\t],");
+
+            code.push("\t\t\t\"Outputs\": [");
+            slots = this.getAllExternalDataSlots("in");
+            for (let i = 0; i < slots.length; i++) {
+                s = slots[i];
+                if (s.connected()) {
+                    num_of_external_input_dataslots += 1;
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                        "\"description\": \"\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
+                        "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                        "\"Units\": \"\"";
+                    code.push("\t\t\t\t{" + params + "},");
+                }
+            }
+            code.push("\t\t\t],");
+
+            code.push("\t\t}");
+
+            code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
+
+            code.push("\t\tself.updateMetadata(metadata)");
+
+            let code_add;
+            if (class_code) {
+                // initialization of workflow inputs
+                slots = this.getAllExternalDataSlots("out");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected()) {
+                        code.push("");
+                        code.push("\t\t# initialization code of external input");
+                        code.push("\t\t" + s.getCodeRepresentation() + " = None");
+                        code.push("\t\t# It should be defined from outside using set() method.");
+                    }
+                }
+            }
+
+            // init codes of child blocks
+
+            let allBlocksRecursive = this.getBlocksRecursive();
+            for (let i = 0; i < allBlocksRecursive.length; i++)
+                extend_array(code, allBlocksRecursive[i].getInitCode(2));
+            
+            code.push("");
+            
+            // --------------------------------------------------
+            // initialize function
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
+
+            code.push("");
+
+            code.push("\t\tself.updateMetadata(dictionary=metadata)");
+
+            code.push("");
+            code.push("\t\texecMD = {");
+            code.push("\t\t\t'Execution': {");
+            code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
+            code.push("\t\t\t\t'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),");
+            code.push("\t\t\t\t'Task_ID': self.getMetadata('Execution.Task_ID')");
+            code.push("\t\t\t}");
+            code.push("\t\t}");
+
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                extend_array(code, all_model_blocks[i].getInitializationCode(2, "execMD"));
+            }
+
+            code.push("");
+
+            for (let i = 0; i < all_model_blocks.length; i++)
+                code.push("\t\tself.registerModel(self." + all_model_blocks[i].getCodeName() + ", \"" + all_model_blocks[i].getCodeName() + "\")");
+            
+            code.push("\t\tself.generateMetadataModelRefsID()");
+
+            code.push("");
+
+            code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+
+            // --------------------------------------------------
+            // get critical time step function
+            // --------------------------------------------------
+
+            let model;
+            if (class_code) {
+                code.push("");
+                code.push("\tdef getCriticalTimeStep(self):");
+                code_add = "";
+                let ii = 0;
+                for (let i = 0; i < child_blocks.length; i++) {
+                    model = child_blocks[i];
+                    if (model instanceof BlockModel) {
+                        if (ii)
+                            code_add += ", ";
+                        code_add += "self." + model.code_name + ".getCriticalTimeStep()";
+                        ii += 1;
+                    }
+                }
+                code.push("\t\treturn min([" + code_add + "])");
+                
+                // --------------------------------------------------
+                // set method
+                // --------------------------------------------------
+
+                code.push("");
+                code.push("\t# set method for all external inputs");
+                code.push("\tdef set(self, obj, objectID=0):");
+
+                code.push("\t\t");
+                code.push("\t\t# in case of Property");
+                code.push("\t\tif isinstance(obj, mupif.property.Property):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("out");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Property') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                        }
+                }
+
+                code.push("");
+                code.push("\t\t# in case of Field");
+                code.push("\t\tif isinstance(obj, mupif.field.Field):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("out");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Field') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                        }
+                }
+                
+                // --------------------------------------------------
+                // get method
+                // --------------------------------------------------
+
+                code.push("");
+                code.push("\t# get method for all external outputs");
+                code.push("\tdef get(self, objectType, time=None, objectID=0):");
+                code.push("");
+                code.push("\t\t# in case of Property");
+                code.push("\t\tif isinstance(objectType, mupif.PropertyID):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("in");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Property') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\treturn self." + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
+                        }
+                }
+
+                code.push("");
+                code.push("\t\t# in case of Field");
+                code.push("\t\tif isinstance(objectType, mupif.FieldID):");
+                code.push("\t\t\tpass");
+                slots = this.getAllExternalDataSlots("in");
+                for (let i = 0; i < slots.length; i++) {
+                    s = slots[i];
+                    if (s.connected())
+                        if (s.type === 'mupif.Field') {
+                            code.push("\t\t\tif objectID == '" + s.name + "':");
+                            code.push("\t\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
+                        }
+                }
+
+                code.push("");
+                code.push("\t\treturn None");
+            }
+
+            // --------------------------------------------------
+            // terminate method
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef terminate(self):");
+            code.push("\t\tpass");
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                model = all_model_blocks[i];
+                code.push("\t\tself." + model.code_name + ".terminate()");
+            }
+            code.push("");
+
+            // --------------------------------------------------
+            // solve or solveStep function
+            // --------------------------------------------------
+
+            if (class_code)
+                code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
+            else
+                code.push("\tdef solve(self, runInBackground=False):");
+
+            code.push("\t\tpass");
+
+            for (let i = 0; i < child_blocks.length; i++) {
+                model = child_blocks[i];
+                if (class_code)
+                    code = code.concat(model.getExecutionCode(2, "tstep", false));
+                else
+                    code = code.concat(model.getExecutionCode(2, "", true));
+            }
+
+            code.push("");
+            code.push("");
+
+            // --------------------------------------------------
+            // execution part
+            // --------------------------------------------------
+
+            if (!class_code || num_of_external_input_dataslots === 0) {
+                code.push("if __name__ == '__main__':");
+                code.push("\tproblem = " + this.settings_project_classname + "()");
+                code.push("");
+                code.push("\tmd = {");
+                code.push("\t\t'Execution': {");
+                code.push("\t\t\t'ID': 'N/A',");
+                code.push("\t\t\t'Use_case_ID': 'N/A',");
+                code.push("\t\t\t'Task_ID': 'N/A'");
+                code.push("\t\t}");
+                code.push("\t}");
+                code.push("\tproblem.initialize(metadata=md)");
+                code.push("\tproblem.solve()");
+                code.push("\tproblem.terminate()");
+                code.push("");
+                code.push("\tprint('Simulation has finished.')");
+                code.push("");
+            }
+
+            return replace_tabs_with_spaces_for_each_line(code);
+        }
+        return '';
     }
 
     defineMenu() {

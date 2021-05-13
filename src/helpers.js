@@ -35,17 +35,6 @@ function extend_array(arr, add){
         arr.push(add[i]);
 }
 
-function logToMyConsole(val, color=null, fontsize=null){
-    let elem = document.getElementById('messageContainer');
-    let color_add = '';
-    let fontsize_add = '';
-    if(color != null)
-        color_add = 'color:' + color + ';';
-    if(fontsize != null)
-        fontsize_add = 'font-size:' + fontsize + ';';
-    elem.innerHTML = '<b class="message" style="' + color_add + fontsize_add + '">' + val + '</b>' + '<br><br>' + elem.innerHTML;
-}
-
 function floatToStr(val){
     let val_str = val.toString();
     if(!val_str.includes('.'))
