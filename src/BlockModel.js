@@ -103,14 +103,7 @@ class BlockModel extends Block {
 
     getInitCode(indent = 0) {
         let code = super.getInitCode();
-        if(this.exec_type === "Distributed"){
-            code.push("self." + this.code_name + " = None  # instances of distributed models are created in initialize function");
-        }else{
-            if (this.model_module !== "undefined" && this.model_module !== "")
-                code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
-            else
-                code.push("self." + this.code_name + " = " + this.model_name + "()");
-        }
+        code.push("self." + this.code_name + " = None  # instances of models are created in the initialize function");
         return push_indents_before_each_line(code, indent);
     }
 
@@ -132,6 +125,11 @@ class BlockModel extends Block {
             code.push("\tlog.info(self." + this.code_name + ")");
             code.push("except Exception as e:");
             code.push("\tlog.exception(e)");
+        }else{
+            if (this.model_module !== "undefined" && this.model_module !== "")
+                code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
+            else
+                code.push("self." + this.code_name + " = " + this.model_name + "()");
         }
 
         code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");

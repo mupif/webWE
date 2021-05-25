@@ -74,6 +74,8 @@ div#workflowContainer{
     z-index: 50;
 
     display:none;
+
+    resize: both;
 }
 
 div#workflowSubContainer{
@@ -82,7 +84,7 @@ div#workflowSubContainer{
 }
 
 div#modelListContainer, div#projectSettingsContainer, div#workflowContainer{
-    width:1600px;
+    width:800px;
     height:760px;
 }
 

@@ -45,7 +45,7 @@
 </div>
 <table id="main_table" cellspacing="0">
     <tr>
-        <td colspan="3"><div id="div_caption">MuPIF Workflow Editor</div></td>
+        <td colspan="3"><div id="div_caption">MuPIF Workflow Editor and Code Generator</div></td>
     </tr>
     <tr>
         <td>
@@ -77,7 +77,7 @@
             </div>
         </td>
         <td>
-            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
+            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;editor.generateWorkflowHtml();">
                 <div id="workflowSubContainer">
 
                 </div>

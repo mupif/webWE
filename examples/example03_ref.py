@@ -36,13 +36,13 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
         
         # __init__ code of model_1 (Thermo-mechanical class workflow)
-        self.model_1 = example02.ThermoMechanicalClassWorkflow_01()
+        self.model_1 = None  # instances of models are created in the initialize function
         
         # __init__ code of model_2 (Field export to image)
-        self.model_2 = field_export.field_export_to_image()
+        self.model_2 = None  # instances of models are created in the initialize function
         
         # __init__ code of model_3 (Field export to image)
-        self.model_3 = field_export.field_export_to_image()
+        self.model_3 = None  # instances of models are created in the initialize function
 
 
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
@@ -58,12 +58,15 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         }
         
         # initialization code of model_1 (Thermo-mechanical class workflow)
+        self.model_1 = example02.ThermoMechanicalClassWorkflow_01()
         self.model_1.initialize(file='', workdir='', metadata=execMD)
         
         # initialization code of model_2 (Field export to image)
+        self.model_2 = field_export.field_export_to_image()
         self.model_2.initialize(file='', workdir='', metadata=execMD)
         
         # initialization code of model_3 (Field export to image)
+        self.model_3 = field_export.field_export_to_image()
         self.model_3.initialize(file='', workdir='', metadata=execMD)
 
         self.registerModel(self.model_1, "model_1")
@@ -115,6 +118,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
 if __name__ == '__main__':
     problem = ThermoMechanicalExecutionWorkflow_02()
 
+    # these metadata are supposed to be filled before execution
     md = {
         'Execution': {
             'ID': 'N/A',

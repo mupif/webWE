@@ -717,14 +717,7 @@ class BlockModel extends Block {
 
     getInitCode(indent = 0) {
         let code = super.getInitCode();
-        if(this.exec_type === "Distributed"){
-            code.push("self." + this.code_name + " = None  # instances of distributed models are created in initialize function");
-        }else{
-            if (this.model_module !== "undefined" && this.model_module !== "")
-                code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
-            else
-                code.push("self." + this.code_name + " = " + this.model_name + "()");
-        }
+        code.push("self." + this.code_name + " = None  # instances of models are created in the initialize function");
         return push_indents_before_each_line(code, indent);
     }
 
@@ -746,6 +739,11 @@ class BlockModel extends Block {
             code.push("\tlog.info(self." + this.code_name + ")");
             code.push("except Exception as e:");
             code.push("\tlog.exception(e)");
+        }else{
+            if (this.model_module !== "undefined" && this.model_module !== "")
+                code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
+            else
+                code.push("self." + this.code_name + " = " + this.model_name + "()");
         }
 
         code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
@@ -1429,7 +1427,10 @@ class BlockWorkflow extends Block{
             slots[i].id = 'external_input_'+(i+1);
     }
 
-    generateCode(class_code){
+    generateCode(class_code, class_with_jobman_code=false){
+        if(!class_code)
+            class_with_jobman_code = false;
+        
         console.log('Generating Python code.');
         if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
 
@@ -1721,10 +1722,11 @@ class BlockWorkflow extends Block{
             // execution part
             // --------------------------------------------------
 
-            if (!class_code || num_of_external_input_dataslots === 0) {
+            if (!class_code) {
                 code.push("if __name__ == '__main__':");
                 code.push("\tproblem = " + this.settings_project_classname + "()");
                 code.push("");
+                code.push("\t# these metadata are supposed to be filled before execution");
                 code.push("\tmd = {");
                 code.push("\t\t'Execution': {");
                 code.push("\t\t\t'ID': 'N/A',");
@@ -2500,6 +2502,30 @@ function keyPress(e){
             q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
 
             myQuery_show(q_html);
+        }
+    }
+    // moving blocks up
+    if(e.which === 38){
+        if(editor.selected_block && editor.selected_block !== editor.workflowblock){
+            editor.selected_block.moveMeUp();
+            editor.generateWorkflowHtml();
+        }
+    }
+    // moving blocks down
+    if(e.which === 40){
+        if(editor.selected_block && editor.selected_block !== editor.workflowblock){
+            editor.selected_block.moveMeDown();
+            editor.generateWorkflowHtml();
+        }
+    }
+    // changing the sorting
+    if(e.which === 79){
+        if(editor.selected_block){
+            if(editor.selected_block.child_block_sort === 'vertical')
+                editor.selected_block.child_block_sort = 'horizontal';
+            else if(editor.selected_block.child_block_sort === 'horizontal')
+                editor.selected_block.child_block_sort = 'vertical';
+            editor.generateWorkflowHtml();
         }
     }
 }

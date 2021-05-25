@@ -36,10 +36,10 @@ class ThermoMechanicalClassWorkflow_01(mupif.workflow.Workflow):
         self.constant_property_1 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
         
         # __init__ code of model_1 (Non-stationary thermal problem)
-        self.model_1 = mupif_examples_models.ThermalNonstatModel()
+        self.model_1 = None  # instances of models are created in the initialize function
         
         # __init__ code of model_2 (Plane stress linear elastic)
-        self.model_2 = mupif_examples_models.MechanicalModel()
+        self.model_2 = None  # instances of models are created in the initialize function
 
 
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
@@ -55,9 +55,11 @@ class ThermoMechanicalClassWorkflow_01(mupif.workflow.Workflow):
         }
         
         # initialization code of model_1 (Non-stationary thermal problem)
+        self.model_1 = mupif_examples_models.ThermalNonstatModel()
         self.model_1.initialize(file='inputT.in', workdir='', metadata=execMD)
         
         # initialization code of model_2 (Plane stress linear elastic)
+        self.model_2 = mupif_examples_models.MechanicalModel()
         self.model_2.initialize(file='inputM.in', workdir='', metadata=execMD)
 
         self.registerModel(self.model_1, "model_1")

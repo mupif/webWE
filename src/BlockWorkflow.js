@@ -71,7 +71,10 @@ class BlockWorkflow extends Block{
             slots[i].id = 'external_input_'+(i+1);
     }
 
-    generateCode(class_code){
+    generateCode(class_code, class_with_jobman_code=false){
+        if(!class_code)
+            class_with_jobman_code = false;
+        
         console.log('Generating Python code.');
         if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
 
@@ -363,10 +366,11 @@ class BlockWorkflow extends Block{
             // execution part
             // --------------------------------------------------
 
-            if (!class_code || num_of_external_input_dataslots === 0) {
+            if (!class_code) {
                 code.push("if __name__ == '__main__':");
                 code.push("\tproblem = " + this.settings_project_classname + "()");
                 code.push("");
+                code.push("\t# these metadata are supposed to be filled before execution");
                 code.push("\tmd = {");
                 code.push("\t\t'Execution': {");
                 code.push("\t\t\t'ID': 'N/A',");

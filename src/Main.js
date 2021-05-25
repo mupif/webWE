@@ -29,6 +29,30 @@ function keyPress(e){
             myQuery_show(q_html);
         }
     }
+    // moving blocks up
+    if(e.which === 38){
+        if(editor.selected_block && editor.selected_block !== editor.workflowblock){
+            editor.selected_block.moveMeUp();
+            editor.generateWorkflowHtml();
+        }
+    }
+    // moving blocks down
+    if(e.which === 40){
+        if(editor.selected_block && editor.selected_block !== editor.workflowblock){
+            editor.selected_block.moveMeDown();
+            editor.generateWorkflowHtml();
+        }
+    }
+    // changing the sorting
+    if(e.which === 79){
+        if(editor.selected_block){
+            if(editor.selected_block.child_block_sort === 'vertical')
+                editor.selected_block.child_block_sort = 'horizontal';
+            else if(editor.selected_block.child_block_sort === 'horizontal')
+                editor.selected_block.child_block_sort = 'vertical';
+            editor.generateWorkflowHtml();
+        }
+    }
 }
 
 function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=null){
