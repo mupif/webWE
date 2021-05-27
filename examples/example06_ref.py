@@ -1,21 +1,20 @@
 import mupif
 import copy
 import Pyro5
-import mupif_examples_models
 import field_export
 import logging
 log = logging.getLogger()
 
 
 @Pyro5.api.expose
-class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
+class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
 
     def __init__(self, metadata={}):
         MD = {
-            "ClassName": "ThermoMechanicalExecutionWorkflow_01",
-            "ModuleName": "example01",
+            "ClassName": "ThermoMechanicalExecutionWorkflow_02",
+            "ModuleName": "example03",
             "Name": "Thermo-mechanical execution workflow",
-            "ID": "thermomechanical_exec_workflow_01",
+            "ID": "thermomechanical_exec_workflow_02",
             "Description": "",
             "Inputs": [
             ],
@@ -37,20 +36,14 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         # __init__ code of constant_property_1 (Property)
         self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
         
-        # __init__ code of constant_property_2 (Property)
-        self.constant_property_2 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.PropertyID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
-        
-        # __init__ code of model_1 (Non-stationary thermal problem)
+        # __init__ code of model_1 (Thermo-mechanical class workflow)
         self.model_1 = None  # instances of models are created in the initialize function
         
-        # __init__ code of model_2 (Plane stress linear elastic)
+        # __init__ code of model_2 (Field export to image)
         self.model_2 = None  # instances of models are created in the initialize function
         
         # __init__ code of model_3 (Field export to image)
         self.model_3 = None  # instances of models are created in the initialize function
-        
-        # __init__ code of model_4 (Field export to image)
-        self.model_4 = None  # instances of models are created in the initialize function
 
 
     def initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
@@ -65,42 +58,27 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
             }
         }
         
-        # initialization code of model_1 (Non-stationary thermal problem)
+        # initialization code of model_1 (Thermo-mechanical class workflow)
         self.model_1_nameserver = mupif.pyroutil.connectNameServer('127.0.0.1', 9090)
-        self.model_1_jobman = mupif.pyroutil.connectJobManager(self.model_1_nameserver, 'JobMan_ThermalNonstat')
+        self.model_1_jobman = mupif.pyroutil.connectJobManager(self.model_1_nameserver, 'ThermoMechanicalClassWorkflow_02_jobman')
         try:
             self.model_1 = mupif.pyroutil.allocateApplicationWithJobManager(ns=self.model_1_nameserver, jobMan=self.model_1_jobman)
             log.info(self.model_1)
         except Exception as e:
             log.exception(e)
-        pf = self.thermalJobMan.getPyroFile(self.model_1.getJobID(), 'inputT.in', 'wb')
-        mupif.pyroutil.uploadPyroFile('inputT.in', pf)
-        self.model_1.initialize(file='inputT.in', workdir='', metadata=execMD)
+        self.model_1.initialize(file='', workdir='', metadata=execMD)
         
-        # initialization code of model_2 (Plane stress linear elastic)
-        self.model_2_nameserver = mupif.pyroutil.connectNameServer('127.0.0.1', 9090)
-        self.model_2_jobman = mupif.pyroutil.connectJobManager(self.model_2_nameserver, 'JobMan_ThermalNonstat')
-        try:
-            self.model_2 = mupif.pyroutil.allocateApplicationWithJobManager(ns=self.model_2_nameserver, jobMan=self.model_2_jobman)
-            log.info(self.model_2)
-        except Exception as e:
-            log.exception(e)
-        pf = self.thermalJobMan.getPyroFile(self.model_2.getJobID(), 'inputM.in', 'wb')
-        mupif.pyroutil.uploadPyroFile('inputM.in', pf)
-        self.model_2.initialize(file='inputM.in', workdir='', metadata=execMD)
+        # initialization code of model_2 (Field export to image)
+        self.model_2 = field_export.field_export_to_image()
+        self.model_2.initialize(file='', workdir='', metadata=execMD)
         
         # initialization code of model_3 (Field export to image)
         self.model_3 = field_export.field_export_to_image()
         self.model_3.initialize(file='', workdir='', metadata=execMD)
-        
-        # initialization code of model_4 (Field export to image)
-        self.model_4 = field_export.field_export_to_image()
-        self.model_4.initialize(file='', workdir='', metadata=execMD)
 
         self.registerModel(self.model_1, "model_1")
         self.registerModel(self.model_2, "model_2")
         self.registerModel(self.model_3, "model_3")
-        self.registerModel(self.model_4, "model_4")
         self.generateMetadataModelRefsID()
 
         mupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)
@@ -110,7 +88,6 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         self.model_1.terminate()
         self.model_2.terminate()
         self.model_3.terminate()
-        self.model_4.terminate()
 
     def solve(self, runInBackground=False):
         pass
@@ -123,7 +100,7 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         while timeloop_1_compute:
             timeloop_1_time_step_number += 1
         
-            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep(), self.model_3.getCriticalTimeStep(), self.model_4.getCriticalTimeStep()])
+            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep(), self.model_3.getCriticalTimeStep()])
             timeloop_1_time = min(timeloop_1_time.inUnitsOf('s').getValue()+timeloop_1_dt.inUnitsOf('s').getValue(), timeloop_1_target_time.inUnitsOf('s').getValue())*mupif.U.s
         
             if timeloop_1_time.inUnitsOf('s').getValue() + 1.e-6 > timeloop_1_target_time.inUnitsOf('s').getValue():
@@ -131,28 +108,22 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
             
             timeloop_1_time_step = mupif.timestep.TimeStep(time=timeloop_1_time, dt=timeloop_1_dt, targetTime=timeloop_1_target_time, number=timeloop_1_time_step_number)
             
-            # execution code of model_1 (Non-stationary thermal problem)
-            self.model_1.set(self.constant_property_1, 'Cauchy top')
-            self.model_1.set(self.constant_property_2, 'Dirichlet left')
-            self.model_1.set(self.constant_property_2, 'Dirichlet right')
+            # execution code of model_1 (Thermo-mechanical class workflow)
+            self.model_1.set(self.constant_property_1, 'top_temperature')
             self.model_1.solveStep(timeloop_1_time_step)
             
-            # execution code of model_2 (Plane stress linear elastic)
-            self.model_2.set(self.model_1.get(mupif.FieldID.FID_Temperature, timeloop_1_time_step.getTime(), 0), 0)
+            # execution code of model_2 (Field export to image)
+            self.model_2.set(self.model_1.get(mupif.FieldID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), 0)
             self.model_2.solveStep(timeloop_1_time_step)
             
             # execution code of model_3 (Field export to image)
-            self.model_3.set(self.model_1.get(mupif.FieldID.FID_Temperature, timeloop_1_time_step.getTime(), 0), 0)
+            self.model_3.set(self.model_1.get(mupif.FieldID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), 0)
             self.model_3.solveStep(timeloop_1_time_step)
-            
-            # execution code of model_4 (Field export to image)
-            self.model_4.set(self.model_2.get(mupif.FieldID.FID_Displacement, timeloop_1_time_step.getTime(), 0), 0)
-            self.model_4.solveStep(timeloop_1_time_step)
         
 
 
 if __name__ == '__main__':
-    problem = ThermoMechanicalExecutionWorkflow_01()
+    problem = ThermoMechanicalExecutionWorkflow_02()
 
     # these metadata are supposed to be filled before execution
     md = {

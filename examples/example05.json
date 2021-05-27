@@ -189,12 +189,17 @@
     ],
     "settings": {
         "project_name": "Thermo-mechanical class workflow",
-        "project_classname": "ThermoMechanicalClassWorkflow_01",
-        "project_modulename": "example02",
-        "project_id": "thermomechanical_class_workflow_01",
+        "project_classname": "ThermoMechanicalClassWorkflow_02",
+        "project_modulename": "",
+        "project_id": "thermomechanical_class_workflow_02",
         "project_nshost": "127.0.0.1",
         "project_nsport": "9090",
-        "script_name_base": "example02",
-        "connection_type": "Local"
+        "script_name_base": "example05",
+        "connection_type": "Distributed",
+        "jobman_settings": {
+            "name": "ThermoMechanicalClassWorkflow_02_jobman",
+            "server_host": "127.0.0.1",
+            "server_port": "44382"
+        }
     }
 }

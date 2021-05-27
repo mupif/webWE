@@ -7,17 +7,20 @@ log = logging.getLogger()
 
 
 @Pyro5.api.expose
-class ThermoMechanicalClassWorkflow_01(mupif.workflow.Workflow):
+class ThermoMechanicalClassWorkflow_02(mupif.workflow.Workflow):
 
     def __init__(self, metadata={}):
         MD = {
-            "ClassName": "ThermoMechanicalClassWorkflow_01",
-            "ModuleName": "example02",
+            "ClassName": "ThermoMechanicalClassWorkflow_02",
+            "ModuleName": "",
             "Name": "Thermo-mechanical class workflow",
-            "ID": "thermomechanical_class_workflow_01",
+            "ID": "thermomechanical_class_workflow_02",
             "Description": "",
             "Execution_settings": {
-                "Type": "Local",
+                "Type": "Distributed",
+                "jobManName": "ThermoMechanicalClassWorkflow_02_jobman",
+                "nshost": "",
+                "nsport": ""
             },
             "Inputs": [
                 {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.PropertyID.PID_Temperature", "Obj_ID": ["top_temperature"], "Units": ""},

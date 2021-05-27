@@ -1,11 +1,13 @@
 import mupif
 import copy
+import Pyro5
 import example02
 import field_export
 import logging
 log = logging.getLogger()
 
 
+@Pyro5.api.expose
 class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
 
     def __init__(self, metadata={}):

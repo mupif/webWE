@@ -305,9 +305,13 @@
         }
     ],
     "settings": {
-        "settings_project_name": "Thermo-mechanical execution workflow",
-        "settings_project_classname": "ThermoMechanicalExecutionWorkflow_01",
-        "settings_project_modulename": "example01",
-        "settings_project_id": "thermomechanical_exec_workflow_01"
+        "project_name": "Thermo-mechanical execution workflow",
+        "project_classname": "ThermoMechanicalExecutionWorkflow_01",
+        "project_modulename": "example01",
+        "project_id": "thermomechanical_exec_workflow_01",
+        "project_nshost": "127.0.0.1",
+        "project_nsport": "9090",
+        "script_name_base": "example04",
+        "connection_type": "Local"
     }
 }

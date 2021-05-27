@@ -55,27 +55,13 @@
             "objectID": 0
         },
         {
-            "classname": "BlockConstProperty",
-            "uid": "constant_property_2",
-            "parent_uid": "workflow",
-            "slot_in_uids": [],
-            "slot_out_uids": [
-                "slot_5"
-            ],
-            "value": "(0.0,)",
-            "units": "deg_C",
-            "propID": "mupif.PropertyID.PID_Temperature",
-            "valueType": "mupif.ValueType.Scalar",
-            "objectID": 0
-        },
-        {
             "classname": "BlockTimeloop",
             "uid": "timeloop_1",
             "parent_uid": "workflow",
             "slot_in_uids": [
+                "slot_5",
                 "slot_6",
-                "slot_7",
-                "slot_8"
+                "slot_7"
             ],
             "slot_out_uids": [],
             "child_block_sort": "vertical"
@@ -85,62 +71,78 @@
             "uid": "model_1",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_9",
-                "slot_10",
-                "slot_11",
-                "slot_12",
-                "slot_13",
-                "slot_14",
-                "slot_15",
-                "slot_16"
+                "slot_8"
             ],
             "slot_out_uids": [
-                "slot_17"
+                "slot_9",
+                "slot_10"
             ],
             "metadata": {
-                "ClassName": "ThermalNonstatModel",
-                "ModuleName": "mupif_examples_models",
-                "Name": "Non-stationary thermal problem",
-                "ID": "ThermalNonstatModel-1",
-                "Description": "Non-stationary heat conduction using finite elements on a rectangular domain",
-                "Version_date": "1.0.0, Feb 2019",
-                "Representation": "Finite volumes",
-                "Geometry": "2D rectangle",
-                "Boundary_conditions": "Dirichlet, Neumann",
+                "ClassName": "ThermoMechanicalClassWorkflow_02",
+                "ModuleName": "",
+                "Name": "Thermo-mechanical class workflow",
+                "ID": "thermomechanical_class_workflow_02",
+                "Description": "",
+                "Version_date": "",
                 "Inputs": [
                     {
-                        "Name": "edge temperature",
+                        "Name": "top_temperature",
                         "Type": "mupif.Property",
-                        "Required": false,
+                        "Required": true,
+                        "description": "",
                         "Type_ID": "mupif.PropertyID.PID_Temperature",
                         "Obj_ID": [
-                            "Cauchy top",
-                            "Cauchy bottom",
-                            "Cauchy left",
-                            "Cauchy right",
-                            "Dirichlet top",
-                            "Dirichlet bottom",
-                            "Dirichlet left",
-                            "Dirichlet right"
-                        ]
+                            "top_temperature"
+                        ],
+                        "Units": ""
                     }
                 ],
                 "Outputs": [
                     {
                         "Name": "temperature",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
                         "Type": "mupif.Field",
-                        "Required": false,
+                        "description": "",
+                        "Type_ID": "mupif.FieldID.FID_Temperature",
                         "Obj_ID": [
-                            0
-                        ]
+                            "temperature"
+                        ],
+                        "Units": ""
+                    },
+                    {
+                        "Name": "displacement",
+                        "Type": "mupif.Field",
+                        "description": "",
+                        "Type_ID": "mupif.FieldID.FID_Displacement",
+                        "Obj_ID": [
+                            "displacement"
+                        ],
+                        "Units": ""
                     }
                 ],
                 "Execution_settings": {
-                    "Type": "Local"
-                }
+                    "Type": "Distributed",
+                    "jobManName": "ThermoMechanicalClassWorkflow_02_jobman",
+                    "nshost": "",
+                    "nsport": ""
+                },
+                "Dependencies": [
+                    {
+                        "Label": "model_1",
+                        "Name": "Non-stationary thermal problem",
+                        "ID": "ThermalNonstatModel-1",
+                        "Version_date": "1.0.0, Feb 2019",
+                        "Type": "undefined"
+                    },
+                    {
+                        "Label": "model_2",
+                        "Name": "Plane stress linear elastic",
+                        "ID": "MechanicalModel-1",
+                        "Version_date": "1.0.0, Feb 2019",
+                        "Type": "undefined"
+                    }
+                ]
             },
-            "model_input_file_name": "inputT.in",
+            "model_input_file_name": "",
             "model_input_file_directory": ""
         },
         {
@@ -148,55 +150,7 @@
             "uid": "model_2",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_18"
-            ],
-            "slot_out_uids": [
-                "slot_19"
-            ],
-            "metadata": {
-                "ClassName": "MechanicalModel",
-                "ModuleName": "mupif_examples_models",
-                "Name": "Plane stress linear elastic",
-                "ID": "MechanicalModel-1",
-                "Description": "Plane stress problem with linear elastic thermo-elastic material",
-                "Version_date": "1.0.0, Feb 2019",
-                "Geometry": "2D rectangle",
-                "Boundary_conditions": "Dirichlet",
-                "Inputs": [
-                    {
-                        "Name": "temperature",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
-                        "Type": "mupif.Field",
-                        "Required": true,
-                        "Obj_ID": [
-                            0
-                        ]
-                    }
-                ],
-                "Outputs": [
-                    {
-                        "Name": "displacement",
-                        "Type_ID": "mupif.FieldID.FID_Displacement",
-                        "Type": "mupif.Field",
-                        "Required": false,
-                        "Obj_ID": [
-                            0
-                        ]
-                    }
-                ],
-                "Execution_settings": {
-                    "Type": "Local"
-                }
-            },
-            "model_input_file_name": "inputM.in",
-            "model_input_file_directory": ""
-        },
-        {
-            "classname": "BlockModel",
-            "uid": "model_3",
-            "parent_uid": "timeloop_1",
-            "slot_in_uids": [
-                "slot_20"
+                "slot_11"
             ],
             "slot_out_uids": [],
             "metadata": {
@@ -227,10 +181,10 @@
         },
         {
             "classname": "BlockModel",
-            "uid": "model_4",
+            "uid": "model_3",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_21"
+                "slot_12"
             ],
             "slot_out_uids": [],
             "metadata": {
@@ -263,49 +217,37 @@
     "datalinks": [
         {
             "ds1_uid": "slot_1",
-            "ds2_uid": "slot_6"
+            "ds2_uid": "slot_5"
         },
         {
             "ds1_uid": "slot_2",
-            "ds2_uid": "slot_7"
+            "ds2_uid": "slot_6"
         },
         {
             "ds1_uid": "slot_3",
-            "ds2_uid": "slot_8"
+            "ds2_uid": "slot_7"
         },
         {
             "ds1_uid": "slot_4",
-            "ds2_uid": "slot_9"
+            "ds2_uid": "slot_8"
         },
         {
-            "ds1_uid": "slot_17",
-            "ds2_uid": "slot_18"
+            "ds1_uid": "slot_9",
+            "ds2_uid": "slot_11"
         },
         {
-            "ds1_uid": "slot_5",
-            "ds2_uid": "slot_15"
-        },
-        {
-            "ds1_uid": "slot_5",
-            "ds2_uid": "slot_16"
-        },
-        {
-            "ds1_uid": "slot_17",
-            "ds2_uid": "slot_20"
-        },
-        {
-            "ds1_uid": "slot_19",
-            "ds2_uid": "slot_21"
+            "ds1_uid": "slot_10",
+            "ds2_uid": "slot_12"
         }
     ],
     "settings": {
         "project_name": "Thermo-mechanical execution workflow",
-        "project_classname": "ThermoMechanicalExecutionWorkflow_01",
-        "project_modulename": "example01",
-        "project_id": "thermomechanical_exec_workflow_01",
+        "project_classname": "ThermoMechanicalExecutionWorkflow_02",
+        "project_modulename": "example03",
+        "project_id": "thermomechanical_exec_workflow_02",
         "project_nshost": "127.0.0.1",
         "project_nsport": "9090",
-        "script_name_base": "example01",
+        "script_name_base": "example06",
         "connection_type": "Local"
     }
 }

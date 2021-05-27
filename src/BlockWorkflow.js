@@ -3,10 +3,10 @@ class BlockWorkflow extends Block{
         super(editor, null);
         this.name = 'Workflow';
 
-        this.settings_project_name = 'My unnamed project';
-        this.settings_project_classname = 'MyUnnamedProject';
-        this.settings_project_modulename = 'MyModuleName';
-        this.settings_project_id = 'my_unnamed_project_01';
+        this.project_name = 'My unnamed project';
+        this.project_classname = 'MyUnnamedProject';
+        this.project_modulename = 'MyModuleName';
+        this.project_id = 'my_unnamed_project_01';
 
 
         this.exec_type = "Local";
@@ -14,6 +14,16 @@ class BlockWorkflow extends Block{
         this.exec_settings_nsport = "";
         this.exec_settings_nshost = "";
 
+        this.project_nshost = '127.0.0.1';// default localhost
+        this.project_nsport = '0';// zero can be default to search all ports for nameserver
+
+        this.jobman_name = '';
+        this.jobman_server_host = '';// default localhost
+        this.jobman_server_port = '';
+        this.jobman_nshost = '';
+        this.jobman_nsport = '';
+        
+        this.script_name_base = '';
     }
 
     getAllExternalDataSlots(inout){
@@ -45,6 +55,9 @@ class BlockWorkflow extends Block{
         if(type === 'class'){
             return true;
         }
+        if(type === 'server'){
+            return true;
+        }
         console.log('Type of code is not valid!');
         return false;
     }
@@ -71,9 +84,46 @@ class BlockWorkflow extends Block{
             slots[i].id = 'external_input_'+(i+1);
     }
 
-    generateCode(class_code, class_with_jobman_code=false){
-        if(!class_code)
-            class_with_jobman_code = false;
+    generateCodeForServer(){
+
+        console.log('Generating Python code for server.');
+        if(this.canGenerateCode('server')) {
+            let code = ["import mupif", "import copy"];
+            code.push("import "+this.script_name_base);
+            code.push("");
+            code.push("if __name__ == '__main__':");
+            code.push("\t# code to run the jobmanager server");
+            code.push("");
+            code.push("\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
+            code.push("");
+            code.push("\tjobMan = mupif.SimpleJobManager(");
+            code.push("\t\tappClass="+this.script_name_base+"."+this.project_classname+",");
+            code.push("\t\tserver='"+this.editor.getJobmanServerHost()+"',");
+            code.push("\t\tnshost='"+this.editor.getJobmanNSHost()+"',");
+            code.push("\t\tnsport="+this.editor.getJobmanNSPort()+",");
+            code.push("\t\tns=ns,");
+            code.push("\t\tappName='"+this.editor.getJobmanName()+"',");
+            code.push("\t\tjobManWorkDir='.',");
+            code.push("\t\tmaxJobs=10");
+            code.push("\t)");
+            code.push("");
+            code.push("\tmupif.pyroutil.runJobManagerServer(");
+            code.push("\t\tserver='"+this.editor.getJobmanServerHost()+"',");
+            code.push("\t\tport="+this.editor.getJobmanServerPort()+",");
+            code.push("\t\tnshost='"+this.editor.getJobmanNSHost()+"',");
+            code.push("\t\tnsport="+this.editor.getJobmanNSPort()+",");
+            code.push("\t\tjobman=jobMan");
+            code.push("\t)");
+            code.push("");
+
+            return replace_tabs_with_spaces_for_each_line(code);
+        }
+        return '';
+        
+        
+    }
+    
+    generateCode(class_code){
         
         console.log('Generating Python code.');
         if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
@@ -85,7 +135,7 @@ class BlockWorkflow extends Block{
             let all_model_blocks = this.getBlocksRecursive(BlockModel);
             let child_blocks = this.getBlocks();
 
-            let code = ["import mupif", "import copy"];
+            let code = ["import mupif", "import copy", "import Pyro5"];
 
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
@@ -104,7 +154,8 @@ class BlockWorkflow extends Block{
 
             code.push("");
             code.push("");
-            code.push("class " + this.settings_project_classname + "(mupif.workflow.Workflow):");
+            code.push("@Pyro5.api.expose");
+            code.push("class " + this.project_classname + "(mupif.workflow.Workflow):");
 
             // --------------------------------------------------
             // __init__ function
@@ -114,21 +165,21 @@ class BlockWorkflow extends Block{
             code.push("\tdef __init__(self, metadata={}):");
 
             code.push("\t\tMD = {");
-            code.push("\t\t\t\"ClassName\": \"" + this.settings_project_classname + "\",");
-            code.push("\t\t\t\"ModuleName\": \"" + this.settings_project_modulename + "\",");
-            code.push("\t\t\t\"Name\": \"" + this.settings_project_name + "\",");
-            code.push("\t\t\t\"ID\": \"" + this.settings_project_id + "\",");
+            code.push("\t\t\t\"ClassName\": \"" + this.project_classname + "\",");
+            code.push("\t\t\t\"ModuleName\": \"" + this.project_modulename + "\",");
+            code.push("\t\t\t\"Name\": \"" + this.project_name + "\",");
+            code.push("\t\t\t\"ID\": \"" + this.project_id + "\",");
             code.push("\t\t\t\"Description\": \"\",");
 
             if (class_code) {
                 code.push("\t\t\t\"Execution_settings\": {");
                 code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
                 if (this.exec_type === 'Distributed') {
-                    code.push("\t\t\t\t\"nshost\": \"" + this.exec_settings_nshost + "\",");
-                    code.push("\t\t\t\t\"nsport\": \"" + this.exec_settings_nsport + "\",");
-                    code.push("\t\t\t\t\"jobManName\": \"" + this.exec_settings_jobmanagername + "\",");
+                    code.push("\t\t\t\t\"jobManName\": \"" + this.jobman_name + "\",");
+                    code.push("\t\t\t\t\"nshost\": \"" + this.jobman_nshost + "\",");
+                    code.push("\t\t\t\t\"nsport\": \"" + this.jobman_nsport + "\"");
                 }
-                code.push("\t\t\t}");
+                code.push("\t\t\t},");
             }
 
 
@@ -368,7 +419,7 @@ class BlockWorkflow extends Block{
 
             if (!class_code) {
                 code.push("if __name__ == '__main__':");
-                code.push("\tproblem = " + this.settings_project_classname + "()");
+                code.push("\tproblem = " + this.project_classname + "()");
                 code.push("");
                 code.push("\t# these metadata are supposed to be filled before execution");
                 code.push("\tmd = {");
@@ -434,12 +485,42 @@ class BlockWorkflow extends Block{
         }
 
         let settings = {
-            'settings_project_name': this.settings_project_name,
-            'settings_project_classname': this.settings_project_classname,
-            'settings_project_modulename': this.settings_project_modulename,
-            'settings_project_id': this.settings_project_id
+            'project_name': this.project_name,
+            'project_classname': this.project_classname,
+            'project_modulename': this.project_modulename,
+            'project_id': this.project_id,
+            'project_nshost': this.project_nshost,
+            'project_nsport': this.project_nsport,
+            'script_name_base': this.script_name_base,
+            'connection_type': this.exec_type
         };
-
+        
+        let jobman_settings = {};
+        let jobman_to_save = false;
+        if(this.jobman_name) {
+            jobman_to_save = true;
+            jobman_settings['name'] = this.jobman_name;
+        }
+        if(this.jobman_server_host) {
+            jobman_to_save = true;
+            jobman_settings['server_host'] = this.jobman_server_host;
+        }
+        if(this.jobman_server_port) {
+            jobman_to_save = true;
+            jobman_settings['server_port'] = this.jobman_server_port;
+        }
+        if(this.jobman_nshost) {
+            jobman_to_save = true;
+            jobman_settings['nshost'] = this.jobman_nshost;
+        }
+        if(this.jobman_nsport) {
+            jobman_to_save = true;
+            jobman_settings['nsport'] = this.jobman_nsport;
+        }
+        
+        if(jobman_to_save)
+            settings['jobman_settings'] = jobman_settings;
+        
         return {'blocks': data_blocks, 'datalinks': data_datalinks, 'settings': settings};
     }
 
@@ -458,11 +539,11 @@ class BlockWorkflow extends Block{
     getBlockHtml_params(){
         let html = '';
         html += '<div class="bl_params">';
-        html += 'Name = <b>\'' + this.settings_project_name + '\'</b>';
+        html += 'Name = <b>\'' + this.project_name + '\'</b>';
         html += '<br>';
-        html += 'ClassName = <b>\'' + this.settings_project_classname + '\'</b>';
+        html += 'ClassName = <b>\'' + this.project_classname + '\'</b>';
         html += '<br>';
-        html += 'ID = <b>\'' + this.settings_project_id + '\'</b>';
+        html += 'ID = <b>\'' + this.project_id + '\'</b>';
 
         html += '</div>';
         return html;

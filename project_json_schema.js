@@ -65,8 +65,8 @@ module.exports = {
                                     "type": "object",
                                     "properties": {
                                         "Type": {"type": "string", "enum": ["Local", "Distributed"]},
-                                        "nshost": {"type": "string"},
-                                        "nsport": {"type": "string"},
+                                        "nshost": {"type": "string"},// optional
+                                        "nsport": {"type": "string"},// optional
                                         "jobManName": {"type": "string"}
                                     },
                                     "anyOf": [
@@ -75,7 +75,7 @@ module.exports = {
                                                 "Type": { "const": "Local" }
                                             }
                                         },
-                                        { "required": ["nshost", "nsport", "jobManName"] }
+                                        { "required": ["jobManName"] }
                                     ]
                                 }
                             },
@@ -137,11 +137,26 @@ module.exports = {
             "settings": {
                 "type": "object",
                 "properties": {
-                    "settings_project_name": {"type": "string"},
-                    "settings_project_classname": {"type": "string"},
-                    "settings_project_id": {"type": "string"},
+                    "project_name": {"type": "string"},
+                    "project_classname": {"type": "string"},
+                    "project_id": {"type": "string"},
+                    "project_nshost": {"type": "string"},// optional
+                    "project_nsport": {"type": "string"},// optional
+                    "connection_type": {"type": "string", "enum": ["Local", "Distributed"]},// valid in case of class workflow
+                    "jobman_settings": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "server_host": {"type": "string"},
+                            "server_port": {"type": "string"},
+                            "nshost": {"type": "string"},// optional
+                            "nsport": {"type": "string"}// optional
+                        },
+                        "required": ["name", "server_host", "server_port"]
+                    },
+                    "script_name_base": {"type": "string"}
                 },
-                "required": ["settings_project_name", "settings_project_classname", "settings_project_id"]
+                "required": ["project_name", "project_classname", "project_id", "connection_type"]
             },
             "required": ["blocks", "datalinks", "settings"]
         }

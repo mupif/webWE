@@ -118,13 +118,18 @@ class BlockModel extends Block {
         // }
 
         if(this.exec_type === "Distributed"){
-            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + this.exec_settings_nshost + "', " + this.exec_settings_nsport + ")");
+            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + (this.exec_settings_nshost !== '' ? this.exec_settings_nshost : this.editor.workflowblock.project_nshost) + "', " + (this.exec_settings_nsport !== '' ? this.exec_settings_nsport : this.editor.workflowblock.project_nsport) + ")");
             code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
             code.push("try:");
             code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
             code.push("\tlog.info(self." + this.code_name + ")");
             code.push("except Exception as e:");
             code.push("\tlog.exception(e)");
+
+            if(this.input_file_name){
+                code.push("pf = self.thermalJobMan.getPyroFile(self." + this.code_name + ".getJobID(), '" + this.input_file_name + "', 'wb')");
+                code.push("mupif.pyroutil.uploadPyroFile('" + this.input_file_name + "', pf)");
+            }
         }else{
             if (this.model_module !== "undefined" && this.model_module !== "")
                 code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");

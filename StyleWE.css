@@ -261,3 +261,19 @@ table.tbl_ext_slots td{
     -webkit-app-region: no-drag;
     cursor: default;
 }
+
+table.settings{
+    width:100%;
+}
+
+table.settings td{
+    color:black;
+    font-size:12px;
+    line-height:18px;
+    padding:3px 10px 3px 10px;
+}
+
+table.settings td input{
+    font-size:12px;
+    line-height:18px;
+}

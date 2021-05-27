@@ -44,26 +44,30 @@ if(process.argv.length >= 4) {
         let code;
         if(workflow_type === "exec")
             code = editor.getExecutionCode();
-        else
+        else if(workflow_type === "class")
             code = editor.getClassCode();
+        else if(workflow_type === "server")
+            code = editor.getServerCode();
 
-        console.log("Writing generated " + workflow_type + " code to file '" + filename_base + ".py'");
-        fs.writeFile(__dirname + "/" + filename_base + ".py", code, err => {
+        console.log("Writing generated " + workflow_type + " code to file '" + filename_base + (workflow_type === "server" ? "_server" : "") + ".py'");
+        fs.writeFile(__dirname + "/" + filename_base + (workflow_type === "server" ? "_server" : "") + ".py", code, err => {
             if (err) {
                 console.error(err);
                 return;
             }
         });
 
-        let json_str = JSON.stringify(editor.getJSON(), null, 4);
+        if(workflow_type !== "server") {
+            let json_str = JSON.stringify(editor.getJSON(), null, 4);
 
-        console.log("Writing generated JSON to file '" + filename_base + "_copy.json'");
-        fs.writeFile(__dirname + "/" + filename_base + "_copy.json", json_str, err => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-        });
+            console.log("Writing generated JSON to file '" + filename_base + "_copy.json'");
+            fs.writeFile(__dirname + "/" + filename_base + "_copy.json", json_str, err => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+            });
+        }
 
     }else{
         console.log("Unsuccessful validation of JSON against schema!");
