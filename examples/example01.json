@@ -50,7 +50,7 @@
             ],
             "value": "(10.0,)",
             "units": "deg_C",
-            "propID": "mupif.PropertyID.PID_Temperature",
+            "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar",
             "objectID": 0
         },
@@ -64,18 +64,38 @@
             ],
             "value": "(0.0,)",
             "units": "deg_C",
-            "propID": "mupif.PropertyID.PID_Temperature",
+            "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar",
             "objectID": 0
+        },
+        {
+            "classname": "BlockInputFile",
+            "uid": "input_file_1",
+            "parent_uid": "workflow",
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_6"
+            ],
+            "filename": "inputT.in"
+        },
+        {
+            "classname": "BlockInputFile",
+            "uid": "input_file_2",
+            "parent_uid": "workflow",
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_7"
+            ],
+            "filename": "inputM.in"
         },
         {
             "classname": "BlockTimeloop",
             "uid": "timeloop_1",
             "parent_uid": "workflow",
             "slot_in_uids": [
-                "slot_6",
-                "slot_7",
-                "slot_8"
+                "slot_8",
+                "slot_9",
+                "slot_10"
             ],
             "slot_out_uids": [],
             "child_block_sort": "vertical"
@@ -85,17 +105,18 @@
             "uid": "model_1",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_9",
-                "slot_10",
                 "slot_11",
                 "slot_12",
                 "slot_13",
                 "slot_14",
                 "slot_15",
-                "slot_16"
+                "slot_16",
+                "slot_17",
+                "slot_18",
+                "slot_19"
             ],
             "slot_out_uids": [
-                "slot_17"
+                "slot_20"
             ],
             "metadata": {
                 "ClassName": "ThermalNonstatModel",
@@ -112,7 +133,7 @@
                         "Name": "edge temperature",
                         "Type": "mupif.Property",
                         "Required": false,
-                        "Type_ID": "mupif.PropertyID.PID_Temperature",
+                        "Type_ID": "mupif.DataID.PID_Temperature",
                         "Obj_ID": [
                             "Cauchy top",
                             "Cauchy bottom",
@@ -122,13 +143,24 @@
                             "Dirichlet bottom",
                             "Dirichlet left",
                             "Dirichlet right"
-                        ]
+                        ],
+                        "Set_at": "timestep"
+                    },
+                    {
+                        "Name": "Input file",
+                        "Type": "mupif.PyroFile",
+                        "Required": true,
+                        "Type_ID": "mupif.DataID.ID_InputFile",
+                        "Obj_ID": [
+                            "input_file_thermal_nonstat"
+                        ],
+                        "Set_at": "initialization"
                     }
                 ],
                 "Outputs": [
                     {
                         "Name": "temperature",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Type": "mupif.Field",
                         "Required": false,
                         "Obj_ID": [
@@ -140,18 +172,18 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "inputT.in",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         },
         {
             "classname": "BlockModel",
             "uid": "model_2",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_18"
+                "slot_21",
+                "slot_22"
             ],
             "slot_out_uids": [
-                "slot_19"
+                "slot_23"
             ],
             "metadata": {
                 "ClassName": "MechanicalModel",
@@ -165,18 +197,29 @@
                 "Inputs": [
                     {
                         "Name": "temperature",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Type": "mupif.Field",
                         "Required": true,
                         "Obj_ID": [
                             0
-                        ]
+                        ],
+                        "Set_at": "timestep"
+                    },
+                    {
+                        "Name": "Input file",
+                        "Type": "mupif.PyroFile",
+                        "Required": true,
+                        "Type_ID": "mupif.DataID.ID_InputFile",
+                        "Obj_ID": [
+                            "input_file_mechanical"
+                        ],
+                        "Set_at": "initialization"
                     }
                 ],
                 "Outputs": [
                     {
                         "Name": "displacement",
-                        "Type_ID": "mupif.FieldID.FID_Displacement",
+                        "Type_ID": "mupif.DataID.FID_Displacement",
                         "Type": "mupif.Field",
                         "Required": false,
                         "Obj_ID": [
@@ -188,15 +231,14 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "inputM.in",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         },
         {
             "classname": "BlockModel",
             "uid": "model_3",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_20"
+                "slot_24"
             ],
             "slot_out_uids": [],
             "metadata": {
@@ -211,10 +253,11 @@
                         "Name": "field",
                         "Type": "mupif.Field",
                         "Required": false,
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Obj_ID": [
                             0
-                        ]
+                        ],
+                        "Set_at": "timestep"
                     }
                 ],
                 "Outputs": [],
@@ -222,15 +265,14 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         },
         {
             "classname": "BlockModel",
             "uid": "model_4",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_21"
+                "slot_25"
             ],
             "slot_out_uids": [],
             "metadata": {
@@ -245,10 +287,11 @@
                         "Name": "field",
                         "Type": "mupif.Field",
                         "Required": false,
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Obj_ID": [
                             0
-                        ]
+                        ],
+                        "Set_at": "timestep"
                     }
                 ],
                 "Outputs": [],
@@ -256,46 +299,53 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         }
     ],
     "datalinks": [
         {
             "ds1_uid": "slot_1",
-            "ds2_uid": "slot_6"
-        },
-        {
-            "ds1_uid": "slot_2",
-            "ds2_uid": "slot_7"
-        },
-        {
-            "ds1_uid": "slot_3",
             "ds2_uid": "slot_8"
         },
         {
-            "ds1_uid": "slot_4",
+            "ds1_uid": "slot_2",
             "ds2_uid": "slot_9"
         },
         {
-            "ds1_uid": "slot_17",
+            "ds1_uid": "slot_3",
+            "ds2_uid": "slot_10"
+        },
+        {
+            "ds1_uid": "slot_4",
+            "ds2_uid": "slot_11"
+        },
+        {
+            "ds1_uid": "slot_20",
+            "ds2_uid": "slot_21"
+        },
+        {
+            "ds1_uid": "slot_5",
+            "ds2_uid": "slot_17"
+        },
+        {
+            "ds1_uid": "slot_5",
             "ds2_uid": "slot_18"
         },
         {
-            "ds1_uid": "slot_5",
-            "ds2_uid": "slot_15"
+            "ds1_uid": "slot_20",
+            "ds2_uid": "slot_24"
         },
         {
-            "ds1_uid": "slot_5",
-            "ds2_uid": "slot_16"
+            "ds1_uid": "slot_23",
+            "ds2_uid": "slot_25"
         },
         {
-            "ds1_uid": "slot_17",
-            "ds2_uid": "slot_20"
+            "ds1_uid": "slot_6",
+            "ds2_uid": "slot_19"
         },
         {
-            "ds1_uid": "slot_19",
-            "ds2_uid": "slot_21"
+            "ds1_uid": "slot_7",
+            "ds2_uid": "slot_22"
         }
     ],
     "settings": {

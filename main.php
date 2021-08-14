@@ -23,6 +23,7 @@
     <script type="text/javascript" src="src/BlockWorkflow.js"></script>
     <script type="text/javascript" src="src/BlockPhysicalQuantity.js"></script>
     <script type="text/javascript" src="src/BlockProperty.js"></script>
+    <script type="text/javascript" src="src/BlockInputFile.js"></script>
     <script type="text/javascript" src="src/BlockTimeloop.js"></script>
     <script type="text/javascript" src="src/BlockDoWhile.js"></script>
     <script type="text/javascript" src="src/BlockModel.js"></script>

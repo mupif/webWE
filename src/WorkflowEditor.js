@@ -154,6 +154,12 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockInputFile'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockInputFile(this, parent_block, json_data['filename']);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
         if(json_data['classname']==='BlockTimeloop'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockTimeloop(this, parent_block);
@@ -164,7 +170,7 @@ class WorkflowEditor{
         }
         if(json_data['classname']==='BlockModel'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
-            new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_input_file_name'], json_data['model_input_file_directory']);
+            new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_working_directory']);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

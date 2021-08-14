@@ -5,7 +5,7 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid=''){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid='', set_at=''){
         this.id = generateNewSlotID();
         if(uid !== '')
             this.id = uid;
@@ -24,6 +24,8 @@ class Slot{
         if(this.inout === 'in')
             this.max_connections = 1;
         this.external = false;
+        
+        this.set_at = set_at;
     }
 
     connected(){

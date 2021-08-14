@@ -53,7 +53,7 @@ class BlockProperty extends Block{
             console.log('Units set to "'+this.units+'"');
         }
         if(action==='set_property_id') {
-            this.property_id = 'mupif.PropertyID.'+document.getElementById('myQuery_temp_val').value;
+            this.property_id = 'mupif.DataID.'+document.getElementById('myQuery_temp_val').value;
             console.log('Property ID set to "'+this.property_id+'"');
         }
         if(action==='set_value_type') {
@@ -102,7 +102,7 @@ class BlockProperty extends Block{
             q_html += '<select id="myQuery_temp_val">';
             for(let i=0;i<mupif_PropertyID.length;i++) {
                 q_html += '<option value="'+mupif_PropertyID[i]+'"';
-                if(this.property_id === 'mupif.PropertyID.'+mupif_PropertyID[i])
+                if(this.property_id === 'mupif.DataID.'+mupif_PropertyID[i])
                     q_html += ' selected';
                 q_html += '>'+mupif_PropertyID[i]+'</option>';
             }
@@ -176,7 +176,7 @@ class BlockProperty extends Block{
         html += '<br>';
         html += 'ValueType = <b>\'' + this.value_type.replace('mupif.ValueType.', '') + '\'</b>';
         html += '<br>';
-        html += 'PropertyID = <b>\'' + this.property_id.replace('mupif.PropertyID.', '') + '\'</b>';
+        html += 'PropertyID = <b>\'' + this.property_id.replace('mupif.DataID.', '') + '\'</b>';
         html += '<br>';
         html += 'ObjectID = <b>\'' + this.object_id + '\'</b>';
 

@@ -1,18 +1,18 @@
 from os import listdir
 from os.path import isfile, join
 
-mypath = './src'
+mypath = '../src'
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
-files = ['src/Init.js']
+files = ['../src/Init.js']
 
 for f in onlyfiles:
-    if 'src/%s' % f not in files:
-        files.append('src/%s' % f)
+    if '../src/%s' % f not in files:
+        files.append('../src/%s' % f)
 
 # print(files)
 
-fres = open('project.js', 'w')
+fres = open('../project.js', 'w')
 
 for f in files:
     print('adding file %s' % f)

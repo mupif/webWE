@@ -43,9 +43,10 @@ module.exports = {
                                             "Type_ID": {"type": "string"},
                                             "Type": {"type": "string"},
                                             "Obj_ID": {"type": ["array", "string", "number"]},
-                                            "Required": {"type": "boolean"}
+                                            "Required": {"type": "boolean"},
+                                            "Set_at": {"type": "string", "enum": ["initialization", "timestep"]}
                                         },
-                                        "required": ["Name", "Type_ID", "Type", "Obj_ID", "Required"]
+                                        "required": ["Name", "Type_ID", "Type", "Obj_ID", "Required", "Set_at"]
                                     }
                                 },
                                 "Outputs": {
@@ -81,8 +82,8 @@ module.exports = {
                             },
                             "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs", "Execution_settings"]
                         },
-                        "model_input_file_name": {"type": "string"},
-                        "model_input_file_directory": {"type": "string"},
+                        //"model_input_file_name": {"type": "array"},
+                        "model_working_directory": {"type": "string"},
                     },
                     "required": ["classname", "uid", "parent_uid"],
                     "allOf": [
@@ -117,7 +118,7 @@ module.exports = {
                                         }
                                     }
                                 },
-                                { "required": ["metadata", "model_input_file_name", "model_input_file_directory"] }
+                                { "required": ["metadata", "model_working_directory"] }
                             ],
                         }
                     ]

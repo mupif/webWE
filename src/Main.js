@@ -351,6 +351,18 @@ function main(visual=false)
             let json_data = JSON.parse(loadTextFileFromServer('examples/example03.json'));
             editor.loadFromJsonData(json_data);
         }
+        if(example_id === 4){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example04.json'));
+            editor.loadFromJsonData(json_data);
+        }
+        if(example_id === 5){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example05.json'));
+            editor.loadFromJsonData(json_data);
+        }
+        if(example_id === 6){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example06.json'));
+            editor.loadFromJsonData(json_data);
+        }
     }
 
     // =====                                                                                          =====

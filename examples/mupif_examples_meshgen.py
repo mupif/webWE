@@ -1,7 +1,10 @@
+import sys
+sys.path.append("C:\Projects\mupif_fork_stan")
+
 # This file is a copy of file 'meshgen.py' in MuPIF project to allow running examples in this directory.
 #
 from builtins import range
-import mupif.mesh
+import mupif
 from mupif import cell
 from mupif import vertex
 
@@ -26,7 +29,7 @@ def meshgen(origin, size, nx, ny, tria=False):
     vertexlist = []
     celllist = []
 
-    mesh = mupif.mesh.UnstructuredMesh()
+    mesh = mupif.UnstructuredMesh()
     # generate vertices
     for ix in range(nx + 1):
         for iy in range(ny + 1):

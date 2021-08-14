@@ -50,18 +50,38 @@
             ],
             "value": "(10.0,)",
             "units": "deg_C",
-            "propID": "mupif.PropertyID.PID_Temperature",
+            "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar",
             "objectID": 0
+        },
+        {
+            "classname": "BlockInputFile",
+            "uid": "input_file_1",
+            "parent_uid": "workflow",
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_5"
+            ],
+            "filename": "inputT.in"
+        },
+        {
+            "classname": "BlockInputFile",
+            "uid": "input_file_2",
+            "parent_uid": "workflow",
+            "slot_in_uids": [],
+            "slot_out_uids": [
+                "slot_6"
+            ],
+            "filename": "inputM.in"
         },
         {
             "classname": "BlockTimeloop",
             "uid": "timeloop_1",
             "parent_uid": "workflow",
             "slot_in_uids": [
-                "slot_5",
-                "slot_6",
-                "slot_7"
+                "slot_7",
+                "slot_8",
+                "slot_9"
             ],
             "slot_out_uids": [],
             "child_block_sort": "vertical"
@@ -71,11 +91,13 @@
             "uid": "model_1",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_8"
+                "slot_10",
+                "slot_11",
+                "slot_12"
             ],
             "slot_out_uids": [
-                "slot_9",
-                "slot_10"
+                "slot_13",
+                "slot_14"
             ],
             "metadata": {
                 "ClassName": "ThermoMechanicalClassWorkflow_01",
@@ -90,11 +112,36 @@
                         "Type": "mupif.Property",
                         "Required": true,
                         "description": "",
-                        "Type_ID": "mupif.PropertyID.PID_Temperature",
+                        "Type_ID": "mupif.DataID.PID_Temperature",
                         "Obj_ID": [
                             "top_temperature"
                         ],
-                        "Units": ""
+                        "Units": "",
+                        "Set_at": "timestep"
+                    },
+                    {
+                        "Name": "input_file_thermal",
+                        "Type": "mupif.PyroFile",
+                        "Required": true,
+                        "description": "",
+                        "Type_ID": "mupif.DataID.ID_InputFile",
+                        "Obj_ID": [
+                            "input_file_thermal"
+                        ],
+                        "Units": "",
+                        "Set_at": "initialization"
+                    },
+                    {
+                        "Name": "input_file_mechanical",
+                        "Type": "mupif.PyroFile",
+                        "Required": true,
+                        "description": "",
+                        "Type_ID": "mupif.DataID.ID_InputFile",
+                        "Obj_ID": [
+                            "input_file_mechanical"
+                        ],
+                        "Units": "",
+                        "Set_at": "initialization"
                     }
                 ],
                 "Outputs": [
@@ -102,7 +149,7 @@
                         "Name": "temperature",
                         "Type": "mupif.Field",
                         "description": "",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Obj_ID": [
                             "temperature"
                         ],
@@ -112,7 +159,7 @@
                         "Name": "displacement",
                         "Type": "mupif.Field",
                         "description": "",
-                        "Type_ID": "mupif.FieldID.FID_Displacement",
+                        "Type_ID": "mupif.DataID.FID_Displacement",
                         "Obj_ID": [
                             "displacement"
                         ],
@@ -139,15 +186,14 @@
                     }
                 ]
             },
-            "model_input_file_name": "",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         },
         {
             "classname": "BlockModel",
             "uid": "model_2",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_11"
+                "slot_15"
             ],
             "slot_out_uids": [],
             "metadata": {
@@ -162,10 +208,11 @@
                         "Name": "field",
                         "Type": "mupif.Field",
                         "Required": false,
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Obj_ID": [
                             0
-                        ]
+                        ],
+                        "Set_at": "timestep"
                     }
                 ],
                 "Outputs": [],
@@ -173,15 +220,14 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         },
         {
             "classname": "BlockModel",
             "uid": "model_3",
             "parent_uid": "timeloop_1",
             "slot_in_uids": [
-                "slot_12"
+                "slot_16"
             ],
             "slot_out_uids": [],
             "metadata": {
@@ -196,10 +242,11 @@
                         "Name": "field",
                         "Type": "mupif.Field",
                         "Required": false,
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Obj_ID": [
                             0
-                        ]
+                        ],
+                        "Set_at": "timestep"
                     }
                 ],
                 "Outputs": [],
@@ -207,33 +254,40 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         }
     ],
     "datalinks": [
         {
             "ds1_uid": "slot_1",
-            "ds2_uid": "slot_5"
-        },
-        {
-            "ds1_uid": "slot_2",
-            "ds2_uid": "slot_6"
-        },
-        {
-            "ds1_uid": "slot_3",
             "ds2_uid": "slot_7"
         },
         {
-            "ds1_uid": "slot_4",
+            "ds1_uid": "slot_2",
             "ds2_uid": "slot_8"
         },
         {
-            "ds1_uid": "slot_9",
+            "ds1_uid": "slot_3",
+            "ds2_uid": "slot_9"
+        },
+        {
+            "ds1_uid": "slot_4",
+            "ds2_uid": "slot_10"
+        },
+        {
+            "ds1_uid": "slot_13",
+            "ds2_uid": "slot_15"
+        },
+        {
+            "ds1_uid": "slot_14",
+            "ds2_uid": "slot_16"
+        },
+        {
+            "ds1_uid": "slot_5",
             "ds2_uid": "slot_11"
         },
         {
-            "ds1_uid": "slot_10",
+            "ds1_uid": "slot_6",
             "ds2_uid": "slot_12"
         }
     ],

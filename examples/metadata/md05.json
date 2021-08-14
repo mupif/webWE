@@ -13,23 +13,23 @@
     "Description": "Mean Field Homogenization for Airbus case",
     "Physics": {"Type": "Continuum", "Entity": "Other"},
     "Inputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixYoung", "Name": "Young matrix", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionYoung", "Name": "Young inclusion", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixPoisson", "Name": "Poisson ratio matrix", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionPoisson", "Name": "Poisson ratio inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionAspectRatio", "Name": "Aspect ratio inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionVolumeFraction", "Name": "Volume fraction inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionDensity", "Name": "density inclusion", "Units": "kg/m**3", "Required": false},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixDensity", "Name": "density matrix", "Units": "kg/m**3", "Required": false}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixYoung", "Name": "Young matrix", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionYoung", "Name": "Young inclusion", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixPoisson", "Name": "Poisson ratio matrix", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionPoisson", "Name": "Poisson ratio inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionAspectRatio", "Name": "Aspect ratio inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionVolumeFraction", "Name": "Volume fraction inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionDensity", "Name": "density inclusion", "Units": "kg/m**3", "Required": false},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixDensity", "Name": "density matrix", "Units": "kg/m**3", "Required": false}
     ],
     "Outputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeAxialYoung", "Name": "Composite Axial Young", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlaneYoung", "Name": "Composite In-plane Young", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlaneShear", "Name": "Composite In-plane Shear", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransverseShear", "Name": "Composite Transverse Shear", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlanePoisson", "Name": "Composite In-plane Poisson ratio", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeAxialYoung", "Name": "Composite Axial Young", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlaneYoung", "Name": "Composite In-plane Young", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlaneShear", "Name": "Composite In-plane Shear", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeTransverseShear", "Name": "Composite Transverse Shear", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlanePoisson", "Name": "Composite In-plane Poisson ratio", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
     ],
     "Execution_settings": {"Type": "Local"}
 }

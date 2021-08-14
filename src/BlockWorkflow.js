@@ -134,9 +134,14 @@ class BlockWorkflow extends Block{
 
             let all_model_blocks = this.getBlocksRecursive(BlockModel);
             let child_blocks = this.getBlocks();
-
-            let code = ["import mupif", "import copy", "import Pyro5"];
-
+            
+            let code = [];
+            
+            code.push("import mupif");
+            code.push("import copy");
+            code.push("import Pyro5");
+            code.push("import threading");
+            
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
             for (let i = 0; i < model_blocks.length; i++) {
@@ -196,7 +201,8 @@ class BlockWorkflow extends Block{
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
                         "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
-                        "\"Units\": \"\"";
+                        "\"Units\": \"\", " +
+                        "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
@@ -223,6 +229,8 @@ class BlockWorkflow extends Block{
             code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
             code.push("\t\tself.updateMetadata(metadata)");
+            
+            code.push("\t\tself.daemon = None");
 
             let code_add;
             if (class_code) {
@@ -232,7 +240,7 @@ class BlockWorkflow extends Block{
                     s = slots[i];
                     if (s.connected()) {
                         code.push("");
-                        code.push("\t\t# initialization code of external input");
+                        code.push("\t\t# initialization code of external input ("+slots[i].obj_id+")");
                         code.push("\t\t" + s.getCodeRepresentation() + " = None");
                         code.push("\t\t# It should be defined from outside using set() method.");
                     }
@@ -252,13 +260,13 @@ class BlockWorkflow extends Block{
             // --------------------------------------------------
 
             code.push("");
-            code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
-
+            code.push("\tdef initialize(self, workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
             code.push("");
 
             code.push("\t\tself.updateMetadata(dictionary=metadata)");
 
             code.push("");
+            
             code.push("\t\texecMD = {");
             code.push("\t\t\t'Execution': {");
             code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
@@ -267,20 +275,49 @@ class BlockWorkflow extends Block{
             code.push("\t\t\t}");
             code.push("\t\t}");
 
-            for (let i = 0; i < all_model_blocks.length; i++) {
-                extend_array(code, all_model_blocks[i].getInitializationCode(2, "execMD"));
+            code.push("");
+            
+            code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
+            code.push("\t\tns._pyroBind()");
+            code.push("\t\tself.daemon = Pyro5.api.Daemon(host=ns._pyroConnection.sock.getsockname()[0])");
+            code.push("\t\tthreading.Thread(target=self.daemon.requestLoop, daemon=True).start()");
+            
+            code.push("");
+            
+            for (let i = 0; i < allBlocksRecursive.length; i++) {
+                extend_array(code, allBlocksRecursive[i].getInitializationCode(2, "execMD"));
             }
 
             code.push("");
 
             for (let i = 0; i < all_model_blocks.length; i++)
                 code.push("\t\tself.registerModel(self." + all_model_blocks[i].getCodeName() + ", \"" + all_model_blocks[i].getCodeName() + "\")");
-            
-            code.push("\t\tself.generateMetadataModelRefsID()");
 
             code.push("");
 
-            code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+            code.push("\t\tmupif.Workflow.initialize(self, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+            
+            // setting of the inputs for initialization
+            let linked_slot;
+            let timestep_time = "None";
+            for (let i = 0; i < allBlocksRecursive.length; i++) {
+                slots = allBlocksRecursive[i].getSlots('in');
+                for (let si = 0; si < slots.length; si++) {
+                    if (slots[si].set_at === 'initialization') {
+                        let obj_id;
+                        linked_slot = slots[si].getLinkedDataSlot();
+                        if (linked_slot != null) {
+                            if(!(linked_slot instanceof SlotExt)){
+                                obj_id = slots[si].obj_id;
+                                if (typeof obj_id === 'string')
+                                    obj_id = "'" + obj_id + "'";
+                                code.push("");
+                                code.push("\t\tself." + allBlocksRecursive[i].code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                            }
+                        }
+                    }
+                }
+            }
 
             // --------------------------------------------------
             // get critical time step function
@@ -311,32 +348,27 @@ class BlockWorkflow extends Block{
                 code.push("\t# set method for all external inputs");
                 code.push("\tdef set(self, obj, objectID=0):");
 
-                code.push("\t\t");
-                code.push("\t\t# in case of Property");
-                code.push("\t\tif isinstance(obj, mupif.property.Property):");
-                code.push("\t\t\tpass");
-                slots = this.getAllExternalDataSlots("out");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
-                    if (s.connected())
-                        if (s.type === 'mupif.Property') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                        }
-                }
-
-                code.push("");
-                code.push("\t\t# in case of Field");
-                code.push("\t\tif isinstance(obj, mupif.field.Field):");
-                code.push("\t\t\tpass");
-                slots = this.getAllExternalDataSlots("out");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
-                    if (s.connected())
-                        if (s.type === 'mupif.Field') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                        }
+                let linked_model;
+                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field"];
+                for(let vi=0;vi<value_types.length;vi++){
+                    code.push("");
+                    code.push("\t\t# in case of " + value_types[vi]);
+                    code.push("\t\tif obj.isInstance(" + value_types[vi] + "):");
+                    code.push("\t\t\tpass");
+                    slots = this.getAllExternalDataSlots("out");
+                    for (let i = 0; i < slots.length; i++) {
+                        s = slots[i];
+                        if (s.connected())
+                            if (s.type === value_types[vi]) {
+                                code.push("\t\t\tif objectID == '" + s.name + "':");
+                                if(s.type === "mupif.PyroFile"){
+                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                                    linked_model = s.getLinkedDataSlot().getParentBlock();
+                                    code.push("\t\t\t\t" + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
+                                }else
+                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                            }
+                    }
                 }
                 
                 // --------------------------------------------------
@@ -345,33 +377,14 @@ class BlockWorkflow extends Block{
 
                 code.push("");
                 code.push("\t# get method for all external outputs");
-                code.push("\tdef get(self, objectType, time=None, objectID=0):");
-                code.push("");
-                code.push("\t\t# in case of Property");
-                code.push("\t\tif isinstance(objectType, mupif.PropertyID):");
-                code.push("\t\t\tpass");
-                slots = this.getAllExternalDataSlots("in");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
-                    if (s.connected())
-                        if (s.type === 'mupif.Property') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\treturn self." + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                        }
-                }
+                code.push("\tdef get(self, objectTypeID, time=None, objectID=0):");
 
-                code.push("");
-                code.push("\t\t# in case of Field");
-                code.push("\t\tif isinstance(objectType, mupif.FieldID):");
-                code.push("\t\t\tpass");
                 slots = this.getAllExternalDataSlots("in");
                 for (let i = 0; i < slots.length; i++) {
                     s = slots[i];
                     if (s.connected())
-                        if (s.type === 'mupif.Field') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                        }
+                        code.push("\t\tif objectID == '" + s.name + "':");
+                        code.push("\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
                 }
 
                 code.push("");

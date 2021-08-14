@@ -1,9 +1,8 @@
 class BlockModel extends Block {
-    constructor(editor, parent_block, md = {}, input_file_name="", input_file_directory="") {
+    constructor(editor, parent_block, md = {}, input_file_directory="") {
         super(editor, parent_block);
         // this.md = md;
 
-        this.input_file_name = input_file_name;
         this.input_file_directory = input_file_directory;
 
         this.exec_type = "";
@@ -16,8 +15,6 @@ class BlockModel extends Block {
 
         if ('Inputs' in this.md && 'Outputs' in this.md)
             this.constructSlots();
-
-
     }
 
     loadDataFromMetadata() {
@@ -67,7 +64,7 @@ class BlockModel extends Block {
                 name = md['Inputs'][i]['Name'];
                 if (md['Inputs'][i]['Obj_ID'][ii] !== '')
                     name += ' [' + md['Inputs'][i]['Obj_ID'][ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii]));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
@@ -125,19 +122,32 @@ class BlockModel extends Block {
             code.push("\tlog.info(self." + this.code_name + ")");
             code.push("except Exception as e:");
             code.push("\tlog.exception(e)");
+            
+            let loc_file_id = this.editor.workflowblock.inp_file_id;
+            
+            if(0) {
+                for (let fi = 0; fi < this.input_file_name.length; fi++) {
 
-            if(this.input_file_name){
-                code.push("pf = self.thermalJobMan.getPyroFile(self." + this.code_name + ".getJobID(), '" + this.input_file_name + "', 'wb')");
-                code.push("mupif.pyroutil.uploadPyroFile('" + this.input_file_name + "', pf)");
+                    // code.push("pf = self." + this.code_name + "_jobman.getPyroFile(self." + this.code_name + ".getJobID(), '" + this.input_file_name[fi] + "', 'wb')");
+                    // code.push("mupif.pyroutil.uploadPyroFile('" + this.input_file_name[fi] + "', pf)");
+
+                    code.push("pf = self." + this.code_name + "_jobman.getPyroFile(self." + this.code_name + ".getJobID(), files[" + loc_file_id + "], 'wb')");
+                    code.push("mupif.pyroutil.uploadPyroFile(files[" + loc_file_id + "], pf)");
+                    loc_file_id++;
+                }
             }
+            
         }else{
             if (this.model_module !== "undefined" && this.model_module !== "")
                 code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
             else
                 code.push("self." + this.code_name + " = " + this.model_name + "()");
         }
-
-        code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
+        
+        code.push("self." + this.code_name + ".initialize(workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
+        
+        
+        
 
         return push_indents_before_each_line(code, indent)
     }
@@ -159,10 +169,12 @@ class BlockModel extends Block {
         for (let i = 0; i < this.input_slots.length; i++) {
             linked_slot = this.input_slots[i].getLinkedDataSlot();
             if (linked_slot != null) {
-                obj_id = this.input_slots[i].obj_id;
-                if (typeof obj_id === 'string')
-                    obj_id = "'" + obj_id + "'";
-                code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                if(this.input_slots[i].set_at !== 'initialization') {
+                    obj_id = this.input_slots[i].obj_id;
+                    if (typeof obj_id === 'string')
+                        obj_id = "'" + obj_id + "'";
+                    code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                }
             }
         }
 
@@ -186,10 +198,6 @@ class BlockModel extends Block {
     }
 
     myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_input_file') {
-            this.input_file_name = document.getElementById('myQuery_temp_val').value;
-            console.log('Input file was set to "'+this.input_file_name+'"');
-        }
         if(action==='set_work_dir') {
             this.input_file_directory = document.getElementById('myQuery_temp_val').value;
             console.log('Working directory was set to "'+this.input_file_directory+'"');
@@ -214,15 +222,6 @@ class BlockModel extends Block {
         //         }
         //     }
         // }
-        if (keyword === 'set_input_file') {
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Input file:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.input_file_name+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
         if (keyword === 'set_work_dir') {
             myquery_temp_instance = this;
             let q_html = '';
@@ -267,8 +266,7 @@ class BlockModel extends Block {
     getDictForJSON() {
         let dict = super.getDictForJSON();
         dict['metadata'] = this.md;
-        dict['model_input_file_name'] = this.input_file_name;
-        dict['model_input_file_directory'] = this.input_file_directory;
+        dict['model_working_directory'] = this.input_file_directory;
         return dict;
     }
 
@@ -292,8 +290,6 @@ class BlockModel extends Block {
         html += 'ID = <b>\'' + this.md['ID'] + '\'</b>';
 
         if(this.exec_type !== "Distributed") {
-            html += '<br>';
-            html += 'Input file = <b>\'' + this.input_file_name + '\'</b>';
             html += '<br>';
             html += 'Working directory = <b>\'' + this.input_file_directory + '\'</b>';
         }

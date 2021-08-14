@@ -13,21 +13,21 @@
     "Description": "multi-purpose finite element software",
     "Physics": {"Type": "Other", "Entity": "Other"},
     "Inputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_YoungModulus1", "Name": "E_1", "Description": "Young modulus 1", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_YoungModulus2", "Name": "E_2", "Description": "Young modulus 2", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_YoungModulus3", "Name": "E_3", "Description": "Young modulus 3", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio12", "Name": "nu_12", "Description": "Poisson's ration 12", "Units": "none", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio13", "Name": "nu_13", "Description": "Poisson's ration 13", "Units": "none", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio23", "Name": "nu_23", "Description": "Poisson's ration 23", "Units": "none", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ShearModulus12", "Name": "G_12", "Description": "Shear modulus 12", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ShearModulus13", "Name": "G_13", "Description": "Shear modulus 13", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ShearModulus23", "Name": "G_23", "Description": "Shear modulus 23", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "PropertyID.PID_Density", "Name": "rho_c", "Description": "Density of the composite", "Units": "kg/m**3", "Required": true}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_YoungModulus1", "Name": "E_1", "Description": "Young modulus 1", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_YoungModulus2", "Name": "E_2", "Description": "Young modulus 2", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_YoungModulus3", "Name": "E_3", "Description": "Young modulus 3", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio12", "Name": "nu_12", "Description": "Poisson's ration 12", "Units": "none", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio13", "Name": "nu_13", "Description": "Poisson's ration 13", "Units": "none", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio23", "Name": "nu_23", "Description": "Poisson's ration 23", "Units": "none", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_ShearModulus12", "Name": "G_12", "Description": "Shear modulus 12", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_ShearModulus13", "Name": "G_13", "Description": "Shear modulus 13", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_ShearModulus23", "Name": "G_23", "Description": "Shear modulus 23", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "DataID.PID_Density", "Name": "rho_c", "Description": "Density of the composite", "Units": "kg/m**3", "Required": true}
     ],
     "Outputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Stiffness",  "Name": "stiffness", "Description": "rotational stiffness of the structure", "Units": "Nmm"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Mass", "Name": "Mass", "Description": "Mass of the structure", "Units": "kg"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_maxPrincipalStress", "Name": "maxStress", "Description": "maximum principal Stress", "Units": "MPa"}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Stiffness",  "Name": "stiffness", "Description": "rotational stiffness of the structure", "Units": "Nmm"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Mass", "Name": "Mass", "Description": "Mass of the structure", "Units": "kg"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_maxPrincipalStress", "Name": "maxStress", "Description": "maximum principal Stress", "Units": "MPa"}
     ],
     "refPoint": "none",
     "componentID": "none",

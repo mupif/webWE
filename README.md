@@ -10,13 +10,13 @@ In case of usage as a Node.js application, it can be installed using git:
 
 `git clone https://github.com/mupif/webWE.git`
 
-The current version works with dev branch of MuPIF, which can be installed using git:
+The current version works with master branch of MuPIF, which can be installed using git:
 
 `git clone --branch dev https://github.com/mupif/mupif.git`
 
 or using pip:
 
-`pip install git+https://github.com/mupif/mupif.git@dev`
+`pip install git+https://github.com/mupif/mupif.git`
 
 ## Examples
 

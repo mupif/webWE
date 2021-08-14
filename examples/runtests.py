@@ -1,8 +1,11 @@
 import os
 import filecmp
+from termcolor import colored
 
 rp = os.path.realpath(__file__)
 dirname = "%s%s" % (os.path.dirname(rp), os.path.sep)
+
+os.system("python unify.py")
 
 tests = [
     [1, "exec"],
@@ -14,6 +17,9 @@ tests = [
     [6, "exec"],
 ]
 
+all_tests_ok = True
+failed_tests = []
+
 for test_number in range(0, len(tests)):
     print("Running example number %d\n----------" % tests[test_number][0])
     os.system("node %sapp_test.js %d %s" % (dirname, tests[test_number][0], tests[test_number][1]))
@@ -24,9 +30,11 @@ for test_number in range(0, len(tests)):
     
         result = filecmp.cmp(f1, f2, shallow=False)
         if result:
-            print("Files %s and %s are identical." % (f1, f2))
+            print(colored("Files %s and %s are identical." % (f1, f2), "green"))
         else:
-            print("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2))
+            print(colored("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2), "red"))
+            all_tests_ok = False
+            failed_tests.append(tests[test_number][0])
     
     server_add = ""
     if tests[test_number][1] == "server":
@@ -37,8 +45,16 @@ for test_number in range(0, len(tests)):
 
     result = filecmp.cmp(f1, f2, shallow=False)
     if result:
-        print("Files %s and %s are identical." % (f1, f2))
+        print(colored("Files %s and %s are identical." % (f1, f2), "green"))
     else:
-        print("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2))
+        print(colored("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2), "red"))
+        all_tests_ok = False
+        failed_tests.append(tests[test_number][0])
 
     print("----------\n")
+    
+if all_tests_ok:
+    print(colored("ALL TESTS PASSED :)", "green"))
+else:
+    print(colored("SOME TESTS FAILED :(", "red"))
+    print(colored(failed_tests, "red"))

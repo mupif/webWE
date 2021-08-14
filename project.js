@@ -319,7 +319,7 @@ class Block{
         if (name === "physicalquantity")
             block = new BlockPhysicalQuantity(this.editor, this, 0, 'None');
         if (name === "property")
-            block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.PropertyID.PID_None', 'mupif.ValueType.Scalar', 'none', '0');
+            block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none', '0');
         if (name === "timeloop")
             block = new BlockTimeloop(this.editor, this);
         if (name === "dowhile")
@@ -612,12 +612,106 @@ class BlockDoWhile extends Block{
 
 }
 
+class BlockInputFile extends Block{
+    constructor(editor, parent_block, filename){
+        super(editor, parent_block);
+        this.filename = filename;
+        this.name = 'InputFile';
+
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'filename = '+this.filename, 'mupif.PyroFile', false, 'None'));
+    }
+
+    generateCodeName(all_blocks, base_name='input_file_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        return "self." + this.getCodeName();
+    }
+
+    getInitCode(indent=0){
+        let code = super.getInitCode();
+        code.push("self."+this.code_name+" = mupif.PyroFile(filename='"+this.filename+"', mode='rb')");
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        //return [];
+        let code = super.getInitializationCode();
+        code.push("self.daemon.register(self."+this.code_name+")");
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value', '', 'Input&nbsp;file'), 'Set');
+    }
+
+    myquery_proceed(action, p1=null, p2=null){
+        if(action==='set_file') {
+            this.value = document.getElementById('myQuery_temp_val').value;
+            console.log('Value set to "'+this.filename+'"');
+        }
+        super.myquery_proceed(action, p1, p2);
+    }
+
+    modificationQuery(keyword, value = null) {
+        if(keyword === 'set_file'){
+            myquery_temp_instance = this;
+            let q_html = '';
+            q_html += '<b>Set Input file:</b>&nbsp;';
+            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.filename+'" style="width:100px;">';
+            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
+
+            myQuery_show(q_html);
+        }
+
+        super.modificationQuery(keyword, value);
+    }
+
+    getClassName() {
+        return 'BlockInputFile';
+    }
+
+    getDictForJSON() {
+        let dict = super.getDictForJSON();
+        dict['filename'] = this.filename;
+        return dict;
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_input_file';
+    }
+
+    getBlockHtmlName(){
+        return 'Input File';
+    }
+
+    getBlockHtml_params(){
+        let html = '';
+        html += '<div class="bl_params">';
+        html += 'Filename = <b>\'' + this.filename + '\'</b>';
+
+        html += '</div>';
+        return html;
+    }
+
+}
+
 class BlockModel extends Block {
-    constructor(editor, parent_block, md = {}, input_file_name="", input_file_directory="") {
+    constructor(editor, parent_block, md = {}, input_file_directory="") {
         super(editor, parent_block);
         // this.md = md;
 
-        this.input_file_name = input_file_name;
         this.input_file_directory = input_file_directory;
 
         this.exec_type = "";
@@ -630,8 +724,6 @@ class BlockModel extends Block {
 
         if ('Inputs' in this.md && 'Outputs' in this.md)
             this.constructSlots();
-
-
     }
 
     loadDataFromMetadata() {
@@ -681,7 +773,7 @@ class BlockModel extends Block {
                 name = md['Inputs'][i]['Name'];
                 if (md['Inputs'][i]['Obj_ID'][ii] !== '')
                     name += ' [' + md['Inputs'][i]['Obj_ID'][ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii]));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
@@ -739,19 +831,32 @@ class BlockModel extends Block {
             code.push("\tlog.info(self." + this.code_name + ")");
             code.push("except Exception as e:");
             code.push("\tlog.exception(e)");
+            
+            let loc_file_id = this.editor.workflowblock.inp_file_id;
+            
+            if(0) {
+                for (let fi = 0; fi < this.input_file_name.length; fi++) {
 
-            if(this.input_file_name){
-                code.push("pf = self.thermalJobMan.getPyroFile(self." + this.code_name + ".getJobID(), '" + this.input_file_name + "', 'wb')");
-                code.push("mupif.pyroutil.uploadPyroFile('" + this.input_file_name + "', pf)");
+                    // code.push("pf = self." + this.code_name + "_jobman.getPyroFile(self." + this.code_name + ".getJobID(), '" + this.input_file_name[fi] + "', 'wb')");
+                    // code.push("mupif.pyroutil.uploadPyroFile('" + this.input_file_name[fi] + "', pf)");
+
+                    code.push("pf = self." + this.code_name + "_jobman.getPyroFile(self." + this.code_name + ".getJobID(), files[" + loc_file_id + "], 'wb')");
+                    code.push("mupif.pyroutil.uploadPyroFile(files[" + loc_file_id + "], pf)");
+                    loc_file_id++;
+                }
             }
+            
         }else{
             if (this.model_module !== "undefined" && this.model_module !== "")
                 code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
             else
                 code.push("self." + this.code_name + " = " + this.model_name + "()");
         }
-
-        code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
+        
+        code.push("self." + this.code_name + ".initialize(workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
+        
+        
+        
 
         return push_indents_before_each_line(code, indent)
     }
@@ -773,10 +878,12 @@ class BlockModel extends Block {
         for (let i = 0; i < this.input_slots.length; i++) {
             linked_slot = this.input_slots[i].getLinkedDataSlot();
             if (linked_slot != null) {
-                obj_id = this.input_slots[i].obj_id;
-                if (typeof obj_id === 'string')
-                    obj_id = "'" + obj_id + "'";
-                code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                if(this.input_slots[i].set_at !== 'initialization') {
+                    obj_id = this.input_slots[i].obj_id;
+                    if (typeof obj_id === 'string')
+                        obj_id = "'" + obj_id + "'";
+                    code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                }
             }
         }
 
@@ -800,10 +907,6 @@ class BlockModel extends Block {
     }
 
     myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_input_file') {
-            this.input_file_name = document.getElementById('myQuery_temp_val').value;
-            console.log('Input file was set to "'+this.input_file_name+'"');
-        }
         if(action==='set_work_dir') {
             this.input_file_directory = document.getElementById('myQuery_temp_val').value;
             console.log('Working directory was set to "'+this.input_file_directory+'"');
@@ -828,15 +931,6 @@ class BlockModel extends Block {
         //         }
         //     }
         // }
-        if (keyword === 'set_input_file') {
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Input file:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.input_file_name+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
         if (keyword === 'set_work_dir') {
             myquery_temp_instance = this;
             let q_html = '';
@@ -881,8 +975,7 @@ class BlockModel extends Block {
     getDictForJSON() {
         let dict = super.getDictForJSON();
         dict['metadata'] = this.md;
-        dict['model_input_file_name'] = this.input_file_name;
-        dict['model_input_file_directory'] = this.input_file_directory;
+        dict['model_working_directory'] = this.input_file_directory;
         return dict;
     }
 
@@ -906,8 +999,6 @@ class BlockModel extends Block {
         html += 'ID = <b>\'' + this.md['ID'] + '\'</b>';
 
         if(this.exec_type !== "Distributed") {
-            html += '<br>';
-            html += 'Input file = <b>\'' + this.input_file_name + '\'</b>';
             html += '<br>';
             html += 'Working directory = <b>\'' + this.input_file_directory + '\'</b>';
         }
@@ -1090,7 +1181,7 @@ class BlockProperty extends Block{
             console.log('Units set to "'+this.units+'"');
         }
         if(action==='set_property_id') {
-            this.property_id = 'mupif.PropertyID.'+document.getElementById('myQuery_temp_val').value;
+            this.property_id = 'mupif.DataID.'+document.getElementById('myQuery_temp_val').value;
             console.log('Property ID set to "'+this.property_id+'"');
         }
         if(action==='set_value_type') {
@@ -1139,7 +1230,7 @@ class BlockProperty extends Block{
             q_html += '<select id="myQuery_temp_val">';
             for(let i=0;i<mupif_PropertyID.length;i++) {
                 q_html += '<option value="'+mupif_PropertyID[i]+'"';
-                if(this.property_id === 'mupif.PropertyID.'+mupif_PropertyID[i])
+                if(this.property_id === 'mupif.DataID.'+mupif_PropertyID[i])
                     q_html += ' selected';
                 q_html += '>'+mupif_PropertyID[i]+'</option>';
             }
@@ -1213,7 +1304,7 @@ class BlockProperty extends Block{
         html += '<br>';
         html += 'ValueType = <b>\'' + this.value_type.replace('mupif.ValueType.', '') + '\'</b>';
         html += '<br>';
-        html += 'PropertyID = <b>\'' + this.property_id.replace('mupif.PropertyID.', '') + '\'</b>';
+        html += 'PropertyID = <b>\'' + this.property_id.replace('mupif.DataID.', '') + '\'</b>';
         html += '<br>';
         html += 'ObjectID = <b>\'' + this.object_id + '\'</b>';
 
@@ -1495,9 +1586,19 @@ class BlockWorkflow extends Block{
 
             let all_model_blocks = this.getBlocksRecursive(BlockModel);
             let child_blocks = this.getBlocks();
+            
+            let code = [];
 
-            let code = ["import mupif", "import copy", "import Pyro5"];
-
+            // TODO
+            // code.push("import sys");
+            // code.push("sys.path.append(\"C:\\Projects\\mupif_current_dev\")");
+            // code.push("");
+            
+            code.push("import mupif");
+            code.push("import copy");
+            code.push("import Pyro5");
+            code.push("import threading");
+            
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
             for (let i = 0; i < model_blocks.length; i++) {
@@ -1557,7 +1658,8 @@ class BlockWorkflow extends Block{
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
                         "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
-                        "\"Units\": \"\"";
+                        "\"Units\": \"\", " +
+                        "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
@@ -1584,6 +1686,8 @@ class BlockWorkflow extends Block{
             code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
 
             code.push("\t\tself.updateMetadata(metadata)");
+            
+            code.push("\t\tself.daemon = None");
 
             let code_add;
             if (class_code) {
@@ -1593,7 +1697,7 @@ class BlockWorkflow extends Block{
                     s = slots[i];
                     if (s.connected()) {
                         code.push("");
-                        code.push("\t\t# initialization code of external input");
+                        code.push("\t\t# initialization code of external input ("+slots[i].obj_id+")");
                         code.push("\t\t" + s.getCodeRepresentation() + " = None");
                         code.push("\t\t# It should be defined from outside using set() method.");
                     }
@@ -1613,13 +1717,13 @@ class BlockWorkflow extends Block{
             // --------------------------------------------------
 
             code.push("");
-            code.push("\tdef initialize(self, file='', workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
-
+            code.push("\tdef initialize(self, workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
             code.push("");
 
             code.push("\t\tself.updateMetadata(dictionary=metadata)");
 
             code.push("");
+            
             code.push("\t\texecMD = {");
             code.push("\t\t\t'Execution': {");
             code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
@@ -1628,20 +1732,49 @@ class BlockWorkflow extends Block{
             code.push("\t\t\t}");
             code.push("\t\t}");
 
-            for (let i = 0; i < all_model_blocks.length; i++) {
-                extend_array(code, all_model_blocks[i].getInitializationCode(2, "execMD"));
+            code.push("");
+            
+            code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
+            code.push("\t\tns._pyroBind()");
+            code.push("\t\tself.daemon = Pyro5.api.Daemon(host=ns._pyroConnection.sock.getsockname()[0])");
+            code.push("\t\tthreading.Thread(target=self.daemon.requestLoop, daemon=True).start()");
+            
+            code.push("");
+            
+            for (let i = 0; i < allBlocksRecursive.length; i++) {
+                extend_array(code, allBlocksRecursive[i].getInitializationCode(2, "execMD"));
             }
 
             code.push("");
 
             for (let i = 0; i < all_model_blocks.length; i++)
                 code.push("\t\tself.registerModel(self." + all_model_blocks[i].getCodeName() + ", \"" + all_model_blocks[i].getCodeName() + "\")");
-            
-            code.push("\t\tself.generateMetadataModelRefsID()");
 
             code.push("");
 
-            code.push("\t\tmupif.workflow.Workflow.initialize(self, file=file, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+            code.push("\t\tmupif.Workflow.initialize(self, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+            
+            // setting of the inputs for initialization TODO pokud je to napojeno na ext slot, tak nedelat
+            let linked_slot;
+            let timestep_time = "None";
+            for (let i = 0; i < allBlocksRecursive.length; i++) {
+                slots = allBlocksRecursive[i].getSlots('in');
+                for (let si = 0; si < slots.length; si++) {
+                    if (slots[si].set_at === 'initialization') {
+                        let obj_id;
+                        linked_slot = slots[si].getLinkedDataSlot();
+                        if (linked_slot != null) {
+                            if(!(linked_slot instanceof SlotExt)){
+                                obj_id = slots[si].obj_id;
+                                if (typeof obj_id === 'string')
+                                    obj_id = "'" + obj_id + "'";
+                                code.push("");
+                                code.push("\t\tself." + allBlocksRecursive[i].code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                            }
+                        }
+                    }
+                }
+            }
 
             // --------------------------------------------------
             // get critical time step function
@@ -1672,32 +1805,27 @@ class BlockWorkflow extends Block{
                 code.push("\t# set method for all external inputs");
                 code.push("\tdef set(self, obj, objectID=0):");
 
-                code.push("\t\t");
-                code.push("\t\t# in case of Property");
-                code.push("\t\tif isinstance(obj, mupif.property.Property):");
-                code.push("\t\t\tpass");
-                slots = this.getAllExternalDataSlots("out");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
-                    if (s.connected())
-                        if (s.type === 'mupif.Property') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                        }
-                }
-
-                code.push("");
-                code.push("\t\t# in case of Field");
-                code.push("\t\tif isinstance(obj, mupif.field.Field):");
-                code.push("\t\t\tpass");
-                slots = this.getAllExternalDataSlots("out");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
-                    if (s.connected())
-                        if (s.type === 'mupif.Field') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-                        }
+                let linked_model;
+                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field"];
+                for(let vi=0;vi<value_types.length;vi++){
+                    code.push("");
+                    code.push("\t\t# in case of " + value_types[vi]);
+                    code.push("\t\tif obj.isInstance(" + value_types[vi] + "):");
+                    code.push("\t\t\tpass");
+                    slots = this.getAllExternalDataSlots("out");
+                    for (let i = 0; i < slots.length; i++) {
+                        s = slots[i];
+                        if (s.connected())
+                            if (s.type === value_types[vi]) {
+                                code.push("\t\t\tif objectID == '" + s.name + "':");
+                                if(s.type === "mupif.PyroFile"){
+                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                                    linked_model = s.getLinkedDataSlot().getParentBlock();
+                                    code.push("\t\t\t\t" + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
+                                }else
+                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                            }
+                    }
                 }
                 
                 // --------------------------------------------------
@@ -1706,33 +1834,14 @@ class BlockWorkflow extends Block{
 
                 code.push("");
                 code.push("\t# get method for all external outputs");
-                code.push("\tdef get(self, objectType, time=None, objectID=0):");
-                code.push("");
-                code.push("\t\t# in case of Property");
-                code.push("\t\tif isinstance(objectType, mupif.PropertyID):");
-                code.push("\t\t\tpass");
-                slots = this.getAllExternalDataSlots("in");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
-                    if (s.connected())
-                        if (s.type === 'mupif.Property') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\treturn self." + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                        }
-                }
+                code.push("\tdef get(self, objectTypeID, time=None, objectID=0):");
 
-                code.push("");
-                code.push("\t\t# in case of Field");
-                code.push("\t\tif isinstance(objectType, mupif.FieldID):");
-                code.push("\t\t\tpass");
                 slots = this.getAllExternalDataSlots("in");
                 for (let i = 0; i < slots.length; i++) {
                     s = slots[i];
                     if (s.connected())
-                        if (s.type === 'mupif.Field') {
-                            code.push("\t\t\tif objectID == '" + s.name + "':");
-                            code.push("\t\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
-                        }
+                        code.push("\t\tif objectID == '" + s.name + "':");
+                        code.push("\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
                 }
 
                 code.push("");
@@ -2071,7 +2180,7 @@ let metaDataThermalStat = {
             'Name': 'edge temperature',
             'Type': 'mupif.Property',
             'Required': false,
-            'Type_ID': 'mupif.PropertyID.PID_Temperature',
+            'Type_ID': 'mupif.DataID.PID_Temperature',
             'Obj_ID': [
                 'Cauchy top',
                 'Cauchy bottom',
@@ -2087,7 +2196,7 @@ let metaDataThermalStat = {
     'Outputs': [
         {
             'Name': 'temperature',
-            'Type_ID': 'mupif.FieldID.FID_Temperature',
+            'Type_ID': 'mupif.DataID.FID_Temperature',
             'Type': 'mupif.Field',
             'Required': false
         }
@@ -2109,7 +2218,7 @@ let metaDataThermalNonStat = {
             'Name': 'edge temperature',
             'Type': 'mupif.Property',
             'Required': false,
-            'Type_ID': 'mupif.PropertyID.PID_Temperature',
+            'Type_ID': 'mupif.DataID.PID_Temperature',
             'Obj_ID': [
                 'Cauchy top',
                 'Cauchy bottom',
@@ -2125,7 +2234,7 @@ let metaDataThermalNonStat = {
     'Outputs': [
         {
             'Name': 'temperature',
-            'Type_ID': 'mupif.FieldID.FID_Temperature',
+            'Type_ID': 'mupif.DataID.FID_Temperature',
             'Type': 'mupif.Field',
             'Required': false
         }
@@ -2144,7 +2253,7 @@ let metaDataMechanical = {
     'Inputs': [
         {
             'Name': 'temperature',
-            'Type_ID': 'mupif.FieldID.FID_Temperature',
+            'Type_ID': 'mupif.DataID.FID_Temperature',
             'Type': 'mupif.Field',
             'Required': true
         }
@@ -2152,7 +2261,7 @@ let metaDataMechanical = {
     'Outputs': [
         {
             'Name': 'displacement',
-            'Type_ID': 'mupif.FieldID.FID_Displacement',
+            'Type_ID': 'mupif.DataID.FID_Displacement',
             'Type': 'mupif.Field',
             'Required': false
         }
@@ -2167,25 +2276,25 @@ let metaData_digimatMFAirbus = {
     "Description": "Mean Field Homogenization for Airbus case",
     "Version_date": "05/2019",
     "Inputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Time_step", "Name": "Time step", "Description": "Time step", "Units": "s", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixYoung", "Name": "Young matrix", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionYoung", "Name": "Young inclusion", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixPoisson", "Name": "Poisson ratio matrix", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionPoisson", "Name": "Poisson ratio inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionAspectRatio", "Name": "Aspect ratio inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionVolumeFraction", "Name": "Volume fraction inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionDensity", "Name": "density inclusion", "Units": "kg/m**3", "Required": false},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixDensity", "Name": "density matrix", "Units": "kg/m**3", "Required": false}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Time_step", "Name": "Time step", "Description": "Time step", "Units": "s", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixYoung", "Name": "Young matrix", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionYoung", "Name": "Young inclusion", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixPoisson", "Name": "Poisson ratio matrix", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionPoisson", "Name": "Poisson ratio inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionAspectRatio", "Name": "Aspect ratio inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionVolumeFraction", "Name": "Volume fraction inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionDensity", "Name": "density inclusion", "Units": "kg/m**3", "Required": false},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixDensity", "Name": "density matrix", "Units": "kg/m**3", "Required": false}
     ],
     "Outputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Time", "Name": "Cummulative time", "Description": "Cummulative time", "Units": "s", "Origin": "Simulated"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeAxialYoung", "Name": "Composite Axial Young", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlaneYoung", "Name": "Composite In-plane Young", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlaneShear", "Name": "Composite In-plane Shear", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransverseShear", "Name": "Composite Transverse Shear", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlanePoisson", "Name": "Composite In-plane Poisson ratio", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Time", "Name": "Cummulative time", "Description": "Cummulative time", "Units": "s", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeAxialYoung", "Name": "Composite Axial Young", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlaneYoung", "Name": "Composite In-plane Young", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlaneShear", "Name": "Composite In-plane Shear", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeTransverseShear", "Name": "Composite Transverse Shear", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlanePoisson", "Name": "Composite In-plane Poisson ratio", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
     ],
     "Execution_type": "Distributed",
     "Execution_settings_jobManagerName": "eX_DigimatMF_JobManager"
@@ -2197,22 +2306,22 @@ let metaData_MUL2 = {
     "Name": "MUL2",
     "Description": "MUL2-FEM code for structural analysis",
     "Inputs": [
-        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_YoungModulus1", "Type": "mupif.Property", "Name": "YoungModulus1"},
-        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_YoungModulus2", "Type": "mupif.Property", "Name": "YoungModulus2"},
-        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_YoungModulus3", "Type": "mupif.Property", "Name": "YoungModulus3"},
-        {"Description": "Material Property", "Units": "-", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_PoissonRatio12", "Type": "mupif.Property", "Name": "PoissonRatio12"},
-        {"Description": "Material Property", "Units": "-", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_PoissonRatio13", "Type": "mupif.Property", "Name": "PoissonRatio13"},
-        {"Description": "Material Property", "Units": "-", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_PoissonRatio23", "Type": "mupif.Property", "Name": "PoissonRatio23"},
-        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_ShearModulus12", "Type": "mupif.Property", "Name": "ShearModulus12"},
-        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_ShearModulus13", "Type": "mupif.Property", "Name": "ShearModulus13"},
-        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_ShearModulus23", "Type": "mupif.Property", "Name": "ShearModulus23"},
-        {"Description": "Material Property", "Units": "kg/mm**3", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.PropertyID.PID_Density", "Type": "mupif.Property", "Name": "Density"}
+        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_YoungModulus1", "Type": "mupif.Property", "Name": "YoungModulus1"},
+        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_YoungModulus2", "Type": "mupif.Property", "Name": "YoungModulus2"},
+        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_YoungModulus3", "Type": "mupif.Property", "Name": "YoungModulus3"},
+        {"Description": "Material Property", "Units": "-", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_PoissonRatio12", "Type": "mupif.Property", "Name": "PoissonRatio12"},
+        {"Description": "Material Property", "Units": "-", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_PoissonRatio13", "Type": "mupif.Property", "Name": "PoissonRatio13"},
+        {"Description": "Material Property", "Units": "-", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_PoissonRatio23", "Type": "mupif.Property", "Name": "PoissonRatio23"},
+        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_ShearModulus12", "Type": "mupif.Property", "Name": "ShearModulus12"},
+        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_ShearModulus13", "Type": "mupif.Property", "Name": "ShearModulus13"},
+        {"Description": "Material Property", "Units": "MPa", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_ShearModulus23", "Type": "mupif.Property", "Name": "ShearModulus23"},
+        {"Description": "Material Property", "Units": "kg/mm**3", "Required": true, "Origin": "Simulated", "Type_ID": "mupif.DataID.PID_Density", "Type": "mupif.Property", "Name": "Density"}
     ],
     "ID": "MUL2-ID-1",
     "Outputs": [
-        {"Description": "First buckling load of the analyzed structure", "Units": "Nm", "Origin": "Simulated", "Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CriticalLoadLevel", "Name": "Buckling load"},
-        {"Description": "Mass of the structure", "Units": "kg", "Origin": "Simulated", "Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Mass", "Name": "Structural Mass"},
-        {"Description": "Three dimensional shape of first buckling load of the analyzed structure", "Units": "-", "Origin": "Simulated", "Type": "mupif.Field", "Type_ID": "mupif.FieldID.FID_BucklingShape", "Name": "Buckling shape"}
+        {"Description": "First buckling load of the analyzed structure", "Units": "Nm", "Origin": "Simulated", "Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CriticalLoadLevel", "Name": "Buckling load"},
+        {"Description": "Mass of the structure", "Units": "kg", "Origin": "Simulated", "Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Mass", "Name": "Structural Mass"},
+        {"Description": "Three dimensional shape of first buckling load of the analyzed structure", "Units": "-", "Origin": "Simulated", "Type": "mupif.Field", "Type_ID": "mupif.DataID.FID_BucklingShape", "Name": "Buckling shape"}
     ],
     "Execution_type": "Distributed",
     "Execution_settings_jobManagerName": "MUL2.JobManager@UseCase1"
@@ -2247,25 +2356,25 @@ let metaData_LAMMPS = {
         "Robustness": "High"
     },
     "Inputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_MOLECULAR_STRUCTURE", "Name": "Monomer Molecular Structure", "Description": "Monomer Molecular Structure", "Units": "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MOLECULAR_WEIGHT", "Name": "Polymer Molecular Weight", "Description": "Polymer Molecular Weight",  "Units": "mol", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CROSSLINKER_TYPE", "Name": "CROSSLINKER TYPE", "Description": "CROSSLINKER TYPE",  "Units": "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_DESIGNATION", "Name": "FILLER DESIGNATION", "Description": "FILLER DESIGNATION", "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CROSSLINKONG_DENSITY", "Name": "CROSSLINKONG DENSITY", "Description": "CROSSLINKONG DENSITY",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_FILLER_CONCENTRATION", "Name": "FILLER CONCENTRATION", "Description": "FILLER CONCENTRATION",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "deg_C", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PRESSURE", "Name": "PRESSURE", "Description": "TEMPERATURE",  "Units":  "atm", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_POLYDISPERSITY_INDEX", "Name": "POLYDISPERSITY INDEX", "Description": "POLYDISPERSITY INDEX",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE", "Name": "SMILE MODIFIER MOLECULAR STRUCTURE", "Description": "SMILE MODIFIER MOLECULAR STRUCTURE",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_SMILE_FILLER_MOLECULAR_STRUCTURE", "Name": "SMILE FILLER MOLECULAR STRUCTURE", "Description": "SMILE FILLER MOLECULAR STRUCTURE", "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_DENSITY_OF_FUNCTIONALIZATION", "Name": "DENSITY OF FUNCTIONALIZATION", "Description": "DENSITY OF FUNCTIONALIZATION", "Units":  "None", "Origin": "Simulated", "Required": true}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_SMILE_MOLECULAR_STRUCTURE", "Name": "Monomer Molecular Structure", "Description": "Monomer Molecular Structure", "Units": "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MOLECULAR_WEIGHT", "Name": "Polymer Molecular Weight", "Description": "Polymer Molecular Weight",  "Units": "mol", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CROSSLINKER_TYPE", "Name": "CROSSLINKER TYPE", "Description": "CROSSLINKER TYPE",  "Units": "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_FILLER_DESIGNATION", "Name": "FILLER DESIGNATION", "Description": "FILLER DESIGNATION", "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CROSSLINKONG_DENSITY", "Name": "CROSSLINKONG DENSITY", "Description": "CROSSLINKONG DENSITY",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_FILLER_CONCENTRATION", "Name": "FILLER CONCENTRATION", "Description": "FILLER CONCENTRATION",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "deg_C", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PRESSURE", "Name": "PRESSURE", "Description": "TEMPERATURE",  "Units":  "atm", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_POLYDISPERSITY_INDEX", "Name": "POLYDISPERSITY INDEX", "Description": "POLYDISPERSITY INDEX",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE", "Name": "SMILE MODIFIER MOLECULAR STRUCTURE", "Description": "SMILE MODIFIER MOLECULAR STRUCTURE",  "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_SMILE_FILLER_MOLECULAR_STRUCTURE", "Name": "SMILE FILLER MOLECULAR STRUCTURE", "Description": "SMILE FILLER MOLECULAR STRUCTURE", "Units":  "None", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_DENSITY_OF_FUNCTIONALIZATION", "Name": "DENSITY OF FUNCTIONALIZATION", "Description": "DENSITY OF FUNCTIONALIZATION", "Units":  "None", "Origin": "Simulated", "Required": true}
     ],
     "Outputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_DENSITY", "Name": "density", "Description": "density", "Units": "g/cm^3", "Origin": "Simulated"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_EModulus", "Name": "Young modulus", "Description": "Young modulus", "Units": "GPa", "Origin": "Simulated"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_effective_conductivity", "Name": "Thermal Conductivity", "Description": "Thermal Conductivity", "Units": "W/m.??C", "Origin": "Simulated"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_TRANSITION_TEMPERATURE", "Name": "Glass Transition Temperature", "Description": "Glass Transition Temperature", "Units": "K", "Origin": "Simulated"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio", "Name": "Poisson Ratio", "Description": "Poisson Ratio", "Units": "None", "Origin": "Simulated"}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_DENSITY", "Name": "density", "Description": "density", "Units": "g/cm^3", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_EModulus", "Name": "Young modulus", "Description": "Young modulus", "Units": "GPa", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_effective_conductivity", "Name": "Thermal Conductivity", "Description": "Thermal Conductivity", "Units": "W/m.??C", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_TRANSITION_TEMPERATURE", "Name": "Glass Transition Temperature", "Description": "Glass Transition Temperature", "Units": "K", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio", "Name": "Poisson Ratio", "Description": "Poisson Ratio", "Units": "None", "Origin": "Simulated"}
     ]
 };
 
@@ -2284,25 +2393,25 @@ let metaData_DIGIMAT = {
     "Description": "Mean Field Homogenization for Airbus case",
     "Physics": {"Type": "Continuum", "Entity": "Other"},
     "Inputs": [
-        // {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Time_step", "Name": "Time step", "Description": "Time step", "Units": "s", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixYoung", "Name": "Young matrix", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionYoung", "Name": "Young inclusion", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixPoisson", "Name": "Poisson ratio matrix", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionPoisson", "Name": "Poisson ratio inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionAspectRatio", "Name": "Aspect ratio inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionVolumeFraction", "Name": "Volume fraction inclusion", "Units": "", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_InclusionDensity", "Name": "density inclusion", "Units": "kg/m**3", "Required": false},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_MatrixDensity", "Name": "density matrix", "Units": "kg/m**3", "Required": false}
+        // {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Time_step", "Name": "Time step", "Description": "Time step", "Units": "s", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixYoung", "Name": "Young matrix", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionYoung", "Name": "Young inclusion", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixPoisson", "Name": "Poisson ratio matrix", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionPoisson", "Name": "Poisson ratio inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionAspectRatio", "Name": "Aspect ratio inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionVolumeFraction", "Name": "Volume fraction inclusion", "Units": "", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_InclusionDensity", "Name": "density inclusion", "Units": "kg/m**3", "Required": false},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_MatrixDensity", "Name": "density matrix", "Units": "kg/m**3", "Required": false}
     ],
     "Outputs": [
-        // {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Time", "Name": "Cummulative time", "Description": "Cummulative time", "Units": "s", "Origin": "Simulated"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeAxialYoung", "Name": "Composite Axial Young", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlaneYoung", "Name": "Composite In-plane Young", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlaneShear", "Name": "Composite In-plane Shear", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransverseShear", "Name": "Composite Transverse Shear", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeInPlanePoisson", "Name": "Composite In-plane Poisson ratio", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
+        // {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Time", "Name": "Cummulative time", "Description": "Cummulative time", "Units": "s", "Origin": "Simulated"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeAxialYoung", "Name": "Composite Axial Young", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlaneYoung", "Name": "Composite In-plane Young", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlaneShear", "Name": "Composite In-plane Shear", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeTransverseShear", "Name": "Composite Transverse Shear", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeInPlanePoisson", "Name": "Composite In-plane Poisson ratio", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeTransversePoisson", "Name": "Composite Transverse Poisson ratio", "Units": "MPa"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CompositeDensity", "Name": "Composite density", "Units": "kg/m**3"}
     ],
     "Execution_type": "Distributed",
     "Execution_settings_jobManagerName": "eX_DigimatMF_JobManager"
@@ -2323,24 +2432,24 @@ let metaData_ABAQUS = {
     "Description": "multi-purpose finite element software",
     "Physics": {"Type": "Other", "Entity": "Other"},
     "Inputs": [
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_YoungModulus1", "Name": "E_1", "Description": "Young modulus 1", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_YoungModulus2", "Name": "E_2", "Description": "Young modulus 2", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_YoungModulus3", "Name": "E_3", "Description": "Young modulus 3", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio12", "Name": "nu_12", "Description": "Poisson\'s ration 12", "Units": "none", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio13", "Name": "nu_13", "Description": "Poisson\'s ration 13", "Units": "none", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_PoissonRatio23", "Name": "nu_23", "Description": "Poisson\'s ration 23", "Units": "none", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ShearModulus12", "Name": "G_12", "Description": "Shear modulus 12", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ShearModulus13", "Name": "G_13", "Description": "Shear modulus 13", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_ShearModulus23", "Name": "G_23", "Description": "Shear modulus 23", "Units": "MPa", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "PropertyID.PID_Density", "Name": "rho_c", "Description": "Density of the composite", "Units": "kg/m**3", "Required": true}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_YoungModulus1", "Name": "E_1", "Description": "Young modulus 1", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_YoungModulus2", "Name": "E_2", "Description": "Young modulus 2", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_YoungModulus3", "Name": "E_3", "Description": "Young modulus 3", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio12", "Name": "nu_12", "Description": "Poisson\'s ration 12", "Units": "none", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio13", "Name": "nu_13", "Description": "Poisson\'s ration 13", "Units": "none", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PoissonRatio23", "Name": "nu_23", "Description": "Poisson\'s ration 23", "Units": "none", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_ShearModulus12", "Name": "G_12", "Description": "Shear modulus 12", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_ShearModulus13", "Name": "G_13", "Description": "Shear modulus 13", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_ShearModulus23", "Name": "G_23", "Description": "Shear modulus 23", "Units": "MPa", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "DataID.PID_Density", "Name": "rho_c", "Description": "Density of the composite", "Units": "kg/m**3", "Required": true}
     ],
     "Outputs": [
-        // {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_CriticalLoadLevel", "Name": "M_crit", "Description": "Buckling load of the structure", "Units": "none"},
-        // {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Mass", "Name": "Mass", "Description": "Mass of the structure", "Units": "kg"},
+        // {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CriticalLoadLevel", "Name": "M_crit", "Description": "Buckling load of the structure", "Units": "none"},
+        // {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Mass", "Name": "Mass", "Description": "Mass of the structure", "Units": "kg"},
 
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Stiffness",  "Name": "stiffness", "Description": "rotational stiffness of the structure", "Units": "Nmm"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_Mass", "Name": "Mass", "Description": "Mass of the structure", "Units": "kg"},
-        {"Type": "mupif.Property", "Type_ID": "mupif.PropertyID.PID_maxPrincipalStress", "Name": "maxStress", "Description": "maximum principal Stress", "Units": "MPa"}
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Stiffness",  "Name": "stiffness", "Description": "rotational stiffness of the structure", "Units": "Nmm"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_Mass", "Name": "Mass", "Description": "Mass of the structure", "Units": "kg"},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_maxPrincipalStress", "Name": "maxStress", "Description": "maximum principal Stress", "Units": "MPa"}
     ],
     "refPoint": "none",
     "componentID": "none",
@@ -2410,7 +2519,7 @@ let md_p2 = {
     "Outputs": [
         {
             "Name": "boolContainsPatology",
-            "Type_ID": "mupif.PropertyID.PID_Bool",
+            "Type_ID": "mupif.DataID.PID_Bool",
             "Type": "mupif.Property",
             "Required": false,
             "Obj_ID": [
@@ -2912,6 +3021,18 @@ function main(visual=false)
             let json_data = JSON.parse(loadTextFileFromServer('examples/example03.json'));
             editor.loadFromJsonData(json_data);
         }
+        if(example_id === 4){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example04.json'));
+            editor.loadFromJsonData(json_data);
+        }
+        if(example_id === 5){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example05.json'));
+            editor.loadFromJsonData(json_data);
+        }
+        if(example_id === 6){
+            let json_data = JSON.parse(loadTextFileFromServer('examples/example06.json'));
+            editor.loadFromJsonData(json_data);
+        }
     }
 
     // =====                                                                                          =====
@@ -3382,7 +3503,7 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid=''){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid='', set_at=''){
         this.id = generateNewSlotID();
         if(uid !== '')
             this.id = uid;
@@ -3401,6 +3522,8 @@ class Slot{
         if(this.inout === 'in')
             this.max_connections = 1;
         this.external = false;
+        
+        this.set_at = set_at;
     }
 
     connected(){
@@ -3670,6 +3793,12 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockInputFile'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockInputFile(this, parent_block, json_data['filename']);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
         if(json_data['classname']==='BlockTimeloop'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockTimeloop(this, parent_block);
@@ -3680,7 +3809,7 @@ class WorkflowEditor{
         }
         if(json_data['classname']==='BlockModel'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
-            new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_input_file_name'], json_data['model_input_file_directory']);
+            new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_working_directory']);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

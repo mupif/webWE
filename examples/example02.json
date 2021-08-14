@@ -31,6 +31,24 @@
                     "obj_id": "top_temperature",
                     "inout": "out",
                     "uid": "external_input_1"
+                },
+                {
+                    "classname": "SlotExt",
+                    "name": "input_file_thermal",
+                    "type": "mupif.PyroFile",
+                    "obj_type": "None",
+                    "obj_id": "input_file_thermal",
+                    "inout": "out",
+                    "uid": "external_input_2"
+                },
+                {
+                    "classname": "SlotExt",
+                    "name": "input_file_mechanical",
+                    "type": "mupif.PyroFile",
+                    "obj_type": "None",
+                    "obj_id": "input_file_mechanical",
+                    "inout": "out",
+                    "uid": "external_input_3"
                 }
             ],
             "child_block_sort": "vertical"
@@ -45,7 +63,7 @@
             ],
             "value": "(0.0,)",
             "units": "deg_C",
-            "propID": "mupif.PropertyID.PID_Temperature",
+            "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar",
             "objectID": 0
         },
@@ -61,10 +79,11 @@
                 "slot_6",
                 "slot_7",
                 "slot_8",
-                "slot_9"
+                "slot_9",
+                "slot_10"
             ],
             "slot_out_uids": [
-                "slot_10"
+                "slot_11"
             ],
             "metadata": {
                 "ClassName": "ThermalNonstatModel",
@@ -81,7 +100,7 @@
                         "Name": "edge temperature",
                         "Type": "mupif.Property",
                         "Required": false,
-                        "Type_ID": "mupif.PropertyID.PID_Temperature",
+                        "Type_ID": "mupif.DataID.PID_Temperature",
                         "Obj_ID": [
                             "Cauchy top",
                             "Cauchy bottom",
@@ -91,13 +110,24 @@
                             "Dirichlet bottom",
                             "Dirichlet left",
                             "Dirichlet right"
-                        ]
+                        ],
+                        "Set_at": "timestep"
+                    },
+                    {
+                        "Name": "Input file",
+                        "Type": "mupif.PyroFile",
+                        "Required": true,
+                        "Type_ID": "mupif.DataID.ID_InputFile",
+                        "Obj_ID": [
+                            "input_file_thermal_nonstat"
+                        ],
+                        "Set_at": "initialization"
                     }
                 ],
                 "Outputs": [
                     {
                         "Name": "temperature",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Type": "mupif.Field",
                         "Required": false,
                         "Obj_ID": [
@@ -109,18 +139,18 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "inputT.in",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         },
         {
             "classname": "BlockModel",
             "uid": "model_2",
             "parent_uid": "workflow",
             "slot_in_uids": [
-                "slot_11"
+                "slot_12",
+                "slot_13"
             ],
             "slot_out_uids": [
-                "slot_12"
+                "slot_14"
             ],
             "metadata": {
                 "ClassName": "MechanicalModel",
@@ -134,18 +164,29 @@
                 "Inputs": [
                     {
                         "Name": "temperature",
-                        "Type_ID": "mupif.FieldID.FID_Temperature",
+                        "Type_ID": "mupif.DataID.FID_Temperature",
                         "Type": "mupif.Field",
                         "Required": true,
                         "Obj_ID": [
                             0
-                        ]
+                        ],
+                        "Set_at": "timestep"
+                    },
+                    {
+                        "Name": "Input file",
+                        "Type": "mupif.PyroFile",
+                        "Required": true,
+                        "Type_ID": "mupif.DataID.ID_InputFile",
+                        "Obj_ID": [
+                            "input_file_mechanical"
+                        ],
+                        "Set_at": "initialization"
                     }
                 ],
                 "Outputs": [
                     {
                         "Name": "displacement",
-                        "Type_ID": "mupif.FieldID.FID_Displacement",
+                        "Type_ID": "mupif.DataID.FID_Displacement",
                         "Type": "mupif.Field",
                         "Required": false,
                         "Obj_ID": [
@@ -157,8 +198,7 @@
                     "Type": "Local"
                 }
             },
-            "model_input_file_name": "inputM.in",
-            "model_input_file_directory": ""
+            "model_working_directory": ""
         }
     ],
     "datalinks": [
@@ -171,20 +211,28 @@
             "ds2_uid": "slot_8"
         },
         {
-            "ds1_uid": "slot_10",
-            "ds2_uid": "slot_11"
+            "ds1_uid": "slot_11",
+            "ds2_uid": "slot_12"
         },
         {
-            "ds1_uid": "slot_10",
+            "ds1_uid": "slot_11",
             "ds2_uid": "external_output_1"
         },
         {
-            "ds1_uid": "slot_12",
+            "ds1_uid": "slot_14",
             "ds2_uid": "external_output_2"
         },
         {
             "ds1_uid": "slot_2",
             "ds2_uid": "external_input_1"
+        },
+        {
+            "ds1_uid": "external_input_2",
+            "ds2_uid": "slot_10"
+        },
+        {
+            "ds1_uid": "external_input_3",
+            "ds2_uid": "slot_13"
         }
     ],
     "settings": {
