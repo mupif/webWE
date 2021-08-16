@@ -1588,11 +1588,6 @@ class BlockWorkflow extends Block{
             let child_blocks = this.getBlocks();
             
             let code = [];
-
-            // TODO
-            // code.push("import sys");
-            // code.push("sys.path.append(\"C:\\Projects\\mupif_current_dev\")");
-            // code.push("");
             
             code.push("import mupif");
             code.push("import copy");
@@ -1735,9 +1730,7 @@ class BlockWorkflow extends Block{
             code.push("");
             
             code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
-            code.push("\t\tns._pyroBind()");
-            code.push("\t\tself.daemon = Pyro5.api.Daemon(host=ns._pyroConnection.sock.getsockname()[0])");
-            code.push("\t\tthreading.Thread(target=self.daemon.requestLoop, daemon=True).start()");
+            code.push("\t\tself.daemon = pyroutil.getDaemon(ns)");
             
             code.push("");
             
@@ -1754,7 +1747,7 @@ class BlockWorkflow extends Block{
 
             code.push("\t\tmupif.Workflow.initialize(self, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
             
-            // setting of the inputs for initialization TODO pokud je to napojeno na ext slot, tak nedelat
+            // setting of the inputs for initialization
             let linked_slot;
             let timestep_time = "None";
             for (let i = 0; i < allBlocksRecursive.length; i++) {
