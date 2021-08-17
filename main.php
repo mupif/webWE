@@ -78,7 +78,7 @@
             </div>
         </td>
         <td>
-            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;editor.generateWorkflowHtml();">
+            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
                 <div id="workflowSubContainer">
 
                 </div>
