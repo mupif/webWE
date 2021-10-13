@@ -128,6 +128,11 @@ class ThermoMechanicalClassWorkflow_02(mupif.workflow.Workflow):
         self.model_1.terminate()
         self.model_2.terminate()
 
+    def finishStep(self, tstep):
+        pass
+        self.model_1.finishStep(tstep)
+        self.model_2.finishStep(tstep)
+
     def solveStep(self, tstep, stageID=0, runInBackground=False):
         pass
         

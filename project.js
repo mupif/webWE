@@ -1572,7 +1572,6 @@ class BlockWorkflow extends Block{
         }
         return '';
         
-        
     }
     
     generateCode(class_code){
@@ -1851,6 +1850,18 @@ class BlockWorkflow extends Block{
             for (let i = 0; i < all_model_blocks.length; i++) {
                 model = all_model_blocks[i];
                 code.push("\t\tself." + model.code_name + ".terminate()");
+            }
+
+            // --------------------------------------------------
+            // finishstep method
+            // --------------------------------------------------
+
+            code.push("");
+            code.push("\tdef finishStep(self, tstep):");
+            code.push("\t\tpass");
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                model = all_model_blocks[i];
+                code.push("\t\tself." + model.code_name + ".finishStep(tstep)");
             }
             code.push("");
 
