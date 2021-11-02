@@ -199,8 +199,18 @@ class Block{
         }
     }
 
-    getBlocks(){
-        return this.blocks;
+    getBlocks(class_filter=null){
+        let sub_blocks;
+        if(class_filter==null)
+            return this.blocks;
+        else{
+            sub_blocks = [];
+            for (let i = 0; i < this.blocks.length; i++) {
+                if (this.blocks[i].constructor.name === class_filter.name)
+                    sub_blocks.push(this.blocks[i]);
+            }
+            return sub_blocks;
+        }
     }
 
     addBlock(block){
