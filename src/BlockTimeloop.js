@@ -71,7 +71,7 @@ class BlockTimeloop extends Block{
             first = false;
         }
 
-        let model_blocks = this.getBlocks(BlockModel.BlockModel);
+        let model_blocks = this.getBlocks(BlockModel);
         for(let i=0;i<model_blocks.length;i++) {
             if (!first)
                 dt_code += ", ";
