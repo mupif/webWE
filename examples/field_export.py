@@ -24,7 +24,7 @@ class field_export_to_image(mupif.model.Model):
         self.step_number = 0
         self.filename_base = "ImageField"
 
-    def initialize(self, files=[''], workdir='', executionID='', metaData={}, validateMetaData=False, **kwargs):
+    def initialize(self, workdir='', metaData={}, validateMetaData=False, **kwargs):
         pass
 
     def setField(self, field, objectID=0):

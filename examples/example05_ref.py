@@ -59,7 +59,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.workflow.Workflow):
         self.model_2 = None  # instances of models are created in the initialize function
 
 
-    def initialize(self, workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):
+    def initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):
 
         self.updateMetadata(dictionary=metadata)
 
@@ -86,7 +86,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.workflow.Workflow):
         self.registerModel(self.model_1, "model_1")
         self.registerModel(self.model_2, "model_2")
 
-        mupif.Workflow.initialize(self, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)
+        mupif.Workflow.initialize(self, workdir=workdir, metadata={}, validateMetaData=validateMetaData, **kwargs)
 
     def getCriticalTimeStep(self):
         return min([self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep()])

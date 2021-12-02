@@ -1721,7 +1721,7 @@ class BlockWorkflow extends Block{
             // --------------------------------------------------
 
             code.push("");
-            code.push("\tdef initialize(self, workdir='', targetTime=0*mupif.Q.s, metadata={}, validateMetaData=True, **kwargs):");
+            code.push("\tdef initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):");
             code.push("");
 
             code.push("\t\tself.updateMetadata(dictionary=metadata)");
@@ -1754,7 +1754,7 @@ class BlockWorkflow extends Block{
 
             code.push("");
 
-            code.push("\t\tmupif.Workflow.initialize(self, workdir=workdir, targetTime=targetTime, metadata={}, validateMetaData=validateMetaData, **kwargs)");
+            code.push("\t\tmupif.Workflow.initialize(self, workdir=workdir, metadata={}, validateMetaData=validateMetaData, **kwargs)");
             
             // setting of the inputs for initialization
             let linked_slot;
