@@ -1,11 +1,10 @@
 class BlockProperty extends Block{
-    constructor(editor, parent_block, value, property_id, value_type, units, object_id){
+    constructor(editor, parent_block, value, property_id, value_type, units){
         super(editor, parent_block);
         this.value = value;
         this.property_id = property_id;
         this.value_type = value_type;
         this.units = units;
-        this.object_id = object_id;
         this.name = 'Property';
 
         this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.Property', false, this.value_type));
@@ -21,7 +20,7 @@ class BlockProperty extends Block{
 
     getInitCode(indent=0){
         let code = super.getInitCode();
-        code.push("self."+this.code_name+" = mupif.property.ConstantProperty(value="+this.value+", propID="+this.property_id+", valueType="+this.value_type+", unit=mupif.U."+this.units+", time=None, objectID="+this.object_id+")");
+        code.push("self."+this.code_name+" = mupif.property.ConstantProperty(value="+this.value+", propID="+this.property_id+", valueType="+this.value_type+", unit=mupif.U."+this.units+", time=None)");
         return push_indents_before_each_line(code, indent);
     }
 
@@ -40,7 +39,6 @@ class BlockProperty extends Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_units', '', 'Units'), 'Set');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_property_id', '', 'Property&nbsp;ID'), 'Set');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value_type', '', 'Value&nbsp;type'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_obj_id', '', 'Object&nbsp;ID'), 'Set');
     }
 
     myquery_proceed(action, p1=null, p2=null){
@@ -59,10 +57,6 @@ class BlockProperty extends Block{
         if(action==='set_value_type') {
             this.value_type = 'mupif.ValueType.'+document.getElementById('myQuery_temp_val').value;
             console.log('Value type set to "'+this.value_type+'"');
-        }
-        if(action==='set_obj_id') {
-            this.object_id = document.getElementById('myQuery_temp_val').value;
-            console.log('Object ID set to "'+this.object_id+'"');
         }
         super.myquery_proceed(action, p1, p2);
     }
@@ -129,15 +123,6 @@ class BlockProperty extends Block{
             myQuery_show(q_html);
         }
 
-        if(keyword === 'set_obj_id'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set ObjectID:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.object_id+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-            myQuery_show(q_html);
-        }
-
         super.modificationQuery(keyword, value);
     }
 
@@ -151,7 +136,6 @@ class BlockProperty extends Block{
         dict['units'] = this.units;
         dict['propID'] = this.property_id;
         dict['valueType'] = this.value_type;
-        dict['objectID'] = this.object_id;
         return dict;
     }
 
@@ -177,8 +161,6 @@ class BlockProperty extends Block{
         html += 'ValueType = <b>\'' + this.value_type.replace('mupif.ValueType.', '') + '\'</b>';
         html += '<br>';
         html += 'PropertyID = <b>\'' + this.property_id.replace('mupif.DataID.', '') + '\'</b>';
-        html += '<br>';
-        html += 'ObjectID = <b>\'' + this.object_id + '\'</b>';
 
         html += '</div>';
         return html;

@@ -36,7 +36,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         self.constant_physical_quantity_3 = 0.5*mupif.U.s
         
         # __init__ code of constant_property_1 (Property)
-        self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
+        self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
         
         # __init__ code of input_file_1 (InputFile)
         self.input_file_1 = mupif.PyroFile(filename='inputT.in', mode='rb')

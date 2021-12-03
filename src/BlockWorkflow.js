@@ -135,6 +135,11 @@ class BlockWorkflow extends Block{
             let child_blocks = this.getBlocks();
             
             let code = [];
+
+            // TODO
+            // code.push("import sys");
+            // code.push("sys.path.append(\"C:\\Projects\\mupif_current_dev\")");
+            // code.push("");
             
             code.push("import mupif");
             code.push("import copy");

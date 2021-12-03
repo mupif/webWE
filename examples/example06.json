@@ -51,8 +51,7 @@
             "value": "(10.0,)",
             "units": "deg_C",
             "propID": "mupif.DataID.PID_Temperature",
-            "valueType": "mupif.ValueType.Scalar",
-            "objectID": 0
+            "valueType": "mupif.ValueType.Scalar"
         },
         {
             "classname": "BlockInputFile",

@@ -50,7 +50,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.workflow.Workflow):
         # It should be defined from outside using set() method.
         
         # __init__ code of constant_property_1 (Property)
-        self.constant_property_1 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None, objectID=0)
+        self.constant_property_1 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
         
         # __init__ code of model_1 (Non-stationary thermal problem)
         self.model_1 = None  # instances of models are created in the initialize function

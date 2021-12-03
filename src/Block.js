@@ -322,7 +322,7 @@ class Block{
         if (name === "physicalquantity")
             block = new BlockPhysicalQuantity(this.editor, this, 0, 'None');
         if (name === "property")
-            block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none', '0');
+            block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none');
         if (name === "timeloop")
             block = new BlockTimeloop(this.editor, this);
         if (name === "dowhile")

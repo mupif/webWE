@@ -150,7 +150,7 @@ class WorkflowEditor{
         }
         if(json_data['classname']==='BlockConstProperty'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
-            new_block = new BlockProperty(this, parent_block, json_data['value'], json_data['propID'], json_data['valueType'], json_data['units'], json_data['objectID']);
+            new_block = new BlockProperty(this, parent_block, json_data['value'], json_data['propID'], json_data['valueType'], json_data['units']);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
