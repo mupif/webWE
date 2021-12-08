@@ -282,7 +282,7 @@ class BlockWorkflow extends Block{
             code.push("");
             
             code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
-            code.push("\t\tself.daemon = pyroutil.getDaemon(ns)");
+            code.push("\t\tself.daemon = mupif.pyroutil.getDaemon(ns)");
             
             code.push("");
             

@@ -72,7 +72,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.workflow.Workflow):
         }
 
         ns = mupif.pyroutil.connectNameServer(nshost='127.0.0.1', nsport=9090)
-        self.daemon = pyroutil.getDaemon(ns)
+        self.daemon = mupif.pyroutil.getDaemon(ns)
 
         
         # initialization code of model_1 (Non-stationary thermal problem)
