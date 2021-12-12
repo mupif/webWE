@@ -366,7 +366,7 @@ class BlockWorkflow extends Block{
                                 if(s.type === "mupif.PyroFile"){
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
-                                    code.push("\t\t\t\t" + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
+                                    code.push("\t\t\t\tself." + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
                                 }else
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                             }
