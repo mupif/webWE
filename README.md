@@ -1,10 +1,10 @@
 # Workflow Editor and Code Generator
 
-The Workflow Editor and Code Generator is a part of MuPIF platform (http://www.mupif.org). It enables easy creation of simulation workflows and also provides generating of executable Python code of the simulations.
+The Workflow Editor and Code Generator is a part of MuPIF platform (http://mupif.org). It enables easy creation of simulation workflows and also provides generating of executable Python code of the simulations.
 
 ## Usage and Installation
 
-At the present time, this tool is available at http://mech.fsv.cvut.cz/~sulc/wecg/ for everyone to be used as a web application.
+At the present time, this tool is available at http://mupif.org/wecg/ for everyone to be used as a web application.
 
 In case of usage as a Node.js application, it can be installed using git:
 
@@ -46,7 +46,7 @@ example03.py (execution workflow)
 
 #### 1) Generate the Python scripts
 
-A) The web version at http://mech.fsv.cvut.cz/~sulc/wecg/ provides examples of basic thermo-mechanical workflows.
+A) The web version at http://mupif.org/wecg/ provides examples of basic thermo-mechanical workflows.
 The generated code can be downloaded to be run locally. Please save it with suggested filenames.
 From the first, second and third workflow download files `example01.py`, `example02.py` and `example03.py`, respectively.
 
