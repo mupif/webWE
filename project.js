@@ -1539,29 +1539,17 @@ class BlockWorkflow extends Block{
             code.push("\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
             code.push("");
             code.push("\tjobMan = mupif.SimpleJobManager(");
-            code.push("\t\tappClass="+this.script_name_base+"."+this.project_classname+",");
-            code.push("\t\tserver='"+this.editor.getJobmanServerHost()+"',");
-            code.push("\t\tnshost='"+this.editor.getJobmanNSHost()+"',");
-            code.push("\t\tnsport="+this.editor.getJobmanNSPort()+",");
             code.push("\t\tns=ns,");
+            code.push("\t\tappClass="+this.script_name_base+"."+this.project_classname+",");
             code.push("\t\tappName='"+this.editor.getJobmanName()+"',");
             code.push("\t\tjobManWorkDir='.',");
             code.push("\t\tmaxJobs=10");
-            code.push("\t)");
-            code.push("");
-            code.push("\tmupif.pyroutil.runJobManagerServer(");
-            code.push("\t\tserver='"+this.editor.getJobmanServerHost()+"',");
-            code.push("\t\tport="+this.editor.getJobmanServerPort()+",");
-            code.push("\t\tnshost='"+this.editor.getJobmanNSHost()+"',");
-            code.push("\t\tnsport="+this.editor.getJobmanNSPort()+",");
-            code.push("\t\tjobman=jobMan");
-            code.push("\t)");
+            code.push("\t).runServer()");
             code.push("");
 
             return replace_tabs_with_spaces_for_each_line(code);
         }
         return '';
-        
     }
     
     generateCode(class_code){
@@ -1577,11 +1565,6 @@ class BlockWorkflow extends Block{
             let child_blocks = this.getBlocks();
             
             let code = [];
-
-            // TODO
-            // code.push("import sys");
-            // code.push("sys.path.append(\"C:\\Projects\\mupif_current_dev\")");
-            // code.push("");
             
             code.push("import mupif");
             code.push("import copy");
@@ -1808,7 +1791,7 @@ class BlockWorkflow extends Block{
                                 if(s.type === "mupif.PyroFile"){
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
-                                    code.push("\t\t\t\t" + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
+                                    code.push("\t\t\t\tself." + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
                                 }else
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                             }

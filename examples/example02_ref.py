@@ -96,10 +96,10 @@ class ThermoMechanicalClassWorkflow_01(mupif.workflow.Workflow):
             pass
             if objectID == 'input_file_thermal':
                 self.external_input_2 = obj
-                model_1.set(self.external_input_2, 'input_file_thermal_nonstat')
+                self.model_1.set(self.external_input_2, 'input_file_thermal_nonstat')
             if objectID == 'input_file_mechanical':
                 self.external_input_3 = obj
-                model_2.set(self.external_input_3, 'input_file_mechanical')
+                self.model_2.set(self.external_input_3, 'input_file_mechanical')
 
         # in case of mupif.Property
         if obj.isInstance(mupif.Property):

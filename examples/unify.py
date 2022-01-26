@@ -4,7 +4,26 @@ from os.path import isfile, join
 mypath = '../src'
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
-files = ['../src/Init.js']
+files = [
+    '../src/Init.js',
+    '../src/Block.js',
+    '../src/BlockDoWhile.js',
+    '../src/BlockInputFile.js',
+    '../src/BlockModel.js',
+    '../src/BlockPhysicalQuantity.js',
+    '../src/BlockProperty.js',
+    '../src/BlockTimeloop.js',
+    '../src/BlockWorkflow.js',
+    '../src/Datalink.js',
+    '../src/example_metadata.js',
+    '../src/helpers.js',
+    '../src/Main.js',
+    '../src/Menu.js',
+    '../src/mupifData.js',
+    '../src/myQuery.js',
+    '../src/Slot.js',
+    '../src/WorkflowEditor.js'
+]
 
 for f in onlyfiles:
     if '../src/%s' % f not in files:
