@@ -7,11 +7,11 @@
 
     <script type="text/javascript" src="src/Init.js"></script>
     <script type="text/javascript">
-        <?php
-        if(isset($_GET['example_id'])){
-            echo 'example_id = '.intval($_GET['example_id']).';';
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const params = Object.fromEntries(urlSearchParams.entries());
+        if('example_id' in params){
+            example_id = parseInt(params['example_id']);
         }
-        ?>
     </script>
     <script type="text/javascript" src="src/example_metadata.js"></script>
     <script type="text/javascript" src="src/myQuery.js"></script>
@@ -30,14 +30,6 @@
     <script type="text/javascript" src="src/Datalink.js"></script>
     <script type="text/javascript" src="src/WorkflowEditor.js"></script>
     <script type="text/javascript" src="src/Main.js"></script>
-
-    <?php
-    if(isset($_POST['file_upload'])){
-        $file_content = file_get_contents($_FILES["json_file"]['tmp_name']);
-        echo '<script type="text/javascript">loaded_json = '.$file_content.';</script>';
-    }
-    ?>
-
 </head>
 <body onload="main(true)" oncontextmenu="return false;" onkeydown="keyPress(event);">
 <div id="myQuery_container">
@@ -65,7 +57,7 @@
                             <form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;" id="form_json_data">
                                 <label for="form_json_file_selector" style="display:block;width:100%;height:100%;">
                                     Load from JSON
-                                    <input type="file" id="form_json_file_selector" name="json_file" style="display:none;width:100px;" onchange="document.getElementById('form_json_data').submit();">
+                                    <input type="file" id="form_json_file_selector" name="json_file" style="display:none;width:100px;" onchange="loadJsonProjectFileContent();">
                                 </label>
                                 <input type="hidden" value="Load from JSON" name="file_upload">
                             </form>

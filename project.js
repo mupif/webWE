@@ -3,8 +3,6 @@ let editor;// The Workflow Editor instance
 
 let example_id = 0;// Global defining optional example
 
-let loaded_json = null;
-
 class Block{
     constructor(editor, parent_block){
         this.editor = editor;
@@ -2851,7 +2849,7 @@ function updateHtmlOfListOfModels(){
             '<form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;display:inline-block;" id="form_metadata_data">' +
             '<label for="form_metadata_file_selector" id="label_form_metadata_file_selector" style="display:none;">' +
             'Load MetaData JSON from file' +
-            '<input type="file" id="form_metadata_file_selector" name="metadata_file" style="display:none;width:100px;" onchange="loadMetaDataFromJSONFileUsingAjax();">' +
+            '<input type="file" id="form_metadata_file_selector" name="metadata_file" style="display:none;width:100px;" onchange="loadJsonMetaDataFileContent();">' +
             '</label>' +
             '<input type="hidden" value="Load from JSON" name="file_upload">' +
             '</form>' +
@@ -2873,60 +2871,30 @@ function updateHtmlOfListOfModels(){
     }
 }
 
-function loadMetaDataFromJSONFileUsingAjax(){
-    let fileSelect = document.getElementById('form_metadata_file_selector');
-    let files = fileSelect.files;
-    let formData = new FormData();
-    for(let i = 0; i < files.length; i++){
-        let file = files[i];
+function loadJsonProjectFileContent(){
+    const reader = new FileReader();
+    reader.addEventListener('load', (event) => {
+        let json_dict = JSON.parse(event.target.result);
+        editor.loadFromJsonData(json_dict);
+        editor.generateWorkflowHtml();
+    });
+    reader.readAsText(document.getElementById('form_json_file_selector').files[0]);
+}
 
-        // Add the file to the form's data
-        formData.append('myfiles[]', file, file.name);
-    }
-
-    let xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onload = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            let answer = this.responseText.trim();
-            // console.log(answer);
-            let model_json = JSON.parse(answer);
-            if(checkMetaDataValidity(model_json))
-                editor.list_of_model_metadata.push(model_json);
-            else
-                console.log('MetaData JSON is not valid for usage.');
-            updateHtmlOfListOfModels();
-        }else{
-            console.log('fail');
-        }
-    };
-
-    xmlhttp.open('POST', 'do.php?action=get_metadata_from_json_file', true);
-    xmlhttp.send(formData);
+function loadJsonMetaDataFileContent(){
+    const reader = new FileReader();
+    reader.addEventListener('load', (event) => {
+        let json_dict = JSON.parse(event.target.result);
+        if(checkMetaDataValidity(json_dict))
+            editor.list_of_model_metadata.push(json_dict);
+        else
+            console.log('MetaData JSON is not valid for usage.');
+        updateHtmlOfListOfModels();
+    });
+    reader.readAsText(document.getElementById('form_metadata_file_selector').files[0]);
 }
 
 function loadMetaDataFromJSONOnServer(filename){
-//     let xmlhttp = new XMLHttpRequest();
-//
-//     xmlhttp.onload = function () {
-//         if (this.readyState === 4 && this.status === 200) {
-//             let answer = this.responseText.trim();
-//             // console.log(answer);
-//             let model_json = JSON.parse(answer);
-//             if(checkMetaDataValidity(model_json))
-//                 editor.list_of_model_metadata.push(model_json);
-//             else
-//                 console.log('MetaData JSON is not valid for usage.');
-//             updateHtmlOfListOfModels();
-//         }else{
-//             console.log('fail');
-//         }
-//     };
-//
-// xmlhttp.open('POST', 'do.php?action=get_metadata_from_json_file_on_server&myfilename='+filename, true);
-// xmlhttp.send();
-
-
     let rawFile = new XMLHttpRequest();
     rawFile.open("GET", filename, false);
     rawFile.onreadystatechange = function ()
@@ -2946,7 +2914,6 @@ function loadMetaDataFromJSONOnServer(filename){
         }
     };
     rawFile.send(null);
-
 }
 
 function loadTextFileFromServer(filename){
@@ -3005,35 +2972,30 @@ function main(visual=false)
         loadMetaDataFromJSONOnServer('examples/metadata/md05.json');
         loadMetaDataFromJSONOnServer('examples/metadata/md06.json');
     }
-
-    if(loaded_json != null){
-        editor.loadFromJsonData(loaded_json);
+    
+    if (example_id === 1) {
+        let json_data = JSON.parse(loadTextFileFromServer('examples/example01.json'));
+        editor.loadFromJsonData(json_data);
     }
-    else {
-        if (example_id === 1) {
-            let json_data = JSON.parse(loadTextFileFromServer('examples/example01.json'));
-            editor.loadFromJsonData(json_data);
-        }
-        if (example_id === 2) {
-            let json_data = JSON.parse(loadTextFileFromServer('examples/example02.json'));
-            editor.loadFromJsonData(json_data);
-        }
-        if(example_id === 3){
-            let json_data = JSON.parse(loadTextFileFromServer('examples/example03.json'));
-            editor.loadFromJsonData(json_data);
-        }
-        if(example_id === 4){
-            let json_data = JSON.parse(loadTextFileFromServer('examples/example04.json'));
-            editor.loadFromJsonData(json_data);
-        }
-        if(example_id === 5){
-            let json_data = JSON.parse(loadTextFileFromServer('examples/example05.json'));
-            editor.loadFromJsonData(json_data);
-        }
-        if(example_id === 6){
-            let json_data = JSON.parse(loadTextFileFromServer('examples/example06.json'));
-            editor.loadFromJsonData(json_data);
-        }
+    if (example_id === 2) {
+        let json_data = JSON.parse(loadTextFileFromServer('examples/example02.json'));
+        editor.loadFromJsonData(json_data);
+    }
+    if(example_id === 3){
+        let json_data = JSON.parse(loadTextFileFromServer('examples/example03.json'));
+        editor.loadFromJsonData(json_data);
+    }
+    if(example_id === 4){
+        let json_data = JSON.parse(loadTextFileFromServer('examples/example04.json'));
+        editor.loadFromJsonData(json_data);
+    }
+    if(example_id === 5){
+        let json_data = JSON.parse(loadTextFileFromServer('examples/example05.json'));
+        editor.loadFromJsonData(json_data);
+    }
+    if(example_id === 6){
+        let json_data = JSON.parse(loadTextFileFromServer('examples/example06.json'));
+        editor.loadFromJsonData(json_data);
     }
 
     // =====                                                                                          =====
