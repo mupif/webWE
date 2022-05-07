@@ -1,10 +1,8 @@
-# This file is a copy of file 'models.py' in MuPIF project to allow running examples in this directory.
-#
 import os
 import mupif
 import mupif as mp
 import Pyro5
-import mupif_examples_meshgen as meshgen
+import meshgen
 import math
 import numpy as np
 import time as timeTime
@@ -26,9 +24,10 @@ def getline(f):
 class ThermalModel(mupif.model.Model):
     """ Simple stationary heat transport solver on rectangular domains"""
 
-    def __init__(self, metadata={}):
-        if len(metadata) == 0:
-            metadata = {
+    def __init__(self, metadata=None):
+        super().__init__(metadata=metadata)
+        if metadata is None:
+            MD = {
                 "Name": "Stationary thermal problem",
                 "ID": "Thermo-1",
                 "Description": "Stationary heat conduction using finite elements on rectangular domain",
@@ -41,6 +40,7 @@ class ThermalModel(mupif.model.Model):
                         "Type": "mupif.Property",
                         "Required": False,
                         "Type_ID": "mupif.DataID.PID_Temperature",
+                        "Units": "degC",
                         "Obj_ID": [
                             "Cauchy top",
                             "Cauchy bottom",
@@ -51,15 +51,17 @@ class ThermalModel(mupif.model.Model):
                             "Dirichlet left",
                             "Dirichlet right"
                         ],
-                        "Set_at": "timestep"
+                        "Set_at": "timestep",
+                        "ValueType": "Scalar"
                     },
                     {
                         "Name": "Input file",
                         "Type": "mupif.PyroFile",
                         "Required": True,
                         "Type_ID": "mupif.DataID.ID_InputFile",
-                        "Obj_ID": ["input_file_thermal"],
-                        "Set_at": "initialization"
+                        "Obj_ID": "input_file_thermal",
+                        "Set_at": "initialization",
+                        "Units": "none"
                     }
                 ],
                 "Outputs": [
@@ -67,7 +69,8 @@ class ThermalModel(mupif.model.Model):
                         "Name": "temperature",
                         "Type_ID": "mupif.DataID.FID_Temperature",
                         "Type": "mupif.Field",
-                        "Required": False
+                        "Required": False,
+                        "Units": "degC"
                     }
                 ],
                 "Solver": {
@@ -77,10 +80,10 @@ class ThermalModel(mupif.model.Model):
                     "Sensitivity": "Low",
                     "Complexity": "Low",
                     "Robustness": "High",
-                    "Estim_time_step": 1,
-                    "Estim_comp_time": 1.e-3,
-                    "Estim_execution_cost": 0.01,
-                    "Estim_personnel_cost": 0.01,
+                    "Estim_time_step_s": 1,
+                    "Estim_comp_time_s": 1.e-3,
+                    "Estim_execution_cost_EUR": 0.01,
+                    "Estim_personnel_cost_EUR": 0.01,
                     "Required_expertise": "None",
                     "Language": "Python",
                     "License": "LGPL",
@@ -90,7 +93,7 @@ class ThermalModel(mupif.model.Model):
                 },
                 "Physics": {
                     "Type": "Continuum",
-                    "Entity": ["Finite volume"],
+                    "Entity": "Finite volume",
                     "Equation": ["Heat balance"],
                     "Equation_quantities": ["Heat flow"],
                     "Relation_description": ["Fick's first law"],
@@ -98,11 +101,11 @@ class ThermalModel(mupif.model.Model):
                     "Representation": "Finite volumes"
                 }
             }
-        super().__init__(metadata=metadata)
+            self.updateMetadata(MD)
         self.mesh = None
         self.morphologyType = None
         self.conductivity = mupif.property.ConstantProperty(
-            value=(1.,),
+            value=1.,
             propID=mupif.DataID.PID_effective_conductivity,
             valueType=mupif.ValueType.Scalar,
             unit=mupif.U['W/m/K']
@@ -136,7 +139,7 @@ class ThermalModel(mupif.model.Model):
 
         self.input_file = None
 
-    def initialize(self, workdir='', metadata={}, validateMetaData=False, **kwargs):
+    def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
     def readInput(self, filename, tria=False):
@@ -276,7 +279,7 @@ class ThermalModel(mupif.model.Model):
                 ineq += 1
         # print (self.loc)
 
-    def get(self, objectTypeID, time=None, objectID=0):
+    def get(self, objectTypeID, time=None, objectID=""):
 
         # Field
         if objectTypeID == mupif.DataID.FID_Temperature:
@@ -331,8 +334,7 @@ class ThermalModel(mupif.model.Model):
                 propID=mupif.DataID.PID_effective_conductivity,
                 valueType=mupif.ValueType.Scalar,
                 unit=mp.U['W/m/K'],
-                time=time,
-                objectID=0
+                time=time
             )
 
         else:
@@ -396,7 +398,7 @@ class ThermalModel(mupif.model.Model):
 
         log.info("Assembling ...")
         for e in mesh.cells():
-            A_e = self.compute_elem_conductivity(e, self.conductivity.getValue(tstep.getTime())[0])
+            A_e = self.compute_elem_conductivity(e, self.conductivity.getValue(tstep.getTime()))
 
             # Assemble
             for i in range(ndofs):  # loop of dofs
@@ -594,7 +596,7 @@ class ThermalModel(mupif.model.Model):
                     A_e[i, j] += K[i, j]
         return A_e
 
-    def set(self, obj, objectID=0):
+    def set(self, obj, objectID=""):
         if obj.isInstance(mp.PyroFile):
             print("Downloading the input file..")
             mp.PyroFile.copy(obj, self.workDir + os.path.sep + 'tmin.in')
@@ -669,6 +671,7 @@ class ThermalNonstatModel(ThermalModel):
                     "Type": "mupif.Property",
                     "Required": False,
                     "Type_ID": "mupif.DataID.PID_Temperature",
+                    "Units": "degC",
                     "Obj_ID": [
                         "Cauchy top",
                         "Cauchy bottom",
@@ -679,15 +682,17 @@ class ThermalNonstatModel(ThermalModel):
                         "Dirichlet left",
                         "Dirichlet right"
                     ],
-                    "Set_at": "timestep"
+                    "Set_at": "timestep",
+                    "ValueType": "Scalar"
                 },
                 {
                     "Name": "Input file",
                     "Type": "mupif.PyroFile",
                     "Required": True,
                     "Type_ID": "mupif.DataID.ID_InputFile",
-                    "Obj_ID": ["input_file_thermal_nonstat"],
-                    "Set_at": "initialization"
+                    "Obj_ID": "input_file_thermal_nonstat",
+                    "Set_at": "initialization",
+                    "Units": "none"
                 }
             ],
             "Outputs": [
@@ -695,7 +700,8 @@ class ThermalNonstatModel(ThermalModel):
                     "Name": "temperature",
                     "Type_ID": "mupif.DataID.FID_Temperature",
                     "Type": "mupif.Field",
-                    "Required": False
+                    "Required": False,
+                    "Units": "degC",
                 }
             ],
             "Solver": {
@@ -705,10 +711,10 @@ class ThermalNonstatModel(ThermalModel):
                 "Sensitivity": "Low",
                 "Complexity": "Low",
                 "Robustness": "High",
-                "Estim_time_step": 1,
-                "Estim_comp_time": 1.e-3,
-                "Estim_execution_cost": 0.01,
-                "Estim_personnel_cost": 0.01,
+                "Estim_time_step_s": 1,
+                "Estim_comp_time_s": 1.e-3,
+                "Estim_execution_cost_EUR": 0.01,
+                "Estim_personnel_cost_EUR": 0.01,
                 "Required_expertise": "None",
                 "Language": "Python",
                 "License": "LGPL",
@@ -718,7 +724,7 @@ class ThermalNonstatModel(ThermalModel):
             },
             "Physics": {
                 "Type": "Continuum",
-                "Entity": ["Finite volume"],
+                "Entity": "Finite volume",
                 "Equation": ["Heat balance"],
                 "Equation_quantities": ["Heat flow"],
                 "Relation_description": ["Fick's first law"],
@@ -738,7 +744,7 @@ class ThermalNonstatModel(ThermalModel):
         self.P = None
         self.Tp = None
 
-    def initialize(self, workdir='', metadata={}, validateMetaData=False, **kwargs):
+    def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
     def getApplicationSignature(self):
@@ -831,7 +837,7 @@ class ThermalNonstatModel(ThermalModel):
 
             log.info("Assembling ...")
             for e in mesh.cells():
-                K_e = self.compute_elem_conductivity(e, self.conductivity.getValue(tstep.getTime())[0])
+                K_e = self.compute_elem_conductivity(e, self.conductivity.getValue(tstep.getTime()))
                 C_e = self.compute_elem_capacity(e)
                 A_e = K_e * self.Tau + C_e / dt
                 P_e = np.subtract(C_e / dt, K_e * (1. - self.Tau))
@@ -989,6 +995,7 @@ class MechanicalModel(mupif.model.Model):
                     "Name": "temperature",
                     "Type_ID": "mupif.DataID.FID_Temperature",
                     "Type": "mupif.Field",
+                    "Units": "degC",
                     "Required": True,
                     "Set_at": "timestep"
                 },
@@ -997,8 +1004,9 @@ class MechanicalModel(mupif.model.Model):
                     "Type": "mupif.PyroFile",
                     "Required": True,
                     "Type_ID": "mupif.DataID.ID_InputFile",
-                    "Obj_ID": ["input_file_mechanical"],
-                    "Set_at": "initialization"
+                    "Obj_ID": "input_file_mechanical",
+                    "Set_at": "initialization",
+                    "Units": "none"
                 }
             ],
             "Outputs": [
@@ -1006,7 +1014,8 @@ class MechanicalModel(mupif.model.Model):
                     "Name": "displacement",
                     "Type_ID": "mupif.DataID.FID_Displacement",
                     "Type": "mupif.Field",
-                    "Required": False
+                    "Required": False,
+                    "Units": "m",
                 }
             ],
             "Solver": {
@@ -1016,10 +1025,10 @@ class MechanicalModel(mupif.model.Model):
                 "Sensitivity": "Low",
                 "Complexity": "Low",
                 "Robustness": "High",
-                "Estim_time_step": 1,
-                "Estim_comp_time": 1.e-3,
-                "Estim_execution_cost": 0.01,
-                "Estim_personnel_cost": 0.01,
+                "Estim_time_step_s": 1,
+                "Estim_comp_time_s": 1.e-3,
+                "Estim_execution_cost_EUR": 0.01,
+                "Estim_personnel_cost_EUR": 0.01,
                 "Required_expertise": "None",
                 "Language": "Python",
                 "License": "LGPL",
@@ -1029,7 +1038,7 @@ class MechanicalModel(mupif.model.Model):
             },
             "Physics": {
                 "Type": "Continuum",
-                "Entity": ["Finite volume"],
+                "Entity": "Finite volume",
                 "Equation": ["Equilibrium"],
                 "Equation_quantities": ["Displacement"],
                 "Relation_description": ["Hooke's law"],
@@ -1065,10 +1074,10 @@ class MechanicalModel(mupif.model.Model):
 
         self.input_file = None
 
-    def initialize(self, workdir='', metadata={}, validateMetaData=False, **kwargs):
+    def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
-    def set(self, obj, objectID=0):
+    def set(self, obj, objectID=""):
         if obj.isInstance(mp.PyroFile):
             print("Downloading the input file..")
             mupif.PyroFile.copy(obj, self.workDir + os.path.sep + 'smin.in')
@@ -1199,7 +1208,7 @@ class MechanicalModel(mupif.model.Model):
 
         # print "loc:", self.loc
 
-    def get(self, objectTypeID, time=None, objectID=0):
+    def get(self, objectTypeID, time=None, objectID=""):
         if objectTypeID == mupif.DataID.FID_Displacement:
             values = []
             for i in range(self.mesh.getNumberOfVertices()):

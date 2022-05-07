@@ -48,7 +48,7 @@
             "slot_out_uids": [
                 "slot_4"
             ],
-            "value": "(10.0,)",
+            "value": "10.0",
             "units": "deg_C",
             "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar"
@@ -208,9 +208,6 @@
                         "Type": "mupif.Field",
                         "Required": false,
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Obj_ID": [
-                            0
-                        ],
                         "Set_at": "timestep"
                     }
                 ],
@@ -242,9 +239,6 @@
                         "Type": "mupif.Field",
                         "Required": false,
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Obj_ID": [
-                            0
-                        ],
                         "Set_at": "timestep"
                     }
                 ],

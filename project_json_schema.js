@@ -42,11 +42,11 @@ module.exports = {
                                             "Name": {"type": "string"},
                                             "Type_ID": {"type": "string"},
                                             "Type": {"type": "string"},
-                                            "Obj_ID": {"type": ["array", "string", "number"]},
+                                            "Obj_ID": {"type": ["array", "string"]},
                                             "Required": {"type": "boolean"},
                                             "Set_at": {"type": "string", "enum": ["initialization", "timestep"]}
                                         },
-                                        "required": ["Name", "Type_ID", "Type", "Obj_ID", "Required", "Set_at"]
+                                        "required": ["Name", "Type_ID", "Type", "Required", "Set_at"]
                                     }
                                 },
                                 "Outputs": {
@@ -59,7 +59,7 @@ module.exports = {
                                             "Type": {"type": "string"},
                                             "Obj_ID": {"type": ["array", "string", "number"]}
                                         },
-                                        "required": ["Name", "Type_ID", "Type", "Obj_ID"]
+                                        "required": ["Name", "Type_ID", "Type"]
                                     }
                                 },
                                 "Execution_settings": {

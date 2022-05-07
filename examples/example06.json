@@ -48,7 +48,7 @@
             "slot_out_uids": [
                 "slot_4"
             ],
-            "value": "(10.0,)",
+            "value": "10.0",
             "units": "deg_C",
             "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar"

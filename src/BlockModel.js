@@ -54,31 +54,44 @@ class BlockModel extends Block {
         this.output_slots = [];
         let md = this.md;
         let name;
+        let objid;
         for (let i = 0; i < md['Inputs'].length; i++) {
+            objid = [''];
             if ('Obj_ID' in md['Inputs'][i]) {
-                if (md['Inputs'][i]['Obj_ID'].length === 0)
-                    md['Inputs'][i]['Obj_ID'] = [0];
-            } else
-                md['Inputs'][i]['Obj_ID'] = [0];
-            for (let ii = 0; ii < md['Inputs'][i]['Obj_ID'].length; ii++) {
+                if (typeof md['Inputs'][i]['Obj_ID'] == "string"){
+                    objid = [md['Inputs'][i]['Obj_ID']];
+                } else if (typeof md['Inputs'][i]['Obj_ID'] == "object"){
+                    if (md['Inputs'][i]['Obj_ID'].length === 0)
+                        objid = [''];
+                    else
+                        objid = md['Inputs'][i]['Obj_ID'];
+                }
+            }
+            for (let ii = 0; ii < objid.length; ii++) {
                 name = md['Inputs'][i]['Name'];
-                if (md['Inputs'][i]['Obj_ID'][ii] !== '')
-                    name += ' [' + md['Inputs'][i]['Obj_ID'][ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                if (objid[ii] !== '')
+                    name += ' [' + objid[ii] + ']';
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
         for (let i = 0; i < md['Outputs'].length; i++) {
+            objid = [''];
             if ('Obj_ID' in md['Outputs'][i]) {
-                if (md['Outputs'][i]['Obj_ID'].length === 0)
-                    md['Outputs'][i]['Obj_ID'] = [0];
-            } else
-                md['Outputs'][i]['Obj_ID'] = [0];
-            for (let ii = 0; ii < md['Outputs'][i]['Obj_ID'].length; ii++) {
+                if (typeof md['Outputs'][i]['Obj_ID'] == "string"){
+                    objid = [md['Outputs'][i]['Obj_ID']];
+                } else if (typeof md['Outputs'][i]['Obj_ID'] == "object"){
+                    if (md['Outputs'][i]['Obj_ID'].length === 0)
+                        objid = [''];
+                    else
+                        objid = md['Outputs'][i]['Obj_ID'];
+                }
+            }
+            for (let ii = 0; ii < objid.length; ii++) {
                 name = md['Outputs'][i]['Name'];
-                if (md['Outputs'][i]['Obj_ID'][ii] !== '')
-                    name += ' [' + md['Outputs'][i]['Obj_ID'][ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], md['Outputs'][i]['Obj_ID'][ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
+                if (objid[ii] !== '')
+                    name += ' [' + objid[ii] + ']';
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
     }
@@ -99,6 +112,7 @@ class BlockModel extends Block {
     }
 
     getInitCode(indent = 0) {
+        return [];
         let code = super.getInitCode();
         code.push("self." + this.code_name + " = None  # instances of models are created in the initialize function");
         return push_indents_before_each_line(code, indent);
@@ -180,6 +194,27 @@ class BlockModel extends Block {
 
         code.push("self." + this.code_name + ".solveStep(" + timestep + ")");
 
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getAllocationMetadata(indent=0){
+        let code;
+        if(this.exec_type === "Distributed") {
+            code = [
+                "{",
+                "\t'Name': '" + this.code_name + "',",
+                "\t'Jobmanager': '" + this.exec_settings_jobmanagername + "',",
+                "},"
+            ];
+        }else{
+            code = [
+                "{",
+                "\t'Name': '" + this.code_name + "',",
+                "\t'Module': '" + this.model_module + "',",
+                "\t'Class': '" + this.model_name + "',",
+                "},"
+            ];
+        }
         return push_indents_before_each_line(code, indent);
     }
 

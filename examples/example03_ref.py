@@ -9,7 +9,7 @@ log = logging.getLogger()
 
 
 @Pyro5.api.expose
-class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
+class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
 
     def __init__(self, metadata={}):
         MD = {
@@ -22,8 +22,25 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
             ],
             "Outputs": [
             ],
+            "Models": [
+                {
+                    'Name': 'model_1',
+                    'Module': 'example02',
+                    'Class': 'ThermoMechanicalClassWorkflow_01',
+                },
+                {
+                    'Name': 'model_2',
+                    'Module': 'field_export',
+                    'Class': 'field_export_to_image',
+                },
+                {
+                    'Name': 'model_3',
+                    'Module': 'field_export',
+                    'Class': 'field_export_to_image',
+                },
+            ],
         }
-        mupif.workflow.Workflow.__init__(self, metadata=MD)
+        super().__init__(metadata=MD)
         self.updateMetadata(metadata)
         self.daemon = None
         
@@ -37,79 +54,24 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
         self.constant_physical_quantity_3 = 0.5*mupif.U.s
         
         # __init__ code of constant_property_1 (Property)
-        self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
+        self.constant_property_1 = mupif.property.ConstantProperty(value=10.0, propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
         
         # __init__ code of input_file_1 (InputFile)
         self.input_file_1 = mupif.PyroFile(filename='inputT.in', mode='rb')
         
         # __init__ code of input_file_2 (InputFile)
         self.input_file_2 = mupif.PyroFile(filename='inputM.in', mode='rb')
-        
-        # __init__ code of model_1 (Thermo-mechanical class workflow)
-        self.model_1 = None  # instances of models are created in the initialize function
-        
-        # __init__ code of model_2 (Field export to image)
-        self.model_2 = None  # instances of models are created in the initialize function
-        
-        # __init__ code of model_3 (Field export to image)
-        self.model_3 = None  # instances of models are created in the initialize function
 
 
     def initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):
+        super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
-        self.updateMetadata(dictionary=metadata)
-
-        execMD = {
-            'Execution': {
-                'ID': self.getMetadata('Execution.ID'),
-                'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),
-                'Task_ID': self.getMetadata('Execution.Task_ID')
-            }
-        }
-
-        ns = mupif.pyroutil.connectNameServer(nshost='127.0.0.1', nsport=9090)
+        ns = mupif.pyroutil.connectNameServer()
         self.daemon = mupif.pyroutil.getDaemon(ns)
-
-        
-        # initialization code of input_file_1 (InputFile)
-        self.daemon.register(self.input_file_1)
-        
-        # initialization code of input_file_2 (InputFile)
-        self.daemon.register(self.input_file_2)
-        
-        # initialization code of model_1 (Thermo-mechanical class workflow)
-        self.model_1 = example02.ThermoMechanicalClassWorkflow_01()
-        self.model_1.initialize(workdir='', metadata=execMD)
-        
-        # initialization code of model_2 (Field export to image)
-        self.model_2 = field_export.field_export_to_image()
-        self.model_2.initialize(workdir='', metadata=execMD)
-        
-        # initialization code of model_3 (Field export to image)
-        self.model_3 = field_export.field_export_to_image()
-        self.model_3.initialize(workdir='', metadata=execMD)
-
-        self.registerModel(self.model_1, "model_1")
-        self.registerModel(self.model_2, "model_2")
-        self.registerModel(self.model_3, "model_3")
-
-        mupif.Workflow.initialize(self, workdir=workdir, metadata={}, validateMetaData=validateMetaData, **kwargs)
 
         self.model_1.set(self.input_file_1, 'input_file_thermal')
 
         self.model_1.set(self.input_file_2, 'input_file_mechanical')
-
-    def terminate(self):
-        pass
-        self.model_1.terminate()
-        self.model_2.terminate()
-        self.model_3.terminate()
-
-    def finishStep(self, tstep):
-        pass
-        self.model_1.finishStep(tstep)
-        self.model_2.finishStep(tstep)
-        self.model_3.finishStep(tstep)
 
     def solve(self, runInBackground=False):
         pass
@@ -135,11 +97,11 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.workflow.Workflow):
             self.model_1.solveStep(timeloop_1_time_step)
             
             # execution code of model_2 (Field export to image)
-            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), 0)
+            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), '')
             self.model_2.solveStep(timeloop_1_time_step)
             
             # execution code of model_3 (Field export to image)
-            self.model_3.set(self.model_1.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), 0)
+            self.model_3.set(self.model_1.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), '')
             self.model_3.solveStep(timeloop_1_time_step)
         
 

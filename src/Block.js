@@ -173,6 +173,10 @@ class Block{
         return push_indents_before_each_line(code, indent);
     }
 
+    getAllocationMetadata(indent=0){
+        return [];
+    }
+
     getBlocksRecursive(class_filter=null){
         let sub_blocks;
         let blocks = [];

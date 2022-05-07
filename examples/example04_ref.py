@@ -9,7 +9,7 @@ log = logging.getLogger()
 
 
 @Pyro5.api.expose
-class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
+class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
 
     def __init__(self, metadata={}):
         MD = {
@@ -22,8 +22,28 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
             ],
             "Outputs": [
             ],
+            "Models": [
+                {
+                    'Name': 'model_1',
+                    'Jobmanager': 'JobMan_ThermalNonstat',
+                },
+                {
+                    'Name': 'model_2',
+                    'Jobmanager': 'JobMan_ThermalNonstat',
+                },
+                {
+                    'Name': 'model_3',
+                    'Module': 'field_export',
+                    'Class': 'field_export_to_image',
+                },
+                {
+                    'Name': 'model_4',
+                    'Module': 'field_export',
+                    'Class': 'field_export_to_image',
+                },
+            ],
         }
-        mupif.workflow.Workflow.__init__(self, metadata=MD)
+        super().__init__(metadata=MD)
         self.updateMetadata(metadata)
         self.daemon = None
         
@@ -37,104 +57,27 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
         self.constant_physical_quantity_3 = 0.5*mupif.U.s
         
         # __init__ code of constant_property_1 (Property)
-        self.constant_property_1 = mupif.property.ConstantProperty(value=(10.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
+        self.constant_property_1 = mupif.property.ConstantProperty(value=10.0, propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
         
         # __init__ code of constant_property_2 (Property)
-        self.constant_property_2 = mupif.property.ConstantProperty(value=(0.0,), propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
+        self.constant_property_2 = mupif.property.ConstantProperty(value=0.0, propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
         
         # __init__ code of input_file_1 (InputFile)
         self.input_file_1 = mupif.PyroFile(filename='inputT.in', mode='rb')
         
         # __init__ code of input_file_2 (InputFile)
         self.input_file_2 = mupif.PyroFile(filename='inputM.in', mode='rb')
-        
-        # __init__ code of model_1 (Non-stationary thermal problem)
-        self.model_1 = None  # instances of models are created in the initialize function
-        
-        # __init__ code of model_2 (Plane stress linear elastic)
-        self.model_2 = None  # instances of models are created in the initialize function
-        
-        # __init__ code of model_3 (Field export to image)
-        self.model_3 = None  # instances of models are created in the initialize function
-        
-        # __init__ code of model_4 (Field export to image)
-        self.model_4 = None  # instances of models are created in the initialize function
 
 
     def initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):
+        super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
-        self.updateMetadata(dictionary=metadata)
-
-        execMD = {
-            'Execution': {
-                'ID': self.getMetadata('Execution.ID'),
-                'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),
-                'Task_ID': self.getMetadata('Execution.Task_ID')
-            }
-        }
-
-        ns = mupif.pyroutil.connectNameServer(nshost='127.0.0.1', nsport=9090)
+        ns = mupif.pyroutil.connectNameServer()
         self.daemon = mupif.pyroutil.getDaemon(ns)
-
-        
-        # initialization code of input_file_1 (InputFile)
-        self.daemon.register(self.input_file_1)
-        
-        # initialization code of input_file_2 (InputFile)
-        self.daemon.register(self.input_file_2)
-        
-        # initialization code of model_1 (Non-stationary thermal problem)
-        self.model_1_nameserver = mupif.pyroutil.connectNameServer('127.0.0.1', 9090)
-        self.model_1_jobman = mupif.pyroutil.connectJobManager(self.model_1_nameserver, 'JobMan_ThermalNonstat')
-        try:
-            self.model_1 = mupif.pyroutil.allocateApplicationWithJobManager(ns=self.model_1_nameserver, jobMan=self.model_1_jobman)
-            log.info(self.model_1)
-        except Exception as e:
-            log.exception(e)
-        self.model_1.initialize(workdir='', metadata=execMD)
-        
-        # initialization code of model_2 (Plane stress linear elastic)
-        self.model_2_nameserver = mupif.pyroutil.connectNameServer('127.0.0.1', 9090)
-        self.model_2_jobman = mupif.pyroutil.connectJobManager(self.model_2_nameserver, 'JobMan_ThermalNonstat')
-        try:
-            self.model_2 = mupif.pyroutil.allocateApplicationWithJobManager(ns=self.model_2_nameserver, jobMan=self.model_2_jobman)
-            log.info(self.model_2)
-        except Exception as e:
-            log.exception(e)
-        self.model_2.initialize(workdir='', metadata=execMD)
-        
-        # initialization code of model_3 (Field export to image)
-        self.model_3 = field_export.field_export_to_image()
-        self.model_3.initialize(workdir='', metadata=execMD)
-        
-        # initialization code of model_4 (Field export to image)
-        self.model_4 = field_export.field_export_to_image()
-        self.model_4.initialize(workdir='', metadata=execMD)
-
-        self.registerModel(self.model_1, "model_1")
-        self.registerModel(self.model_2, "model_2")
-        self.registerModel(self.model_3, "model_3")
-        self.registerModel(self.model_4, "model_4")
-
-        mupif.Workflow.initialize(self, workdir=workdir, metadata={}, validateMetaData=validateMetaData, **kwargs)
 
         self.model_1.set(self.input_file_1, 'input_file_thermal_nonstat')
 
         self.model_2.set(self.input_file_2, 'input_file_mechanical')
-
-    def terminate(self):
-        pass
-        self.model_1.terminate()
-        self.model_2.terminate()
-        self.model_3.terminate()
-        self.model_4.terminate()
-
-    def finishStep(self, tstep):
-        pass
-        self.model_1.finishStep(tstep)
-        self.model_2.finishStep(tstep)
-        self.model_3.finishStep(tstep)
-        self.model_4.finishStep(tstep)
 
     def solve(self, runInBackground=False):
         pass
@@ -162,15 +105,15 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.workflow.Workflow):
             self.model_1.solveStep(timeloop_1_time_step)
             
             # execution code of model_2 (Plane stress linear elastic)
-            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 0), 0)
+            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), ''), '')
             self.model_2.solveStep(timeloop_1_time_step)
             
             # execution code of model_3 (Field export to image)
-            self.model_3.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 0), 0)
+            self.model_3.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), ''), '')
             self.model_3.solveStep(timeloop_1_time_step)
             
             # execution code of model_4 (Field export to image)
-            self.model_4.set(self.model_2.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 0), 0)
+            self.model_4.set(self.model_2.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), ''), '')
             self.model_4.solveStep(timeloop_1_time_step)
         
 

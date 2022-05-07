@@ -178,6 +178,10 @@ class Block{
         return push_indents_before_each_line(code, indent);
     }
 
+    getAllocationMetadata(indent=0){
+        return [];
+    }
+
     getBlocksRecursive(class_filter=null){
         let sub_blocks;
         let blocks = [];
@@ -771,31 +775,44 @@ class BlockModel extends Block {
         this.output_slots = [];
         let md = this.md;
         let name;
+        let objid;
         for (let i = 0; i < md['Inputs'].length; i++) {
+            objid = [''];
             if ('Obj_ID' in md['Inputs'][i]) {
-                if (md['Inputs'][i]['Obj_ID'].length === 0)
-                    md['Inputs'][i]['Obj_ID'] = [0];
-            } else
-                md['Inputs'][i]['Obj_ID'] = [0];
-            for (let ii = 0; ii < md['Inputs'][i]['Obj_ID'].length; ii++) {
+                if (typeof md['Inputs'][i]['Obj_ID'] == "string"){
+                    objid = [md['Inputs'][i]['Obj_ID']];
+                } else if (typeof md['Inputs'][i]['Obj_ID'] == "object"){
+                    if (md['Inputs'][i]['Obj_ID'].length === 0)
+                        objid = [''];
+                    else
+                        objid = md['Inputs'][i]['Obj_ID'];
+                }
+            }
+            for (let ii = 0; ii < objid.length; ii++) {
                 name = md['Inputs'][i]['Name'];
-                if (md['Inputs'][i]['Obj_ID'][ii] !== '')
-                    name += ' [' + md['Inputs'][i]['Obj_ID'][ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], md['Inputs'][i]['Obj_ID'][ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                if (objid[ii] !== '')
+                    name += ' [' + objid[ii] + ']';
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
         for (let i = 0; i < md['Outputs'].length; i++) {
+            objid = [''];
             if ('Obj_ID' in md['Outputs'][i]) {
-                if (md['Outputs'][i]['Obj_ID'].length === 0)
-                    md['Outputs'][i]['Obj_ID'] = [0];
-            } else
-                md['Outputs'][i]['Obj_ID'] = [0];
-            for (let ii = 0; ii < md['Outputs'][i]['Obj_ID'].length; ii++) {
+                if (typeof md['Outputs'][i]['Obj_ID'] == "string"){
+                    objid = [md['Outputs'][i]['Obj_ID']];
+                } else if (typeof md['Outputs'][i]['Obj_ID'] == "object"){
+                    if (md['Outputs'][i]['Obj_ID'].length === 0)
+                        objid = [''];
+                    else
+                        objid = md['Outputs'][i]['Obj_ID'];
+                }
+            }
+            for (let ii = 0; ii < objid.length; ii++) {
                 name = md['Outputs'][i]['Name'];
-                if (md['Outputs'][i]['Obj_ID'][ii] !== '')
-                    name += ' [' + md['Outputs'][i]['Obj_ID'][ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], md['Outputs'][i]['Obj_ID'][ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
+                if (objid[ii] !== '')
+                    name += ' [' + objid[ii] + ']';
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
     }
@@ -816,6 +833,7 @@ class BlockModel extends Block {
     }
 
     getInitCode(indent = 0) {
+        return [];
         let code = super.getInitCode();
         code.push("self." + this.code_name + " = None  # instances of models are created in the initialize function");
         return push_indents_before_each_line(code, indent);
@@ -897,6 +915,27 @@ class BlockModel extends Block {
 
         code.push("self." + this.code_name + ".solveStep(" + timestep + ")");
 
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getAllocationMetadata(indent=0){
+        let code;
+        if(this.exec_type === "Distributed") {
+            code = [
+                "{",
+                "\t'Name': '" + this.code_name + "',",
+                "\t'Jobmanager': '" + this.exec_settings_jobmanagername + "',",
+                "},"
+            ];
+        }else{
+            code = [
+                "{",
+                "\t'Name': '" + this.code_name + "',",
+                "\t'Module': '" + this.model_module + "',",
+                "\t'Class': '" + this.model_name + "',",
+                "},"
+            ];
+        }
         return push_indents_before_each_line(code, indent);
     }
 
@@ -1563,6 +1602,7 @@ class BlockWorkflow extends Block{
 
             let all_model_blocks = this.getBlocksRecursive(BlockModel);
             let child_blocks = this.getBlocks();
+            let model;
             
             let code = [];
             
@@ -1589,7 +1629,7 @@ class BlockWorkflow extends Block{
             code.push("");
             code.push("");
             code.push("@Pyro5.api.expose");
-            code.push("class " + this.project_classname + "(mupif.workflow.Workflow):");
+            code.push("class " + this.project_classname + "(mupif.Workflow):");
 
             // --------------------------------------------------
             // __init__ function
@@ -1629,7 +1669,7 @@ class BlockWorkflow extends Block{
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                        "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                        "\"Obj_ID\": \"" + s.getObjID() + "\", " +
                         "\"Units\": \"\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     code.push("\t\t\t\t{" + params + "},");
@@ -1646,22 +1686,25 @@ class BlockWorkflow extends Block{
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                        "\"Obj_ID\": [\"" + s.getObjID() + "\"], " +
+                        "\"Obj_ID\": \"" + s.getObjID() + "\", " +
                         "\"Units\": \"\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
             code.push("\t\t\t],");
 
+            code.push("\t\t\t\"Models\": [");
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                model = all_model_blocks[i];
+                extend_array(code, all_model_blocks[i].getAllocationMetadata(4));
+            }
+            code.push("\t\t\t],");
+
             code.push("\t\t}");
-
-            code.push("\t\tmupif.workflow.Workflow.__init__(self, metadata=MD)");
-
+            code.push("\t\tsuper().__init__(metadata=MD)");
             code.push("\t\tself.updateMetadata(metadata)");
-            
             code.push("\t\tself.daemon = None");
 
-            let code_add;
             if (class_code) {
                 // initialization of workflow inputs
                 slots = this.getAllExternalDataSlots("out");
@@ -1690,39 +1733,13 @@ class BlockWorkflow extends Block{
 
             code.push("");
             code.push("\tdef initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):");
-            code.push("");
-
-            code.push("\t\tself.updateMetadata(dictionary=metadata)");
+            code.push("\t\tsuper().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)");
 
             code.push("");
-            
-            code.push("\t\texecMD = {");
-            code.push("\t\t\t'Execution': {");
-            code.push("\t\t\t\t'ID': self.getMetadata('Execution.ID'),");
-            code.push("\t\t\t\t'Use_case_ID': self.getMetadata('Execution.Use_case_ID'),");
-            code.push("\t\t\t\t'Task_ID': self.getMetadata('Execution.Task_ID')");
-            code.push("\t\t\t}");
-            code.push("\t\t}");
 
-            code.push("");
-            
-            code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
+            // code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
+            code.push("\t\tns = mupif.pyroutil.connectNameServer()");
             code.push("\t\tself.daemon = mupif.pyroutil.getDaemon(ns)");
-            
-            code.push("");
-            
-            for (let i = 0; i < allBlocksRecursive.length; i++) {
-                extend_array(code, allBlocksRecursive[i].getInitializationCode(2, "execMD"));
-            }
-
-            code.push("");
-
-            for (let i = 0; i < all_model_blocks.length; i++)
-                code.push("\t\tself.registerModel(self." + all_model_blocks[i].getCodeName() + ", \"" + all_model_blocks[i].getCodeName() + "\")");
-
-            code.push("");
-
-            code.push("\t\tmupif.Workflow.initialize(self, workdir=workdir, metadata={}, validateMetaData=validateMetaData, **kwargs)");
             
             // setting of the inputs for initialization
             let linked_slot;
@@ -1745,27 +1762,8 @@ class BlockWorkflow extends Block{
                     }
                 }
             }
-
-            // --------------------------------------------------
-            // get critical time step function
-            // --------------------------------------------------
-
-            let model;
+            
             if (class_code) {
-                code.push("");
-                code.push("\tdef getCriticalTimeStep(self):");
-                code_add = "";
-                let ii = 0;
-                for (let i = 0; i < child_blocks.length; i++) {
-                    model = child_blocks[i];
-                    if (model instanceof BlockModel) {
-                        if (ii)
-                            code_add += ", ";
-                        code_add += "self." + model.code_name + ".getCriticalTimeStep()";
-                        ii += 1;
-                    }
-                }
-                code.push("\t\treturn min([" + code_add + "])");
                 
                 // --------------------------------------------------
                 // set method
@@ -1819,34 +1817,10 @@ class BlockWorkflow extends Block{
             }
 
             // --------------------------------------------------
-            // terminate method
-            // --------------------------------------------------
-
-            code.push("");
-            code.push("\tdef terminate(self):");
-            code.push("\t\tpass");
-            for (let i = 0; i < all_model_blocks.length; i++) {
-                model = all_model_blocks[i];
-                code.push("\t\tself." + model.code_name + ".terminate()");
-            }
-
-            // --------------------------------------------------
-            // finishstep method
-            // --------------------------------------------------
-
-            code.push("");
-            code.push("\tdef finishStep(self, tstep):");
-            code.push("\t\tpass");
-            for (let i = 0; i < all_model_blocks.length; i++) {
-                model = all_model_blocks[i];
-                code.push("\t\tself." + model.code_name + ".finishStep(tstep)");
-            }
-            code.push("");
-
-            // --------------------------------------------------
             // solve or solveStep function
             // --------------------------------------------------
 
+            code.push("");
             if (class_code)
                 code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
             else
@@ -3490,7 +3464,7 @@ class Slot{
     }
 
     getLinkedDataSlot(){
-        if(this.inout === 'out')
+        if(this.inout === 'out' && this.external === false)
             console.log('Warning: function getLinkedDataSlot should be used only for input dataslots!');
         let all_datalinks = this.getParentBlock().editor.datalinks;
         for(let i=0;i<all_datalinks.length;i++) {
