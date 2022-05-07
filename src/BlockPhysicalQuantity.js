@@ -5,7 +5,7 @@ class BlockPhysicalQuantity extends Block{
         this.units = units;
         this.name = 'PhysicalQuantity';
 
-        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.PhysicalQuantity', false, 'mupif.ValueType.Scalar'));
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.PhysicalQuantity', false, 'mupif.ValueType.Scalar', '', '', '', units));
     }
 
     generateCodeName(all_blocks, base_name='constant_physical_quantity_'){

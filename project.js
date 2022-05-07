@@ -545,7 +545,7 @@ class BlockDoWhile extends Block{
         super(editor, parent_block);
         this.name = 'DoWhile';
 
-        this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true));
+        this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true, null));
     }
 
     generateCodeName(all_blocks, base_name='dowhile_'){
@@ -630,7 +630,7 @@ class BlockInputFile extends Block{
         this.filename = filename;
         this.name = 'InputFile';
 
-        this.addOutputSlot(new Slot(this, 'out', 'value', 'filename = '+this.filename, 'mupif.PyroFile', false, 'None'));
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'filename = '+this.filename, 'mupif.PyroFile', false, 'None', '', '', '', 'none'));
     }
 
     generateCodeName(all_blocks, base_name='input_file_'){
@@ -792,7 +792,7 @@ class BlockModel extends Block {
                 name = md['Inputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at'], md['Inputs'][i]['Units']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
@@ -812,7 +812,7 @@ class BlockModel extends Block {
                 name = md['Outputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Units']));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
     }
@@ -1062,7 +1062,7 @@ class BlockPhysicalQuantity extends Block{
         this.units = units;
         this.name = 'PhysicalQuantity';
 
-        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.PhysicalQuantity', false, 'mupif.ValueType.Scalar'));
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.PhysicalQuantity', false, 'mupif.ValueType.Scalar', '', '', '', units));
     }
 
     generateCodeName(all_blocks, base_name='constant_physical_quantity_'){
@@ -1182,7 +1182,7 @@ class BlockProperty extends Block{
         this.units = units;
         this.name = 'Property';
 
-        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.Property', false, this.value_type));
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.Property', false, this.value_type, '', '', '', units));
     }
 
     generateCodeName(all_blocks, base_name='constant_property_'){
@@ -1349,9 +1349,9 @@ class BlockTimeloop extends Block{
         this.name = 'TimeLoop';
         this.defines_timestep = true;
 
-        this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false));
-        this.addInputSlot(new Slot(this, 'in', 'target_time', 'target_time', 'mupif.PhysicalQuantity', false));
-        this.addInputSlot(new Slot(this, 'in', 'max_dt', 'max_dt', 'mupif.PhysicalQuantity', true));
+        this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false, null, '', '', '', 'none'));
+        this.addInputSlot(new Slot(this, 'in', 'target_time', 'target_time', 'mupif.PhysicalQuantity', false, null, '', '', '', 'none'));
+        this.addInputSlot(new Slot(this, 'in', 'max_dt', 'max_dt', 'mupif.PhysicalQuantity', true, null, '', '', '', 'none'));
     }
 
     generateCodeName(all_blocks, base_name='timeloop_'){
@@ -1670,7 +1670,7 @@ class BlockWorkflow extends Block{
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjID() + "\", " +
-                        "\"Units\": \"\", " +
+                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
@@ -1687,7 +1687,7 @@ class BlockWorkflow extends Block{
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjID() + "\", " +
-                        "\"Units\": \"\"";
+                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
@@ -3423,7 +3423,7 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid='', set_at=''){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id='', uid='', set_at='', units=''){
         this.id = generateNewSlotID();
         if(uid !== '')
             this.id = uid;
@@ -3432,6 +3432,7 @@ class Slot{
         this.text = text;
         this.parent_block = parent_block;
         // this.code_name = "";
+        this.units = units;
 
         this.type = type;
         this.required = required;
@@ -3478,25 +3479,17 @@ class Slot{
         return null;
     }
 
-    getObjType(){
-        return this.obj_type;
-    }
+    getObjType(){return this.obj_type;}
 
-    getObjID(){
-        return this.obj_id;
-    }
+    getObjID(){return this.obj_id;}
 
-    getParentBlock(){
-        return this.parent_block;
-    }
+    getParentBlock(){return this.parent_block;}
 
-    getCodeRepresentation() {
-        return "self." + this.id;
-    }
+    getCodeRepresentation(){return "self." + this.id;}
+    
+    getUnits(){return this.units;}
 
-    getUID(){
-        return this.id;
-    }
+    getUID(){return this.id;}
 
     getName(){return this.name;}
 

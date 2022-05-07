@@ -24,9 +24,9 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
                 "nsport": ""
             },
             "Inputs": [
-                {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.DataID.PID_Temperature", "Obj_ID": "top_temperature", "Units": "", "Set_at": "timestep"},
-                {"Name": "input_file_thermal", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_thermal", "Units": "", "Set_at": "initialization"},
-                {"Name": "input_file_mechanical", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_mechanical", "Units": "", "Set_at": "initialization"},
+                {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.DataID.PID_Temperature", "Obj_ID": "top_temperature", "Units": "degC", "Set_at": "timestep"},
+                {"Name": "input_file_thermal", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_thermal", "Units": "none", "Set_at": "initialization"},
+                {"Name": "input_file_mechanical", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_mechanical", "Units": "none", "Set_at": "initialization"},
             ],
             "Outputs": [
                 {"Name": "temperature", "Type": "mupif.Field", "description": "", "Type_ID": "mupif.DataID.FID_Temperature", "Obj_ID": "temperature", "Units": ""},

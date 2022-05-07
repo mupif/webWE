@@ -4,7 +4,7 @@ class BlockInputFile extends Block{
         this.filename = filename;
         this.name = 'InputFile';
 
-        this.addOutputSlot(new Slot(this, 'out', 'value', 'filename = '+this.filename, 'mupif.PyroFile', false, 'None'));
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'filename = '+this.filename, 'mupif.PyroFile', false, 'None', '', '', '', 'none'));
     }
 
     generateCodeName(all_blocks, base_name='input_file_'){

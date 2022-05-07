@@ -5,7 +5,7 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id=0, uid='', set_at=''){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id='', uid='', set_at='', units=''){
         this.id = generateNewSlotID();
         if(uid !== '')
             this.id = uid;
@@ -14,6 +14,7 @@ class Slot{
         this.text = text;
         this.parent_block = parent_block;
         // this.code_name = "";
+        this.units = units;
 
         this.type = type;
         this.required = required;
@@ -46,7 +47,7 @@ class Slot{
     }
 
     getLinkedDataSlot(){
-        if(this.inout === 'out')
+        if(this.inout === 'out' && this.external === false)
             console.log('Warning: function getLinkedDataSlot should be used only for input dataslots!');
         let all_datalinks = this.getParentBlock().editor.datalinks;
         for(let i=0;i<all_datalinks.length;i++) {
@@ -60,25 +61,17 @@ class Slot{
         return null;
     }
 
-    getObjType(){
-        return this.obj_type;
-    }
+    getObjType(){return this.obj_type;}
 
-    getObjID(){
-        return this.obj_id;
-    }
+    getObjID(){return this.obj_id;}
 
-    getParentBlock(){
-        return this.parent_block;
-    }
+    getParentBlock(){return this.parent_block;}
 
-    getCodeRepresentation() {
-        return "self." + this.id;
-    }
+    getCodeRepresentation(){return "self." + this.id;}
+    
+    getUnits(){return this.units;}
 
-    getUID(){
-        return this.id;
-    }
+    getUID(){return this.id;}
 
     getName(){return this.name;}
 

@@ -3,7 +3,7 @@ class BlockDoWhile extends Block{
         super(editor, parent_block);
         this.name = 'DoWhile';
 
-        this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true));
+        this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true, null));
     }
 
     generateCodeName(all_blocks, base_name='dowhile_'){

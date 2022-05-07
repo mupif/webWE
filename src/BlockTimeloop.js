@@ -4,9 +4,9 @@ class BlockTimeloop extends Block{
         this.name = 'TimeLoop';
         this.defines_timestep = true;
 
-        this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false));
-        this.addInputSlot(new Slot(this, 'in', 'target_time', 'target_time', 'mupif.PhysicalQuantity', false));
-        this.addInputSlot(new Slot(this, 'in', 'max_dt', 'max_dt', 'mupif.PhysicalQuantity', true));
+        this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false, null, '', '', '', 'none'));
+        this.addInputSlot(new Slot(this, 'in', 'target_time', 'target_time', 'mupif.PhysicalQuantity', false, null, '', '', '', 'none'));
+        this.addInputSlot(new Slot(this, 'in', 'max_dt', 'max_dt', 'mupif.PhysicalQuantity', true, null, '', '', '', 'none'));
     }
 
     generateCodeName(all_blocks, base_name='timeloop_'){

@@ -71,7 +71,7 @@ class BlockModel extends Block {
                 name = md['Inputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at'], md['Inputs'][i]['Units']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
@@ -91,7 +91,7 @@ class BlockModel extends Block {
                 name = md['Outputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii]));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Units']));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
     }

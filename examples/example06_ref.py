@@ -95,11 +95,11 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
             self.model_1.solveStep(timeloop_1_time_step)
             
             # execution code of model_2 (Field export to image)
-            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), 0)
+            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), '')
             self.model_2.solveStep(timeloop_1_time_step)
             
             # execution code of model_3 (Field export to image)
-            self.model_3.set(self.model_1.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), 0)
+            self.model_3.set(self.model_1.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), '')
             self.model_3.solveStep(timeloop_1_time_step)
         
 

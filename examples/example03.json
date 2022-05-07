@@ -115,7 +115,7 @@
                         "Obj_ID": [
                             "top_temperature"
                         ],
-                        "Units": "",
+                        "Units": "degC",
                         "Set_at": "timestep"
                     },
                     {
@@ -127,7 +127,7 @@
                         "Obj_ID": [
                             "input_file_thermal"
                         ],
-                        "Units": "",
+                        "Units": "none",
                         "Set_at": "initialization"
                     },
                     {
@@ -139,7 +139,7 @@
                         "Obj_ID": [
                             "input_file_mechanical"
                         ],
-                        "Units": "",
+                        "Units": "none",
                         "Set_at": "initialization"
                     }
                 ],
@@ -152,7 +152,7 @@
                         "Obj_ID": [
                             "temperature"
                         ],
-                        "Units": ""
+                        "Units": "degC"
                     },
                     {
                         "Name": "displacement",
@@ -162,7 +162,7 @@
                         "Obj_ID": [
                             "displacement"
                         ],
-                        "Units": ""
+                        "Units": "m"
                     }
                 ],
                 "Execution_settings": {
@@ -208,7 +208,8 @@
                         "Type": "mupif.Field",
                         "Required": false,
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Set_at": "timestep"
+                        "Set_at": "timestep",
+                        "Units": "none"
                     }
                 ],
                 "Outputs": [],
@@ -239,7 +240,8 @@
                         "Type": "mupif.Field",
                         "Required": false,
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Set_at": "timestep"
+                        "Set_at": "timestep",
+                        "Units": "none"
                     }
                 ],
                 "Outputs": [],

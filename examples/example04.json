@@ -322,7 +322,8 @@
                         "Type": "mupif.Field",
                         "Required": false,
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Set_at": "timestep"
+                        "Set_at": "timestep",
+                        "Units": "none"
                     }
                 ],
                 "Outputs": [],
@@ -353,7 +354,8 @@
                         "Type": "mupif.Field",
                         "Required": false,
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Set_at": "timestep"
+                        "Set_at": "timestep",
+                        "Units": "none"
                     }
                 ],
                 "Outputs": [],

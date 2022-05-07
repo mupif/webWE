@@ -189,7 +189,7 @@ class BlockWorkflow extends Block{
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjID() + "\", " +
-                        "\"Units\": \"\", " +
+                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
@@ -206,7 +206,7 @@ class BlockWorkflow extends Block{
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjID() + "\", " +
-                        "\"Units\": \"\"";
+                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
