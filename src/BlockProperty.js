@@ -7,7 +7,7 @@ class BlockProperty extends Block{
         this.units = units;
         this.name = 'Property';
 
-        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.Property', false, this.value_type, '', '', '', units));
+        this.addOutputSlot(new Slot(this, 'out', 'value', 'value = '+this.value, 'mupif.Property', false, this.property_id, '', '', '', units, this.value_type));
     }
 
     generateCodeName(all_blocks, base_name='constant_property_'){

@@ -187,10 +187,12 @@ class BlockWorkflow extends Block{
                     num_of_external_input_dataslots += 1;
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
-                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjID() + "\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
+                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
+                    if(s.type === 'mupif.Property')
+                        params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
@@ -204,8 +206,8 @@ class BlockWorkflow extends Block{
                     num_of_external_input_dataslots += 1;
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
                         "\"description\": \"\", " +
-                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getObjType() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjID() + "\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
+                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
                     code.push("\t\t\t\t{" + params + "},");
                 }

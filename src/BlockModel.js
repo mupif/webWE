@@ -55,8 +55,12 @@ class BlockModel extends Block {
         let md = this.md;
         let name;
         let objid;
+        let vt;
         for (let i = 0; i < md['Inputs'].length; i++) {
             objid = [''];
+            vt = '';
+            if ('ValueType' in md['Inputs'][i])
+                vt = md['Inputs'][i]['ValueType'];
             if ('Obj_ID' in md['Inputs'][i]) {
                 if (typeof md['Inputs'][i]['Obj_ID'] == "string"){
                     objid = [md['Inputs'][i]['Obj_ID']];
@@ -71,12 +75,15 @@ class BlockModel extends Block {
                 name = md['Inputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at'], md['Inputs'][i]['Units']));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
+                this.addInputSlot(new Slot(this, 'in', name, name, md['Inputs'][i]['Type'], md['Inputs'][i]['Required'], md['Inputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Set_at'], md['Inputs'][i]['Units'], vt));// + '(' + md['Inputs'][i]['Type'] + ', ' + md['Inputs'][i]['Type_ID'] + ')'
             }
         }
 
         for (let i = 0; i < md['Outputs'].length; i++) {
             objid = [''];
+            vt = '';
+            if ('ValueType' in md['Outputs'][i])
+                vt = md['Inputs'][i]['ValueType'];
             if ('Obj_ID' in md['Outputs'][i]) {
                 if (typeof md['Outputs'][i]['Obj_ID'] == "string"){
                     objid = [md['Outputs'][i]['Obj_ID']];
@@ -91,7 +98,7 @@ class BlockModel extends Block {
                 name = md['Outputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Units']));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Units'], vt));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
     }
@@ -227,7 +234,7 @@ class BlockModel extends Block {
                 obj_id = "'" + slot.obj_id + "'";
             else
                 obj_id = slot.obj_id;
-            return "self." + this.code_name + ".get(" + slot.getObjType() + ", " + time + ", " + obj_id + ")";
+            return "self." + this.code_name + ".get(" + slot.getDataID() + ", " + time + ", " + obj_id + ")";
         }
         return "None";
     }

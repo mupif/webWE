@@ -5,7 +5,7 @@ function generateNewSlotID(){
 }
 
 class Slot{
-    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id='', uid='', set_at='', units=''){
+    constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id='', uid='', set_at='', units='', value_type=''){
         this.id = generateNewSlotID();
         if(uid !== '')
             this.id = uid;
@@ -15,6 +15,7 @@ class Slot{
         this.parent_block = parent_block;
         // this.code_name = "";
         this.units = units;
+        this.value_type = value_type;
 
         this.type = type;
         this.required = required;
@@ -61,9 +62,9 @@ class Slot{
         return null;
     }
 
-    getObjType(){return this.obj_type;}
+    getDataID(){return this.obj_type;}
 
-    getObjID(){return this.obj_id;}
+    getObjectID(){return this.obj_id;}
 
     getParentBlock(){return this.parent_block;}
 
@@ -76,6 +77,8 @@ class Slot{
     getName(){return this.name;}
 
     getClassName(){return 'Slot';}
+
+    getValueType(){return this.value_type;}
 
     getDictForJSON(){
         return {
