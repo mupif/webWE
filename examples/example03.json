@@ -112,9 +112,7 @@
                         "Required": true,
                         "description": "",
                         "Type_ID": "mupif.DataID.PID_Temperature",
-                        "Obj_ID": [
-                            "top_temperature"
-                        ],
+                        "Obj_ID": "top_temperature",
                         "Units": "degC",
                         "Set_at": "timestep"
                     },
@@ -124,9 +122,7 @@
                         "Required": true,
                         "description": "",
                         "Type_ID": "mupif.DataID.ID_InputFile",
-                        "Obj_ID": [
-                            "input_file_thermal"
-                        ],
+                        "Obj_ID": "input_file_thermal",
                         "Units": "none",
                         "Set_at": "initialization"
                     },
@@ -136,9 +132,7 @@
                         "Required": true,
                         "description": "",
                         "Type_ID": "mupif.DataID.ID_InputFile",
-                        "Obj_ID": [
-                            "input_file_mechanical"
-                        ],
+                        "Obj_ID": "input_file_mechanical",
                         "Units": "none",
                         "Set_at": "initialization"
                     }
@@ -149,9 +143,7 @@
                         "Type": "mupif.Field",
                         "description": "",
                         "Type_ID": "mupif.DataID.FID_Temperature",
-                        "Obj_ID": [
-                            "temperature"
-                        ],
+                        "Obj_ID": "temperature",
                         "Units": "degC"
                     },
                     {
@@ -159,9 +151,7 @@
                         "Type": "mupif.Field",
                         "description": "",
                         "Type_ID": "mupif.DataID.FID_Displacement",
-                        "Obj_ID": [
-                            "displacement"
-                        ],
+                        "Obj_ID": "displacement",
                         "Units": "m"
                     }
                 ],
