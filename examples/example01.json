@@ -411,8 +411,8 @@
         "project_classname": "ThermoMechanicalExecutionWorkflow_01",
         "project_modulename": "example01",
         "project_id": "thermomechanical_exec_workflow_01",
-        "project_nshost": "127.0.0.1",
-        "project_nsport": "9090",
+        "project_nshost": "",
+        "project_nsport": "",
         "script_name_base": "example01",
         "connection_type": "Local"
     }

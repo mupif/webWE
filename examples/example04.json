@@ -202,8 +202,6 @@
                 },
                 "Execution_settings": {
                     "Type": "Distributed",
-                    "nshost": "127.0.0.1",
-                    "nsport": "9090",
                     "jobManName": "JobMan_ThermalNonstat"
                 }
             },
@@ -294,8 +292,6 @@
                 },
                 "Execution_settings": {
                     "Type": "Distributed",
-                    "nshost": "127.0.0.1",
-                    "nsport": "9090",
                     "jobManName": "JobMan_ThermalNonstat"
                 }
             },
@@ -417,8 +413,8 @@
         "project_classname": "ThermoMechanicalExecutionWorkflow_01",
         "project_modulename": "example01",
         "project_id": "thermomechanical_exec_workflow_01",
-        "project_nshost": "127.0.0.1",
-        "project_nsport": "9090",
+        "project_nshost": "",
+        "project_nsport": "",
         "script_name_base": "example04",
         "connection_type": "Local"
     }

@@ -303,14 +303,12 @@
         "project_classname": "ThermoMechanicalClassWorkflow_02",
         "project_modulename": "",
         "project_id": "thermomechanical_class_workflow_02",
-        "project_nshost": "127.0.0.1",
-        "project_nsport": "9090",
+        "project_nshost": "",
+        "project_nsport": "",
         "script_name_base": "example05",
         "connection_type": "Distributed",
         "jobman_settings": {
-            "name": "ThermoMechanicalClassWorkflow_02_jobman",
-            "server_host": "127.0.0.1",
-            "server_port": "44382"
+            "name": "ThermoMechanicalClassWorkflow_02_jobman"
         }
     }
 }

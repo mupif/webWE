@@ -86,17 +86,15 @@ module.exports = {
                                     "type": "object",
                                     "properties": {
                                         "Type": {"type": "string", "enum": ["Local", "Distributed"]},
-                                        "nshost": {"type": "string"},// optional
-                                        "nsport": {"type": "string"},// optional
                                         "jobManName": {"type": "string"}
                                     },
                                     "anyOf": [
+                                        { "required": ["jobManName"] },
                                         {
                                             "properties": {
                                                 "Type": { "const": "Local" }
                                             }
-                                        },
-                                        { "required": ["jobManName"] }
+                                        }
                                     ]
                                 }
                             },
@@ -167,13 +165,9 @@ module.exports = {
                     "jobman_settings": {
                         "type": "object",
                         "properties": {
-                            "name": {"type": "string"},
-                            "server_host": {"type": "string"},
-                            "server_port": {"type": "string"},
-                            "nshost": {"type": "string"},// optional
-                            "nsport": {"type": "string"}// optional
+                            "name": {"type": "string"}
                         },
-                        "required": ["name", "server_host", "server_port"]
+                        "required": ["name"]
                     },
                     "script_name_base": {"type": "string"}
                 },

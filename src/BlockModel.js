@@ -7,8 +7,6 @@ class BlockModel extends Block {
 
         this.exec_type = "";
         this.exec_settings_jobmanagername = "";
-        this.exec_settings_nsport = "";
-        this.exec_settings_nshost = "";
 
         // this.loadDataFromMetadata();
         this.setMetadata(md);
@@ -38,10 +36,6 @@ class BlockModel extends Block {
             if ('Type' in this.md['Execution_settings']) {
                 if (this.md['Execution_settings']['Type'] === 'Distributed') {
                     this.exec_type = this.md['Execution_settings']['Type'];
-                    if ('nshost' in this.md['Execution_settings'])
-                        this.exec_settings_nshost = this.md['Execution_settings']['nshost'];
-                    if ('nsport' in this.md['Execution_settings'])
-                        this.exec_settings_nsport = this.md['Execution_settings']['nsport'];
                     if ('jobManName' in this.md['Execution_settings'])
                         this.exec_settings_jobmanagername = this.md['Execution_settings']['jobManName'];
                 }
@@ -136,27 +130,16 @@ class BlockModel extends Block {
         // }
 
         if(this.exec_type === "Distributed"){
-            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer('" + (this.exec_settings_nshost !== '' ? this.exec_settings_nshost : this.editor.workflowblock.project_nshost) + "', " + (this.exec_settings_nsport !== '' ? this.exec_settings_nsport : this.editor.workflowblock.project_nsport) + ")");
+            let conn_info = "";
+            if(this.editor.workflowblock.project_nshost && this.editor.workflowblock.project_nsport)
+                conn_info = "nshost='" + this.editor.workflowblock.project_nshost + "', nsport=" + this.editor.workflowblock.project_nsport + "";
+            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer(" + conn_info + ")");
             code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
             code.push("try:");
             code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
             code.push("\tlog.info(self." + this.code_name + ")");
             code.push("except Exception as e:");
             code.push("\tlog.exception(e)");
-            
-            let loc_file_id = this.editor.workflowblock.inp_file_id;
-            
-            if(0) {
-                for (let fi = 0; fi < this.input_file_name.length; fi++) {
-
-                    // code.push("pf = self." + this.code_name + "_jobman.getPyroFile(self." + this.code_name + ".getJobID(), '" + this.input_file_name[fi] + "', 'wb')");
-                    // code.push("mupif.pyroutil.uploadPyroFile('" + this.input_file_name[fi] + "', pf)");
-
-                    code.push("pf = self." + this.code_name + "_jobman.getPyroFile(self." + this.code_name + ".getJobID(), files[" + loc_file_id + "], 'wb')");
-                    code.push("mupif.pyroutil.uploadPyroFile(files[" + loc_file_id + "], pf)");
-                    loc_file_id++;
-                }
-            }
             
         }else{
             if (this.model_module !== "undefined" && this.model_module !== "")

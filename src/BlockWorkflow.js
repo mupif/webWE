@@ -11,17 +11,11 @@ class BlockWorkflow extends Block{
 
         this.exec_type = "Local";
         this.exec_settings_jobmanagername = "";
-        this.exec_settings_nsport = "";
-        this.exec_settings_nshost = "";
 
-        this.project_nshost = '127.0.0.1';// default localhost
-        this.project_nsport = '0';// zero can be default to search all ports for nameserver
+        this.project_nshost = '';// nshost is set by environment variables by default
+        this.project_nsport = '';// nsport is set by environment variables by default
 
         this.jobman_name = '';
-        this.jobman_server_host = '';// default localhost
-        this.jobman_server_port = '';
-        this.jobman_nshost = '';
-        this.jobman_nsport = '';
         
         this.script_name_base = '';
     }
@@ -94,7 +88,10 @@ class BlockWorkflow extends Block{
             code.push("if __name__ == '__main__':");
             code.push("\t# code to run the jobmanager server");
             code.push("");
-            code.push("\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
+            let conn_info = "";
+            if(this.project_nshost && this.project_nsport)
+                conn_info = "nshost='" + this.project_nshost + "', nsport=" + this.project_nsport + "";
+            code.push("\tns = mupif.pyroutil.connectNameServer(" + conn_info + ")");
             code.push("");
             code.push("\tjobMan = mupif.SimpleJobManager(");
             code.push("\t\tns=ns,");
@@ -168,9 +165,7 @@ class BlockWorkflow extends Block{
                 code.push("\t\t\t\"Execution_settings\": {");
                 code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
                 if (this.exec_type === 'Distributed') {
-                    code.push("\t\t\t\t\"jobManName\": \"" + this.jobman_name + "\",");
-                    code.push("\t\t\t\t\"nshost\": \"" + this.jobman_nshost + "\",");
-                    code.push("\t\t\t\t\"nsport\": \"" + this.jobman_nsport + "\"");
+                    code.push("\t\t\t\t\"jobManName\": \"" + this.jobman_name + "\"");
                 }
                 code.push("\t\t\t},");
             }
@@ -258,8 +253,10 @@ class BlockWorkflow extends Block{
 
             code.push("");
 
-            // code.push("\t\tns = mupif.pyroutil.connectNameServer(nshost='"+this.editor.getJobmanNSHost()+"', nsport="+this.editor.getJobmanNSPort()+")");
-            code.push("\t\tns = mupif.pyroutil.connectNameServer()");
+            let conn_info = "";
+            if(this.project_nshost && this.project_nsport)
+                conn_info = "nshost='" + this.project_nshost + "', nsport=" + this.project_nsport + "";
+            code.push("\t\tns = mupif.pyroutil.connectNameServer(" + conn_info + ")");
             code.push("\t\tself.daemon = mupif.pyroutil.getDaemon(ns)");
             
             // setting of the inputs for initialization
@@ -447,22 +444,6 @@ class BlockWorkflow extends Block{
         if(this.jobman_name) {
             jobman_to_save = true;
             jobman_settings['name'] = this.jobman_name;
-        }
-        if(this.jobman_server_host) {
-            jobman_to_save = true;
-            jobman_settings['server_host'] = this.jobman_server_host;
-        }
-        if(this.jobman_server_port) {
-            jobman_to_save = true;
-            jobman_settings['server_port'] = this.jobman_server_port;
-        }
-        if(this.jobman_nshost) {
-            jobman_to_save = true;
-            jobman_settings['nshost'] = this.jobman_nshost;
-        }
-        if(this.jobman_nsport) {
-            jobman_to_save = true;
-            jobman_settings['nsport'] = this.jobman_nsport;
         }
         
         if(jobman_to_save)

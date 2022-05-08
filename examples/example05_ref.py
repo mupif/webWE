@@ -19,9 +19,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
             "Description": "",
             "Execution_settings": {
                 "Type": "Distributed",
-                "jobManName": "ThermoMechanicalClassWorkflow_02_jobman",
-                "nshost": "",
-                "nsport": ""
+                "jobManName": "ThermoMechanicalClassWorkflow_02_jobman"
             },
             "Inputs": [
                 {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.DataID.PID_Temperature", "Obj_ID": "top_temperature", "Units": "degC", "Set_at": "timestep", "ValueType": "Scalar"},

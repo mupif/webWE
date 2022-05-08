@@ -225,12 +225,6 @@ class WorkflowEditor{
                     this.workflowblock.project_nsport = json_data['settings']['project_nsport'];
                 if('jobman_settings' in json_data['settings']){
                     this.workflowblock.jobman_name = json_data['settings']['jobman_settings']['name'];
-                    this.workflowblock.jobman_server_host = json_data['settings']['jobman_settings']['server_host'];
-                    this.workflowblock.jobman_server_port = json_data['settings']['jobman_settings']['server_port'];
-                    if('nshost' in json_data['settings']['jobman_settings'])
-                        this.workflowblock.jobman_nshost = json_data['settings']['jobman_settings']['nshost'];
-                    if('nsport' in json_data['settings']['jobman_settings'])
-                        this.workflowblock.jobman_nsport = json_data['settings']['jobman_settings']['nsport'];
                 }
                 if('connection_type' in json_data['settings'])
                     this.workflowblock.exec_type = json_data['settings']['connection_type'];
@@ -270,26 +264,6 @@ class WorkflowEditor{
     
     getJobmanName(){
         return this.workflowblock.jobman_name;
-    }
-
-    getJobmanServerHost(){
-        return this.workflowblock.jobman_server_host;
-    }
-
-    getJobmanServerPort(){
-        return this.workflowblock.jobman_server_port;
-    }
-
-    getJobmanNSHost(){
-        if(this.workflowblock.jobman_nshost !== '')
-            return this.workflowblock.jobman_nshost;
-        return this.workflowblock.project_nshost;
-    }
-
-    getJobmanNSPort(){
-        if(this.workflowblock.jobman_nsport !== '')
-            return this.workflowblock.jobman_nsport;
-        return this.workflowblock.project_nsport;
     }
 
     selectSettingsAndUpdate(){
