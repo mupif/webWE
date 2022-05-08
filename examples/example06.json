@@ -114,7 +114,8 @@
                         "Type_ID": "mupif.DataID.PID_Temperature",
                         "Obj_ID": "top_temperature",
                         "Units": "",
-                        "Set_at": "timestep"
+                        "Set_at": "timestep",
+                        "ValueType": "Scalar"
                     },
                     {
                         "Name": "input_file_thermal",

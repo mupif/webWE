@@ -46,7 +46,17 @@ module.exports = {
                                             "Required": {"type": "boolean"},
                                             "Set_at": {"type": "string", "enum": ["initialization", "timestep"]}
                                         },
-                                        "required": ["Name", "Type_ID", "Type", "Required", "Set_at"]
+                                        "required": ["Name", "Type_ID", "Type", "Required", "Set_at"],
+                                        "anyOf": [
+                                            {"required": ["ValueType"]},
+                                            {
+                                                "not": {
+                                                    "properties": {
+                                                        "Type": {"const": "mupif.Property"}
+                                                    }
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 "Outputs": {
@@ -59,7 +69,17 @@ module.exports = {
                                             "Type": {"type": "string"},
                                             "Obj_ID": {"type": ["array", "string", "number"]}
                                         },
-                                        "required": ["Name", "Type_ID", "Type"]
+                                        "required": ["Name", "Type_ID", "Type"],
+                                        "anyOf": [
+                                            {"required": ["ValueType"]},
+                                            {
+                                                "not": {
+                                                    "properties": {
+                                                        "Type": {"const": "mupif.Property"}
+                                                    }
+                                                }
+                                            }
+                                        ]
                                     }
                                 },
                                 "Execution_settings": {
