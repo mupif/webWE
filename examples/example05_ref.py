@@ -10,7 +10,7 @@ log = logging.getLogger()
 @Pyro5.api.expose
 class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
 
-    def __init__(self, metadata={}):
+    def __init__(self, metadata=None):
         MD = {
             "ClassName": "ThermoMechanicalClassWorkflow_02",
             "ModuleName": "",
@@ -63,7 +63,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
         self.constant_property_1 = mupif.property.ConstantProperty(value=0.0, propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
 
 
-    def initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):
+    def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
         ns = mupif.pyroutil.connectNameServer()

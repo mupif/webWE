@@ -11,7 +11,7 @@ log = logging.getLogger()
 @Pyro5.api.expose
 class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
 
-    def __init__(self, metadata={}):
+    def __init__(self, metadata=None):
         MD = {
             "ClassName": "ThermoMechanicalExecutionWorkflow_01",
             "ModuleName": "example01",
@@ -69,7 +69,7 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
         self.input_file_2 = mupif.PyroFile(filename='inputM.in', mode='rb')
 
 
-    def initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):
+    def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
         ns = mupif.pyroutil.connectNameServer()

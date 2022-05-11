@@ -1623,7 +1623,7 @@ class BlockWorkflow extends Block{
             // --------------------------------------------------
 
             code.push("");
-            code.push("\tdef __init__(self, metadata={}):");
+            code.push("\tdef __init__(self, metadata=None):");
 
             code.push("\t\tMD = {");
             code.push("\t\t\t\"ClassName\": \"" + this.project_classname + "\",");
@@ -1719,7 +1719,7 @@ class BlockWorkflow extends Block{
             // --------------------------------------------------
 
             code.push("");
-            code.push("\tdef initialize(self, workdir='', metadata={}, validateMetaData=True, **kwargs):");
+            code.push("\tdef initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):");
             code.push("\t\tsuper().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)");
 
             code.push("");
