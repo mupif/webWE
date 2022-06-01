@@ -177,12 +177,12 @@ class BlockModel extends Block {
                     obj_id = this.input_slots[i].obj_id;
                     if (typeof obj_id === 'string')
                         obj_id = "'" + obj_id + "'";
-                    code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                    code.push("self.getModel('" + this.code_name + "').set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
                 }
             }
         }
 
-        code.push("self." + this.code_name + ".solveStep(" + timestep + ")");
+        code.push("self.getModel('" + this.code_name + "').solveStep(" + timestep + ")");
 
         return push_indents_before_each_line(code, indent);
     }
@@ -217,7 +217,7 @@ class BlockModel extends Block {
                 obj_id = "'" + slot.obj_id + "'";
             else
                 obj_id = slot.obj_id;
-            return "self." + this.code_name + ".get(" + slot.getDataID() + ", " + time + ", " + obj_id + ")";
+            return "self.getModel('" + this.code_name + "').get(" + slot.getDataID() + ", " + time + ", " + obj_id + ")";
         }
         return "None";
     }

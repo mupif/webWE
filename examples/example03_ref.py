@@ -69,9 +69,9 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
         ns = mupif.pyroutil.connectNameServer()
         self.daemon = mupif.pyroutil.getDaemon(ns)
 
-        self.model_1.set(self.input_file_1, 'input_file_thermal')
+        self.getModel('model_1').set(self.input_file_1, 'input_file_thermal')
 
-        self.model_1.set(self.input_file_2, 'input_file_mechanical')
+        self.getModel('model_1').set(self.input_file_2, 'input_file_mechanical')
 
     def solve(self, runInBackground=False):
         pass
@@ -93,16 +93,16 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
             timeloop_1_time_step = mupif.timestep.TimeStep(time=timeloop_1_time, dt=timeloop_1_dt, targetTime=timeloop_1_target_time, number=timeloop_1_time_step_number)
             
             # execution code of model_1 (Thermo-mechanical class workflow)
-            self.model_1.set(self.constant_property_1, 'top_temperature')
-            self.model_1.solveStep(timeloop_1_time_step)
+            self.getModel('model_1').set(self.constant_property_1, 'top_temperature')
+            self.getModel('model_1').solveStep(timeloop_1_time_step)
             
             # execution code of model_2 (Field export to image)
-            self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), '')
-            self.model_2.solveStep(timeloop_1_time_step)
+            self.getModel('model_2').set(self.getModel('model_1').get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), '')
+            self.getModel('model_2').solveStep(timeloop_1_time_step)
             
             # execution code of model_3 (Field export to image)
-            self.model_3.set(self.model_1.get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), '')
-            self.model_3.solveStep(timeloop_1_time_step)
+            self.getModel('model_3').set(self.getModel('model_1').get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), '')
+            self.getModel('model_3').solveStep(timeloop_1_time_step)
         
 
 

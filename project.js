@@ -898,12 +898,12 @@ class BlockModel extends Block {
                     obj_id = this.input_slots[i].obj_id;
                     if (typeof obj_id === 'string')
                         obj_id = "'" + obj_id + "'";
-                    code.push("self." + this.code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                    code.push("self.getModel('" + this.code_name + "').set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
                 }
             }
         }
 
-        code.push("self." + this.code_name + ".solveStep(" + timestep + ")");
+        code.push("self.getModel('" + this.code_name + "').solveStep(" + timestep + ")");
 
         return push_indents_before_each_line(code, indent);
     }
@@ -938,7 +938,7 @@ class BlockModel extends Block {
                 obj_id = "'" + slot.obj_id + "'";
             else
                 obj_id = slot.obj_id;
-            return "self." + this.code_name + ".get(" + slot.getDataID() + ", " + time + ", " + obj_id + ")";
+            return "self.getModel('" + this.code_name + "').get(" + slot.getDataID() + ", " + time + ", " + obj_id + ")";
         }
         return "None";
     }
@@ -1745,7 +1745,7 @@ class BlockWorkflow extends Block{
                                 if (typeof obj_id === 'string')
                                     obj_id = "'" + obj_id + "'";
                                 code.push("");
-                                code.push("\t\tself." + allBlocksRecursive[i].code_name + ".set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                                code.push("\t\tself.getModel('" + allBlocksRecursive[i].code_name + "').set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
                             }
                         }
                     }
@@ -1778,7 +1778,7 @@ class BlockWorkflow extends Block{
                                 if(s.type === "mupif.PyroFile"){
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
-                                    code.push("\t\t\t\tself." + linked_model.getCodeName() + ".set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
+                                    code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
                                 }else
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                             }

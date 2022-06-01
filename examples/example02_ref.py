@@ -76,10 +76,10 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
             pass
             if objectID == 'input_file_thermal':
                 self.external_input_2 = obj
-                self.model_1.set(self.external_input_2, 'input_file_thermal_nonstat')
+                self.getModel('model_1').set(self.external_input_2, 'input_file_thermal_nonstat')
             if objectID == 'input_file_mechanical':
                 self.external_input_3 = obj
-                self.model_2.set(self.external_input_3, 'input_file_mechanical')
+                self.getModel('model_2').set(self.external_input_3, 'input_file_mechanical')
 
         # in case of mupif.Property
         if obj.isInstance(mupif.Property):
@@ -94,9 +94,9 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
     # get method for all external outputs
     def get(self, objectTypeID, time=None, objectID=0):
         if objectID == 'temperature':
-            return self.model_1.get(mupif.DataID.FID_Temperature, time, '')
+            return self.getModel('model_1').get(mupif.DataID.FID_Temperature, time, '')
         if objectID == 'displacement':
-            return self.model_2.get(mupif.DataID.FID_Displacement, time, '')
+            return self.getModel('model_2').get(mupif.DataID.FID_Displacement, time, '')
 
         return None
 
@@ -104,13 +104,13 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
         pass
         
         # execution code of model_1 (Non-stationary thermal problem)
-        self.model_1.set(self.external_input_1, 'Cauchy top')
-        self.model_1.set(self.constant_property_1, 'Dirichlet bottom')
-        self.model_1.set(self.constant_property_1, 'Dirichlet left')
-        self.model_1.solveStep(tstep)
+        self.getModel('model_1').set(self.external_input_1, 'Cauchy top')
+        self.getModel('model_1').set(self.constant_property_1, 'Dirichlet bottom')
+        self.getModel('model_1').set(self.constant_property_1, 'Dirichlet left')
+        self.getModel('model_1').solveStep(tstep)
         
         # execution code of model_2 (Plane stress linear elastic)
-        self.model_2.set(self.model_1.get(mupif.DataID.FID_Temperature, tstep.getTime(), ''), '')
-        self.model_2.solveStep(tstep)
+        self.getModel('model_2').set(self.getModel('model_1').get(mupif.DataID.FID_Temperature, tstep.getTime(), ''), '')
+        self.getModel('model_2').solveStep(tstep)
 
 
