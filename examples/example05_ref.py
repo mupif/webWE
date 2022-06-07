@@ -62,7 +62,6 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
         # __init__ code of constant_property_1 (Property)
         self.constant_property_1 = mupif.property.ConstantProperty(value=0.0, propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit=mupif.U.deg_C, time=None)
 
-
     def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
@@ -70,7 +69,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
         self.daemon = mupif.pyroutil.getDaemon(ns)
 
     # set method for all external inputs
-    def set(self, obj, objectID=0):
+    def set(self, obj, objectID=''):
 
         # in case of mupif.PyroFile
         if obj.isInstance(mupif.PyroFile):
@@ -93,7 +92,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
             pass
 
     # get method for all external outputs
-    def get(self, objectTypeID, time=None, objectID=0):
+    def get(self, objectTypeID, time=None, objectID=''):
         if objectID == 'temperature':
             return self.getModel('model_1').get(mupif.DataID.FID_Temperature, time, '')
         if objectID == 'displacement':

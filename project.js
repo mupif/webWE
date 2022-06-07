@@ -1712,8 +1712,6 @@ class BlockWorkflow extends Block{
             for (let i = 0; i < allBlocksRecursive.length; i++)
                 extend_array(code, allBlocksRecursive[i].getInitCode(2));
             
-            code.push("");
-            
             // --------------------------------------------------
             // initialize function
             // --------------------------------------------------
@@ -1760,7 +1758,7 @@ class BlockWorkflow extends Block{
 
                 code.push("");
                 code.push("\t# set method for all external inputs");
-                code.push("\tdef set(self, obj, objectID=0):");
+                code.push("\tdef set(self, obj, objectID=''):");
 
                 let linked_model;
                 let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field"];
@@ -1772,16 +1770,17 @@ class BlockWorkflow extends Block{
                     slots = this.getAllExternalDataSlots("out");
                     for (let i = 0; i < slots.length; i++) {
                         s = slots[i];
-                        if (s.connected())
+                        if (s.connected()) {
                             if (s.type === value_types[vi]) {
                                 code.push("\t\t\tif objectID == '" + s.name + "':");
-                                if(s.type === "mupif.PyroFile"){
+                                if (s.type === "mupif.PyroFile") {
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
                                     code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
-                                }else
+                                } else
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                             }
+                        }
                     }
                 }
                 
@@ -1791,14 +1790,15 @@ class BlockWorkflow extends Block{
 
                 code.push("");
                 code.push("\t# get method for all external outputs");
-                code.push("\tdef get(self, objectTypeID, time=None, objectID=0):");
+                code.push("\tdef get(self, objectTypeID, time=None, objectID=''):");
 
                 slots = this.getAllExternalDataSlots("in");
                 for (let i = 0; i < slots.length; i++) {
                     s = slots[i];
-                    if (s.connected())
+                    if (s.connected()) {
                         code.push("\t\tif objectID == '" + s.name + "':");
-                        code.push("\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'))
+                        code.push("\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'));
+                    }
                 }
 
                 code.push("");

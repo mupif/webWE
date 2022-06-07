@@ -68,7 +68,6 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
         # __init__ code of input_file_2 (InputFile)
         self.input_file_2 = mupif.PyroFile(filename='inputM.in', mode='rb')
 
-
     def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
