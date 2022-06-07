@@ -300,9 +300,9 @@ class BlockWorkflow extends Block{
                     for (let i = 0; i < slots.length; i++) {
                         s = slots[i];
                         if (s.connected()) {
-                            if (s.type === value_types[vi]) {
+                            if (s.getLinkedDataSlot().type === value_types[vi]) {
                                 code.push("\t\t\tif objectID == '" + s.name + "':");
-                                if (s.type === "mupif.PyroFile") {
+                                if (s.getLinkedDataSlot().type === "mupif.PyroFile") {
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
                                     code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
