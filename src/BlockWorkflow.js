@@ -107,6 +107,100 @@ class BlockWorkflow extends Block{
         return '';
     }
     
+    generateMetadata(class_code){
+        if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
+            let num_of_external_input_dataslots = 0;
+
+            this.generateAllElementCodeNames();
+
+            let all_model_blocks = this.getBlocksRecursive(BlockModel);
+            let child_blocks = this.getBlocks();
+            let model;
+
+            let code = [];
+
+            let model_blocks = this.getBlocksRecursive(BlockModel);
+            let imported_modules = [];
+            for (let i = 0; i < model_blocks.length; i++) {
+                if (model_blocks[i].model_module !== "") {
+                    if (!imported_modules.includes(model_blocks[i].model_module)) {
+                        code.push("import " + model_blocks[i].model_module);
+                        imported_modules.push(model_blocks[i].model_module);
+                    }
+                }
+            }
+
+            code.push("{");
+            code.push("\t\"ClassName\": \"" + this.project_classname + "\",");
+            code.push("\t\"ModuleName\": \"" + this.project_modulename + "\",");
+            code.push("\t\"Name\": \"" + this.project_name + "\",");
+            code.push("\t\"ID\": \"" + this.project_id + "\",");
+            code.push("\t\"Description\": \"\",");
+
+            if (class_code) {
+                code.push("\t\"Execution_settings\": {");
+                code.push("\t\t\"Type\": \"" + this.exec_type + "\",");
+                if (this.exec_type === 'Distributed') {
+                    code.push("\t\t\"jobManName\": \"" + this.jobman_name + "\"");
+                }
+                code.push("\t},");
+            }
+
+
+            let slots;
+            let params;
+            let s;
+            code.push("\t\"Inputs\": [");
+            slots = this.getAllExternalDataSlots("out");
+            for (let i = 0; i < slots.length; i++) {
+                s = slots[i];
+                if (s.connected()) {
+                    num_of_external_input_dataslots += 1;
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
+                        "\"Required\": True, \"description\": \"\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
+                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
+                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
+                        "\"Set_at\": \"" + (s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep') + "\"";
+                    if (s.getLinkedDataSlot().type === 'mupif.Property')
+                        params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
+                    code.push("\t\t{" + params + "},");
+                }
+            }
+            code.push("\t],");
+
+            code.push("\t\"Outputs\": [");
+            slots = this.getAllExternalDataSlots("in");
+            for (let i = 0; i < slots.length; i++) {
+                s = slots[i];
+                if (s.connected()) {
+                    num_of_external_input_dataslots += 1;
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
+                        "\"description\": \"\", " +
+                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
+                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
+                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
+                    if (s.getLinkedDataSlot().type === 'mupif.Property')
+                        params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
+                    code.push("\t\t{" + params + "},");
+                }
+            }
+            code.push("\t],");
+
+            code.push("\t\"Models\": [");
+            for (let i = 0; i < all_model_blocks.length; i++) {
+                model = all_model_blocks[i];
+                extend_array(code, all_model_blocks[i].getAllocationMetadata(4));
+            }
+            code.push("\t],");
+
+            code.push("}");
+            return replace_tabs_with_spaces_for_each_line(code);
+        }
+        return [];
+        
+    }
+    
     generateCode(class_code){
         
         console.log('Generating Python code.');
