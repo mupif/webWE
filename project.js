@@ -813,7 +813,7 @@ class BlockModel extends Block {
                 name = md['Outputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', md['Inputs'][i]['Units'], vt));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', '', md['Inputs'][i]['Units'], vt));// + '(' + md['Outputs'][i]['Type'] + ', ' + md['Outputs'][i]['Type_ID'] + ')'
             }
         }
     }
@@ -1651,13 +1651,13 @@ class BlockWorkflow extends Block{
                 s = slots[i];
                 if (s.connected()) {
                     num_of_external_input_dataslots += 1;
-                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
-                    if(s.type === 'mupif.Property')
+                    if(s.getLinkedDataSlot().type === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "},");
                 }
@@ -1670,11 +1670,13 @@ class BlockWorkflow extends Block{
                 s = slots[i];
                 if (s.connected()) {
                     num_of_external_input_dataslots += 1;
-                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.type + "\", " +
+                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
+                    if(s.getLinkedDataSlot().type === 'mupif.Property')
+                        params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "},");
                 }
             }
