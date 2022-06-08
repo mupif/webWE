@@ -2,7 +2,6 @@ import mupif
 import copy
 import Pyro5
 import threading
-import mupif_examples_models
 import field_export
 import logging
 log = logging.getLogger()

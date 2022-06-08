@@ -1694,7 +1694,7 @@ class BlockWorkflow extends Block{
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
             for (let i = 0; i < model_blocks.length; i++) {
-                if (model_blocks[i].model_module !== "") {
+                if (model_blocks[i].model_module !== "" && model_blocks[i].exec_type === "Local") {
                     if (!imported_modules.includes(model_blocks[i].model_module)) {
                         code.push("import " + model_blocks[i].model_module);
                         imported_modules.push(model_blocks[i].model_module);
