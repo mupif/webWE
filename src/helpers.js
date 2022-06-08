@@ -49,3 +49,9 @@ function getTextValueFromUser(message, def_val){
     }
     return val;
 }
+
+function addCommaToLastLine(code_lines){
+    let len = code_lines.length;
+    code_lines[len-1] = code_lines[len-1] + ",";
+    return code_lines;
+}

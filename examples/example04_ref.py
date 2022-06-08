@@ -24,24 +24,24 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
             ],
             "Models": [
                 {
-                    'Name': 'model_1',
-                    'Jobmanager': 'JobMan_ThermalNonstat',
+                    "Name": "model_1",
+                    "Jobmanager": "JobMan_ThermalNonstat"
+                },,
+                {
+                    "Name": "model_2",
+                    "Jobmanager": "JobMan_ThermalNonstat"
+                },,
+                {
+                    "Name": "model_3",
+                    "Module": "field_export",
+                    "Class": "field_export_to_image"
                 },
                 {
-                    'Name': 'model_2',
-                    'Jobmanager': 'JobMan_ThermalNonstat',
-                },
-                {
-                    'Name': 'model_3',
-                    'Module': 'field_export',
-                    'Class': 'field_export_to_image',
-                },
-                {
-                    'Name': 'model_4',
-                    'Module': 'field_export',
-                    'Class': 'field_export_to_image',
-                },
-            ],
+                    "Name": "model_4",
+                    "Module": "field_export",
+                    "Class": "field_export_to_image"
+                }
+            ]
         }
         super().__init__(metadata=MD)
         self.updateMetadata(metadata)

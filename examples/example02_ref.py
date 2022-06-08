@@ -18,29 +18,29 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
             "ID": "thermomechanical_class_workflow_01",
             "Description": "",
             "Execution_settings": {
-                "Type": "Local",
+                "Type": "Local"
             },
             "Inputs": [
                 {"Name": "top_temperature", "Type": "mupif.Property", "Required": True, "description": "", "Type_ID": "mupif.DataID.PID_Temperature", "Obj_ID": "top_temperature", "Units": "degC", "Set_at": "timestep", "ValueType": "Scalar"},
                 {"Name": "input_file_thermal", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_thermal", "Units": "none", "Set_at": "initialization"},
-                {"Name": "input_file_mechanical", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_mechanical", "Units": "none", "Set_at": "initialization"},
+                {"Name": "input_file_mechanical", "Type": "mupif.PyroFile", "Required": True, "description": "", "Type_ID": "mupif.DataID.ID_InputFile", "Obj_ID": "input_file_mechanical", "Units": "none", "Set_at": "initialization"}
             ],
             "Outputs": [
                 {"Name": "temperature", "Type": "mupif.Field", "description": "", "Type_ID": "mupif.DataID.FID_Temperature", "Obj_ID": "temperature", "Units": "degC"},
-                {"Name": "displacement", "Type": "mupif.Field", "description": "", "Type_ID": "mupif.DataID.FID_Displacement", "Obj_ID": "displacement", "Units": "degC"},
+                {"Name": "displacement", "Type": "mupif.Field", "description": "", "Type_ID": "mupif.DataID.FID_Displacement", "Obj_ID": "displacement", "Units": "degC"}
             ],
             "Models": [
                 {
-                    'Name': 'model_1',
-                    'Module': 'mupif_examples_models',
-                    'Class': 'ThermalNonstatModel',
+                    "Name": "model_1",
+                    "Module": "mupif_examples_models",
+                    "Class": "ThermalNonstatModel"
                 },
                 {
-                    'Name': 'model_2',
-                    'Module': 'mupif_examples_models',
-                    'Class': 'MechanicalModel',
-                },
-            ],
+                    "Name": "model_2",
+                    "Module": "mupif_examples_models",
+                    "Class": "MechanicalModel"
+                }
+            ]
         }
         super().__init__(metadata=MD)
         self.updateMetadata(metadata)

@@ -42,12 +42,24 @@ if(process.argv.length >= 4) {
         editor.loadFromJsonData(json_data);
 
         let code;
+        let metadata = null;
         if(workflow_type === "exec")
             code = editor.getExecutionCode();
-        else if(workflow_type === "class")
+        else if(workflow_type === "class") {
             code = editor.getClassCode();
+            metadata = editor.getMetadata();
+        }
         else if(workflow_type === "server")
             code = editor.getServerCode();
+
+        if(metadata) {
+            fs.writeFile(__dirname + "/" + filename_base + "_md.json", metadata, err => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+            });
+        }
 
         console.log("Writing generated " + workflow_type + " code to file '" + filename_base + (workflow_type === "server" ? "_server" : "") + ".py'");
         fs.writeFile(__dirname + "/" + filename_base + (workflow_type === "server" ? "_server" : "") + ".py", code, err => {

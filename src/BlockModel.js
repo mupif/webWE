@@ -192,17 +192,17 @@ class BlockModel extends Block {
         if(this.exec_type === "Distributed") {
             code = [
                 "{",
-                "\t'Name': '" + this.code_name + "',",
-                "\t'Jobmanager': '" + this.exec_settings_jobmanagername + "',",
+                "\t\"Name\": \"" + this.code_name + "\",",
+                "\t\"Jobmanager\": \"" + this.exec_settings_jobmanagername + "\"",
                 "},"
             ];
         }else{
             code = [
                 "{",
-                "\t'Name': '" + this.code_name + "',",
-                "\t'Module': '" + this.model_module + "',",
-                "\t'Class': '" + this.model_name + "',",
-                "},"
+                "\t\"Name\": \"" + this.code_name + "\",",
+                "\t\"Module\": \"" + this.model_module + "\",",
+                "\t\"Class\": \"" + this.model_name + "\"",
+                "}"
             ];
         }
         return push_indents_before_each_line(code, indent);

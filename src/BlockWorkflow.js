@@ -79,7 +79,6 @@ class BlockWorkflow extends Block{
     }
 
     generateCodeForServer(){
-
         console.log('Generating Python code for server.');
         if(this.canGenerateCode('server')) {
             let code = ["import mupif", "import copy"];
@@ -109,96 +108,99 @@ class BlockWorkflow extends Block{
     
     generateMetadata(class_code){
         if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
-            let num_of_external_input_dataslots = 0;
 
             this.generateAllElementCodeNames();
 
             let all_model_blocks = this.getBlocksRecursive(BlockModel);
-            let child_blocks = this.getBlocks();
             let model;
 
             let code = [];
 
-            let model_blocks = this.getBlocksRecursive(BlockModel);
-            let imported_modules = [];
-            for (let i = 0; i < model_blocks.length; i++) {
-                if (model_blocks[i].model_module !== "") {
-                    if (!imported_modules.includes(model_blocks[i].model_module)) {
-                        code.push("import " + model_blocks[i].model_module);
-                        imported_modules.push(model_blocks[i].model_module);
-                    }
-                }
-            }
-
-            code.push("{");
-            code.push("\t\"ClassName\": \"" + this.project_classname + "\",");
-            code.push("\t\"ModuleName\": \"" + this.project_modulename + "\",");
-            code.push("\t\"Name\": \"" + this.project_name + "\",");
-            code.push("\t\"ID\": \"" + this.project_id + "\",");
-            code.push("\t\"Description\": \"\",");
+            // begin
+            code.push("\t\t\t\"ClassName\": \"" + this.project_classname + "\",");
+            code.push("\t\t\t\"ModuleName\": \"" + this.project_modulename + "\",");
+            code.push("\t\t\t\"Name\": \"" + this.project_name + "\",");
+            code.push("\t\t\t\"ID\": \"" + this.project_id + "\",");
+            code.push("\t\t\t\"Description\": \"\",");
 
             if (class_code) {
-                code.push("\t\"Execution_settings\": {");
-                code.push("\t\t\"Type\": \"" + this.exec_type + "\",");
+                code.push("\t\t\t\"Execution_settings\": {");
+                code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\"");
                 if (this.exec_type === 'Distributed') {
-                    code.push("\t\t\"jobManName\": \"" + this.jobman_name + "\"");
+                    code = addCommaToLastLine(code);
+                    code.push("\t\t\t\t\"jobManName\": \"" + this.jobman_name + "\"");
                 }
-                code.push("\t},");
+                code.push("\t\t\t},");
             }
-
 
             let slots;
             let params;
             let s;
-            code.push("\t\"Inputs\": [");
+            let n_slots_printed;
+            n_slots_printed = 0;
+            code.push("\t\t\t\"Inputs\": [");
             slots = this.getAllExternalDataSlots("out");
             for (let i = 0; i < slots.length; i++) {
                 s = slots[i];
                 if (s.connected()) {
-                    num_of_external_input_dataslots += 1;
+                    if (n_slots_printed)
+                        code = addCommaToLastLine(code);
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
-                        "\"Set_at\": \"" + (s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep') + "\"";
-                    if (s.getLinkedDataSlot().type === 'mupif.Property')
+                        "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
+                    if(s.getLinkedDataSlot().type === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
-                    code.push("\t\t{" + params + "},");
+                    code.push("\t\t\t\t{" + params + "}");
+                    n_slots_printed += 1;
                 }
             }
-            code.push("\t],");
+            code.push("\t\t\t],");
 
-            code.push("\t\"Outputs\": [");
+            n_slots_printed = 0;
+            code.push("\t\t\t\"Outputs\": [");
             slots = this.getAllExternalDataSlots("in");
             for (let i = 0; i < slots.length; i++) {
                 s = slots[i];
                 if (s.connected()) {
-                    num_of_external_input_dataslots += 1;
+                    if (n_slots_printed)
+                        code = addCommaToLastLine(code);
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
                         "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
-                    if (s.getLinkedDataSlot().type === 'mupif.Property')
+                    if(s.getLinkedDataSlot().type === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
-                    code.push("\t\t{" + params + "},");
+                    code.push("\t\t\t\t{" + params + "}");
+                    n_slots_printed += 1;
                 }
             }
-            code.push("\t],");
+            code.push("\t\t\t],");
 
-            code.push("\t\"Models\": [");
+            code.push("\t\t\t\"Models\": [");
             for (let i = 0; i < all_model_blocks.length; i++) {
+                if (i)
+                    code = addCommaToLastLine(code);
                 model = all_model_blocks[i];
                 extend_array(code, all_model_blocks[i].getAllocationMetadata(4));
             }
-            code.push("\t],");
+            code.push("\t\t\t]");
 
-            code.push("}");
-            return replace_tabs_with_spaces_for_each_line(code);
+            // end
+
+            return code;
         }
         return [];
-        
+    }
+
+    generateMetadataJson(){
+        let code = ["{"];
+        extend_array(code, replace_tabs_with_spaces_for_each_line(this.generateMetadata(true)));
+        code.push("}");
+        return code;
     }
     
     generateCode(class_code){
@@ -206,11 +208,8 @@ class BlockWorkflow extends Block{
         console.log('Generating Python code.');
         if(this.canGenerateCode(class_code ? 'class' : 'exec')) {
 
-            let num_of_external_input_dataslots = 0;
-
             this.generateAllElementCodeNames();
 
-            let all_model_blocks = this.getBlocksRecursive(BlockModel);
             let child_blocks = this.getBlocks();
             let model;
             
@@ -249,68 +248,11 @@ class BlockWorkflow extends Block{
             code.push("\tdef __init__(self, metadata=None):");
 
             code.push("\t\tMD = {");
-            code.push("\t\t\t\"ClassName\": \"" + this.project_classname + "\",");
-            code.push("\t\t\t\"ModuleName\": \"" + this.project_modulename + "\",");
-            code.push("\t\t\t\"Name\": \"" + this.project_name + "\",");
-            code.push("\t\t\t\"ID\": \"" + this.project_id + "\",");
-            code.push("\t\t\t\"Description\": \"\",");
 
-            if (class_code) {
-                code.push("\t\t\t\"Execution_settings\": {");
-                code.push("\t\t\t\t\"Type\": \"" + this.exec_type + "\",");
-                if (this.exec_type === 'Distributed') {
-                    code.push("\t\t\t\t\"jobManName\": \"" + this.jobman_name + "\"");
-                }
-                code.push("\t\t\t},");
-            }
-
+            extend_array(code, this.generateMetadata(class_code));
 
             let slots;
-            let params;
             let s;
-            code.push("\t\t\t\"Inputs\": [");
-            slots = this.getAllExternalDataSlots("out");
-            for (let i = 0; i < slots.length; i++) {
-                s = slots[i];
-                if (s.connected()) {
-                    num_of_external_input_dataslots += 1;
-                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
-                        "\"Required\": True, \"description\": \"\", " +
-                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
-                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
-                        "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
-                    if(s.getLinkedDataSlot().type === 'mupif.Property')
-                        params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
-                    code.push("\t\t\t\t{" + params + "},");
-                }
-            }
-            code.push("\t\t\t],");
-
-            code.push("\t\t\t\"Outputs\": [");
-            slots = this.getAllExternalDataSlots("in");
-            for (let i = 0; i < slots.length; i++) {
-                s = slots[i];
-                if (s.connected()) {
-                    num_of_external_input_dataslots += 1;
-                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
-                        "\"description\": \"\", " +
-                        "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
-                        "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
-                    if(s.getLinkedDataSlot().type === 'mupif.Property')
-                        params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
-                    code.push("\t\t\t\t{" + params + "},");
-                }
-            }
-            code.push("\t\t\t],");
-
-            code.push("\t\t\t\"Models\": [");
-            for (let i = 0; i < all_model_blocks.length; i++) {
-                model = all_model_blocks[i];
-                extend_array(code, all_model_blocks[i].getAllocationMetadata(4));
-            }
-            code.push("\t\t\t],");
 
             code.push("\t\t}");
             code.push("\t\tsuper().__init__(metadata=MD)");
