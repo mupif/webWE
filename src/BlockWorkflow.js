@@ -148,7 +148,7 @@ class BlockWorkflow extends Block{
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
+                        "\"Obj_ID\": \"" + s.name + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     if(s.getLinkedDataSlot().type === 'mupif.Property')
@@ -170,7 +170,7 @@ class BlockWorkflow extends Block{
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
+                        "\"Obj_ID\": \"" + s.name + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
                     if(s.getLinkedDataSlot().type === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
