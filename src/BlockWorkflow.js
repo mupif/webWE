@@ -328,7 +328,7 @@ class BlockWorkflow extends Block{
                 code.push("\tdef set(self, obj, objectID=''):");
 
                 let linked_model;
-                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field"];
+                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field", "mupif.HeavyStruct"];
                 for(let vi=0;vi<value_types.length;vi++){
                     code.push("");
                     code.push("\t\t# in case of " + value_types[vi]);
