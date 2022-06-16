@@ -92,7 +92,7 @@ class BlockModel extends Block {
                 name = md['Outputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', '', md['Inputs'][i]['Units'], vt));
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', '', md['Outputs'][i]['Units'], vt));
             }
         }
     }

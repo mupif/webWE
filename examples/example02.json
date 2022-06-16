@@ -62,7 +62,7 @@
                 "slot_1"
             ],
             "value": "0.0",
-            "units": "deg_C",
+            "units": "degC",
             "propID": "mupif.DataID.PID_Temperature",
             "valueType": "mupif.ValueType.Scalar"
         },

@@ -813,7 +813,7 @@ class BlockModel extends Block {
                 name = md['Outputs'][i]['Name'];
                 if (objid[ii] !== '')
                     name += ' [' + objid[ii] + ']';
-                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', '', md['Inputs'][i]['Units'], vt));
+                this.addOutputSlot(new Slot(this, 'out', name, name, md['Outputs'][i]['Type'], md['Outputs'][i]['Required'], md['Outputs'][i]['Type_ID'], objid[ii], '', '', md['Outputs'][i]['Units'], vt));
             }
         }
     }
@@ -1619,7 +1619,7 @@ class BlockWorkflow extends Block{
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
+                        "\"Obj_ID\": \"" + s.name + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
                     if(s.getLinkedDataSlot().type === 'mupif.Property')
@@ -1641,7 +1641,7 @@ class BlockWorkflow extends Block{
                     params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.getObjectID() + "\", " +
+                        "\"Obj_ID\": \"" + s.name + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
                     if(s.getLinkedDataSlot().type === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
@@ -2329,7 +2329,7 @@ let metaData_LAMMPS = {
         {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_FILLER_DESIGNATION", "Name": "FILLER DESIGNATION", "Description": "FILLER DESIGNATION", "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_CROSSLINKONG_DENSITY", "Name": "CROSSLINKONG DENSITY", "Description": "CROSSLINKONG DENSITY",  "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_FILLER_CONCENTRATION", "Name": "FILLER CONCENTRATION", "Description": "FILLER CONCENTRATION",  "Units":  "None", "Origin": "Simulated", "Required": true},
-        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "deg_C", "Origin": "Simulated", "Required": true},
+        {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_TEMPERATURE", "Name": "TEMPERATURE", "Description": "TEMPERATURE",  "Units":  "degC", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_PRESSURE", "Name": "PRESSURE", "Description": "TEMPERATURE",  "Units":  "atm", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_POLYDISPERSITY_INDEX", "Name": "POLYDISPERSITY INDEX", "Description": "POLYDISPERSITY INDEX",  "Units":  "None", "Origin": "Simulated", "Required": true},
         {"Type": "mupif.Property", "Type_ID": "mupif.DataID.PID_SMILE_MODIFIER_MOLECULAR_STRUCTURE", "Name": "SMILE MODIFIER MOLECULAR STRUCTURE", "Description": "SMILE MODIFIER MOLECULAR STRUCTURE",  "Units":  "None", "Origin": "Simulated", "Required": true},
@@ -3394,7 +3394,7 @@ let mupif_Units = [
     'Bq',
     'Gy',
     'Sv',
-    'deg_C',
+    'degC',
     'degF',
 ];
 
