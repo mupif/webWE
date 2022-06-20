@@ -25,11 +25,11 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
                 {
                     "Name": "model_1",
                     "Jobmanager": "JobMan_ThermalNonstat"
-                },,
+                },
                 {
                     "Name": "model_2",
                     "Jobmanager": "JobMan_ThermalNonstat"
-                },,
+                },
                 {
                     "Name": "model_3",
                     "Module": "field_export",

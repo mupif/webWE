@@ -25,7 +25,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
                 {
                     "Name": "model_1",
                     "Jobmanager": "ThermoMechanicalClassWorkflow_02_jobman"
-                },,
+                },
                 {
                     "Name": "model_2",
                     "Module": "field_export",

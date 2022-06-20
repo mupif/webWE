@@ -915,7 +915,7 @@ class BlockModel extends Block {
                 "{",
                 "\t\"Name\": \"" + this.code_name + "\",",
                 "\t\"Jobmanager\": \"" + this.exec_settings_jobmanagername + "\"",
-                "},"
+                "}"
             ];
         }else{
             code = [
