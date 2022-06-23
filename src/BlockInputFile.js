@@ -1,5 +1,5 @@
 class BlockInputFile extends Block{
-    constructor(editor, parent_block, filename){
+    constructor(editor, parent_block, filename=""){
         super(editor, parent_block);
         this.filename = filename;
         this.name = 'InputFile';
@@ -35,12 +35,12 @@ class BlockInputFile extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value', '', 'Input&nbsp;file'), 'Set');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_file', '', 'Input&nbsp;file'), 'Set');
     }
 
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_file') {
-            this.value = document.getElementById('myQuery_temp_val').value;
+            this.filename = document.getElementById('myQuery_temp_val').value;
             console.log('Value set to "'+this.filename+'"');
         }
         super.myquery_proceed(action, p1, p2);

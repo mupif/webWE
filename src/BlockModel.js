@@ -120,40 +120,7 @@ class BlockModel extends Block {
     }
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
-        let code = super.getInitializationCode();
-
-        // if(this.exec_type === "Distributed"){
-        //     code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
-        //     code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metadata=" + metaDataStr + ")");
-        // }else{
-        //     code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
-        // }
-
-        if(this.exec_type === "Distributed"){
-            let conn_info = "";
-            if(this.editor.workflowblock.project_nshost && this.editor.workflowblock.project_nsport)
-                conn_info = "nshost='" + this.editor.workflowblock.project_nshost + "', nsport=" + this.editor.workflowblock.project_nsport + "";
-            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer(" + conn_info + ")");
-            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
-            code.push("try:");
-            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
-            code.push("\tlog.info(self." + this.code_name + ")");
-            code.push("except Exception as e:");
-            code.push("\tlog.exception(e)");
-            
-        }else{
-            if (this.model_module !== "undefined" && this.model_module !== "")
-                code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
-            else
-                code.push("self." + this.code_name + " = " + this.model_name + "()");
-        }
-        
-        code.push("self." + this.code_name + ".initialize(workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
-        
-        
-        
-
-        return push_indents_before_each_line(code, indent)
+        return [];
     }
 
     getExecutionCode(indent = 0, timestep = "", solvefunc=false) {

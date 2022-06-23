@@ -294,6 +294,9 @@ class BlockWorkflow extends Block{
                 conn_info = "nshost='" + this.project_nshost + "', nsport=" + this.project_nsport + "";
             code.push("\t\tns = mupif.pyroutil.connectNameServer(" + conn_info + ")");
             code.push("\t\tself.daemon = mupif.pyroutil.getDaemon(ns)");
+
+            for (let i = 0; i < allBlocksRecursive.length; i++)
+                extend_array(code, allBlocksRecursive[i].getInitializationCode(2));
             
             // setting of the inputs for initialization
             let linked_slot;
@@ -340,12 +343,14 @@ class BlockWorkflow extends Block{
                         if (s.connected()) {
                             if (s.getLinkedDataSlot().type === value_types[vi]) {
                                 code.push("\t\t\tif objectID == '" + s.name + "':");
-                                if (s.getLinkedDataSlot().type === "mupif.PyroFile") {
-                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                                code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+
+                                if(s.getLinkedDataSlot().set_at === 'initialization') {
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
-                                    code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
-                                } else
-                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                                    if (linked_model instanceof BlockModel) {
+                                        code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')");
+                                    }
+                                }
                             }
                         }
                     }

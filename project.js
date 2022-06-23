@@ -56,6 +56,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'timeloop', 'Time&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'dowhile', 'DoWhile&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -338,6 +339,8 @@ class Block{
             block = new BlockDoWhile(this.editor, this);
         if (name === "model")
             block = new BlockModel(this.editor, this, {});
+        if (name === "file")
+            block = new BlockInputFile(this.editor, this, '');
 
 
         if (block !== null) {
@@ -625,7 +628,7 @@ class BlockDoWhile extends Block{
 }
 
 class BlockInputFile extends Block{
-    constructor(editor, parent_block, filename){
+    constructor(editor, parent_block, filename=""){
         super(editor, parent_block);
         this.filename = filename;
         this.name = 'InputFile';
@@ -661,12 +664,12 @@ class BlockInputFile extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value', '', 'Input&nbsp;file'), 'Set');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_file', '', 'Input&nbsp;file'), 'Set');
     }
 
     myquery_proceed(action, p1=null, p2=null){
         if(action==='set_file') {
-            this.value = document.getElementById('myQuery_temp_val').value;
+            this.filename = document.getElementById('myQuery_temp_val').value;
             console.log('Value set to "'+this.filename+'"');
         }
         super.myquery_proceed(action, p1, p2);
@@ -841,40 +844,7 @@ class BlockModel extends Block {
     }
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
-        let code = super.getInitializationCode();
-
-        // if(this.exec_type === "Distributed"){
-        //     code.push("loc_workdir = self." + this.code_name + ".getWorkDir() + '/' + self." + this.code_name + ".getJobID()");
-        //     code.push("self." + this.code_name + ".initialize(workdir=loc_workdir, metadata=" + metaDataStr + ")");
-        // }else{
-        //     code.push("self." + this.code_name + ".initialize(file='" + this.input_file_name + "', workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
-        // }
-
-        if(this.exec_type === "Distributed"){
-            let conn_info = "";
-            if(this.editor.workflowblock.project_nshost && this.editor.workflowblock.project_nsport)
-                conn_info = "nshost='" + this.editor.workflowblock.project_nshost + "', nsport=" + this.editor.workflowblock.project_nsport + "";
-            code.push("self." + this.code_name + "_nameserver = mupif.pyroutil.connectNameServer(" + conn_info + ")");
-            code.push("self." + this.code_name + "_jobman = mupif.pyroutil.connectJobManager(self." + this.code_name + "_nameserver, '" + this.exec_settings_jobmanagername + "')");
-            code.push("try:");
-            code.push("\tself." + this.code_name + " = mupif.pyroutil.allocateApplicationWithJobManager(ns=self."+this.code_name+"_nameserver, jobMan=self."+this.code_name+"_jobman)");
-            code.push("\tlog.info(self." + this.code_name + ")");
-            code.push("except Exception as e:");
-            code.push("\tlog.exception(e)");
-            
-        }else{
-            if (this.model_module !== "undefined" && this.model_module !== "")
-                code.push("self." + this.code_name + " = " + this.model_module + "." + this.model_name + "()");
-            else
-                code.push("self." + this.code_name + " = " + this.model_name + "()");
-        }
-        
-        code.push("self." + this.code_name + ".initialize(workdir='" + this.input_file_directory + "', metadata=" + metaDataStr + ")");
-        
-        
-        
-
-        return push_indents_before_each_line(code, indent)
+        return [];
     }
 
     getExecutionCode(indent = 0, timestep = "", solvefunc=false) {
@@ -1765,6 +1735,9 @@ class BlockWorkflow extends Block{
                 conn_info = "nshost='" + this.project_nshost + "', nsport=" + this.project_nsport + "";
             code.push("\t\tns = mupif.pyroutil.connectNameServer(" + conn_info + ")");
             code.push("\t\tself.daemon = mupif.pyroutil.getDaemon(ns)");
+
+            for (let i = 0; i < allBlocksRecursive.length; i++)
+                extend_array(code, allBlocksRecursive[i].getInitializationCode(2));
             
             // setting of the inputs for initialization
             let linked_slot;
@@ -1811,12 +1784,14 @@ class BlockWorkflow extends Block{
                         if (s.connected()) {
                             if (s.getLinkedDataSlot().type === value_types[vi]) {
                                 code.push("\t\t\tif objectID == '" + s.name + "':");
-                                if (s.getLinkedDataSlot().type === "mupif.PyroFile") {
-                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                                code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+
+                                if(s.getLinkedDataSlot().set_at === 'initialization') {
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
-                                    code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')"); //s.getCodeRepresentation() + " = obj");
-                                } else
-                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+                                    if (linked_model instanceof BlockModel) {
+                                        code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')");
+                                    }
+                                }
                             }
                         }
                     }

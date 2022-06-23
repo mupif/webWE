@@ -75,6 +75,12 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
 
         ns = mupif.pyroutil.connectNameServer()
         self.daemon = mupif.pyroutil.getDaemon(ns)
+        
+        # initialization code of input_file_1 (InputFile)
+        self.daemon.register(self.input_file_1)
+        
+        # initialization code of input_file_2 (InputFile)
+        self.daemon.register(self.input_file_2)
 
         self.getModel('model_1').set(self.input_file_1, 'input_file_thermal_nonstat')
 

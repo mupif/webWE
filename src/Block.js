@@ -51,6 +51,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'timeloop', 'Time&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'dowhile', 'DoWhile&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -333,6 +334,8 @@ class Block{
             block = new BlockDoWhile(this.editor, this);
         if (name === "model")
             block = new BlockModel(this.editor, this, {});
+        if (name === "file")
+            block = new BlockInputFile(this.editor, this, '');
 
 
         if (block !== null) {
