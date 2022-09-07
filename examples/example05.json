@@ -169,7 +169,9 @@
                     "Representation": "Finite volumes"
                 },
                 "Execution_settings": {
-                    "Type": "Local"
+                    "Type": "Local",
+                    "Class": "ThermalNonstatModel",
+                    "Module": "mupif_examples_models"
                 }
             },
             "model_working_directory": ""
@@ -258,7 +260,9 @@
                     "Representation": "Finite volumes"
                 },
                 "Execution_settings": {
-                    "Type": "Local"
+                    "Type": "Local",
+                    "Class": "MechanicalModel",
+                    "Module": "mupif_examples_models"
                 }
             },
             "model_working_directory": ""

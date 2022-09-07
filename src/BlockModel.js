@@ -16,30 +16,28 @@ class BlockModel extends Block {
     }
 
     loadDataFromMetadata() {
-        if ('ClassName' in this.md) {
-            this.name = this.md['ClassName'];
-            this.model_name = this.md['ClassName'];
-        } else {
-            if ('ID' in this.md)
-                this.name = 'Model | ' + this.md['ID'];// + ' | ' + this.md['Name']
-            else
-                this.name = 'Model';
-        }
-        if ('Name' in this.md) {
-            this.name = this.md['Name'];
-        }
-        if ('ModuleName' in this.md)
-            this.model_module = this.md['ModuleName'];
+        // backwards compatibitlity ?
+        // if ('ClassName' in this.md) {
+        //     this.name = this.md['ClassName'];
+        //     this.model_name = this.md['ClassName'];
+        // }
+        // if ('ModuleName' in this.md)
+        //     this.model_module = this.md['ModuleName'];
 
+        if ('Name' in this.md)
+            this.name = this.md['Name'];
+        
         this.exec_type = 'Local';
         if ('Execution_settings' in this.md) {
-            if ('Type' in this.md['Execution_settings']) {
-                if (this.md['Execution_settings']['Type'] === 'Distributed') {
+            if ('Type' in this.md['Execution_settings'])
+                if (this.md['Execution_settings']['Type'] === 'Distributed')
                     this.exec_type = this.md['Execution_settings']['Type'];
-                    if ('jobManName' in this.md['Execution_settings'])
-                        this.exec_settings_jobmanagername = this.md['Execution_settings']['jobManName'];
-                }
-            }
+            if ('jobManName' in this.md['Execution_settings'])
+                this.exec_settings_jobmanagername = this.md['Execution_settings']['jobManName'];
+            if ('Module' in this.md['Execution_settings'])
+                this.model_module = this.md['Execution_settings']['Module'];
+            if ('Class' in this.md['Execution_settings'])
+                this.model_name = this.md['Execution_settings']['Class'];
         }
     }
 

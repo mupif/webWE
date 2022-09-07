@@ -86,19 +86,36 @@ module.exports = {
                                     "type": "object",
                                     "properties": {
                                         "Type": {"type": "string", "enum": ["Local", "Distributed"]},
-                                        "jobManName": {"type": "string"}
+                                        "jobManName": {"type": "string"},
+                                        "Module": {"type": "string"},
+                                        "Class": {"type": "string"}
                                     },
                                     "anyOf": [
-                                        { "required": ["jobManName"] },
                                         {
-                                            "properties": {
-                                                "Type": { "const": "Local" }
-                                            }
+                                            "allOf": [
+                                                { "required": ["jobManName"] },
+                                                {
+                                                    "properties": {
+                                                        "Type": { "const": "Distributed" }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                { "required": ["Module", "Class"] },
+                                                {
+                                                    "properties": {
+                                                        "Type": { "const": "Local" }
+                                                    }
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
                             },
-                            "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs", "Execution_settings"]
+                            "required": ["Name", "ID", "Inputs", "Outputs", "Execution_settings"],
+                            // "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs", "Execution_settings"]
                         },
                         //"model_input_file_name": {"type": "array"},
                         "model_working_directory": {"type": "string"},

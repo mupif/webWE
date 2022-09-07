@@ -259,10 +259,10 @@ function loadTextFileFromServer(filename){
 }
 
 function checkMetaDataValidity(md){
-    if(!("ClassName" in md))
-        return false;
-    if(!("ModuleName" in md))
-        return false;
+    // if(!("ClassName" in md))
+    //     return false;
+    // if(!("ModuleName" in md))
+    //     return false;
     if(!("Name" in md))
         return false;
     if(!("ID" in md))
@@ -270,6 +270,8 @@ function checkMetaDataValidity(md){
     if(!("Inputs" in md))
         return false;
     if(!("Outputs" in md))
+        return false;
+    if(!("Execution_settings" in md))
         return false;
     return true;
 }
