@@ -94,6 +94,10 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
         if obj.isInstance(mupif.HeavyStruct):
             pass
 
+        # in case of mupif.String
+        if obj.isInstance(mupif.String):
+            pass
+
     # get method for all external outputs
     def get(self, objectTypeID, time=None, objectID=''):
         if objectID == 'temperature':
