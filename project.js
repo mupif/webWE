@@ -799,7 +799,7 @@ class BlockModel extends Block {
             objid = [''];
             vt = '';
             if ('ValueType' in md['Outputs'][i])
-                vt = md['Inputs'][i]['ValueType'];
+                vt = md['Outputs'][i]['ValueType'];
             if ('Obj_ID' in md['Outputs'][i]) {
                 if (typeof md['Outputs'][i]['Obj_ID'] == "string"){
                     objid = [md['Outputs'][i]['Obj_ID']];
