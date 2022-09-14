@@ -67,7 +67,7 @@ module.exports = {
                                             "Name": {"type": "string"},
                                             "Type_ID": {"type": "string"},
                                             "Type": {"type": "string"},
-                                            "Obj_ID": {"type": ["array", "string", "number"]}
+                                            "Obj_ID": {"type": ["array", "string"]}
                                         },
                                         "required": ["Name", "Type_ID", "Type"],
                                         "anyOf": [
@@ -114,10 +114,8 @@ module.exports = {
                                     ]
                                 }
                             },
-                            "required": ["Name", "ID", "Inputs", "Outputs", "Execution_settings"],
-                            // "required": ["ClassName", "ModuleName", "Name", "ID", "Inputs", "Outputs", "Execution_settings"]
+                            "required": ["Name", "ID", "Inputs", "Outputs", "Execution_settings"]
                         },
-                        //"model_input_file_name": {"type": "array"},
                         "model_working_directory": {"type": "string"},
                     },
                     "required": ["classname", "uid", "parent_uid"],
