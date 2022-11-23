@@ -65,7 +65,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
     def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
-        ns = mupif.pyroutil.connectNameServer()
+        ns = mupif.pyroutil.connectNameserver()
         self.daemon = mupif.pyroutil.getDaemon(ns)
         
         # initialization code of input_file_1 (InputFile)

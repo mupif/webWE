@@ -90,7 +90,7 @@ class BlockWorkflow extends Block{
             let conn_info = "";
             if(this.project_nshost && this.project_nsport)
                 conn_info = "nshost='" + this.project_nshost + "', nsport=" + this.project_nsport + "";
-            code.push("\tns = mupif.pyroutil.connectNameServer(" + conn_info + ")");
+            code.push("\tns = mupif.pyroutil.connectNameserver(" + conn_info + ")");
             code.push("");
             code.push("\tjobMan = mupif.SimpleJobManager(");
             code.push("\t\tns=ns,");
@@ -292,7 +292,7 @@ class BlockWorkflow extends Block{
             let conn_info = "";
             if(this.project_nshost && this.project_nsport)
                 conn_info = "nshost='" + this.project_nshost + "', nsport=" + this.project_nsport + "";
-            code.push("\t\tns = mupif.pyroutil.connectNameServer(" + conn_info + ")");
+            code.push("\t\tns = mupif.pyroutil.connectNameserver(" + conn_info + ")");
             code.push("\t\tself.daemon = mupif.pyroutil.getDaemon(ns)");
 
             for (let i = 0; i < allBlocksRecursive.length; i++)

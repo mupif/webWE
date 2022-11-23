@@ -5,7 +5,7 @@ import example05
 if __name__ == '__main__':
     # code to run the jobmanager server
 
-    ns = mupif.pyroutil.connectNameServer()
+    ns = mupif.pyroutil.connectNameserver()
 
     jobMan = mupif.SimpleJobManager(
         ns=ns,

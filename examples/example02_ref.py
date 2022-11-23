@@ -64,7 +64,7 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
     def initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):
         super().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)
 
-        ns = mupif.pyroutil.connectNameServer()
+        ns = mupif.pyroutil.connectNameserver()
         self.daemon = mupif.pyroutil.getDaemon(ns)
 
     # set method for all external inputs
