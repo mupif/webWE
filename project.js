@@ -58,6 +58,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_from_property', 'Quantity&nbsp;from&nbsp;Property'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -333,7 +334,7 @@ class Block{
         if (name === "physicalquantity")
             block = new BlockPhysicalQuantity(this.editor, this, 0, 'None');
         if (name === "property")
-            block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none');
+            block = new BlockProperty(this.editor, this, '0.', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none');
         if (name === "timeloop")
             block = new BlockTimeloop(this.editor, this);
         if (name === "dowhile")
@@ -344,6 +345,8 @@ class Block{
             block = new BlockInputFile(this.editor, this, '');
         if (name === "quantity_comparison")
             block = new BlockQuantityComparison(this.editor, this);
+        if (name === "quantity_from_property")
+            block = new BlockExtractorPhysicalQuantityFromProperty(this.editor, this);
 
 
         if (block !== null) {
@@ -1985,7 +1988,7 @@ class BlockWorkflow extends Block{
 class BlockQuantityComparison extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
-        this.name = 'QuantityComparison';
+        this.name = this.getClassName().replace('Block', '');
 
         this.addInputSlot(new Slot(this, 'in', 'a', 'a', 'mupif.Property', true, null));
         this.addInputSlot(new Slot(this, 'in', 'b', 'b', 'mupif.Property', true, null));
@@ -3807,6 +3810,12 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockExtractorPhysicalQuantityFromProperty'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockExtractorPhysicalQuantityFromProperty(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
 
         if(new_block != null){
             slots = new_block.getSlots('in');
@@ -4159,5 +4168,58 @@ class WorkflowEditor{
         this.generateWorkflowHtml();
     }
 
+
+}
+
+class BlockExtractorPhysicalQuantityFromProperty extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'property', 'property', 'mupif.Property', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'quantity', 'quantity', 'mupif.PhysicalQuantity', false));
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let prop_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
+        if(prop_slot != null) {
+            let prop = prop_slot.getParentBlock().generateOutputDataSlotGetFunction(prop_slot);
+            return prop + '.getValue()';
+        }
+        return 'None'
+    }
+
+    generateCodeName(all_blocks, base_name='quantity_from_property_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockExtractorPhysicalQuantityFromProperty';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_timeloop';
+    }
+
+    getBlockHtmlName(){
+        return 'Quantity from Property';
+    }
 
 }

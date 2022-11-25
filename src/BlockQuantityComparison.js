@@ -1,7 +1,7 @@
 class BlockQuantityComparison extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
-        this.name = 'QuantityComparison';
+        this.name = this.getClassName().replace('Block', '');
 
         this.addInputSlot(new Slot(this, 'in', 'a', 'a', 'mupif.Property', true, null));
         this.addInputSlot(new Slot(this, 'in', 'b', 'b', 'mupif.Property', true, null));

@@ -53,6 +53,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_from_property', 'Quantity&nbsp;from&nbsp;Property'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -328,7 +329,7 @@ class Block{
         if (name === "physicalquantity")
             block = new BlockPhysicalQuantity(this.editor, this, 0, 'None');
         if (name === "property")
-            block = new BlockProperty(this.editor, this, '(0.,)', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none');
+            block = new BlockProperty(this.editor, this, '0.', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none');
         if (name === "timeloop")
             block = new BlockTimeloop(this.editor, this);
         if (name === "dowhile")
@@ -339,6 +340,8 @@ class Block{
             block = new BlockInputFile(this.editor, this, '');
         if (name === "quantity_comparison")
             block = new BlockQuantityComparison(this.editor, this);
+        if (name === "quantity_from_property")
+            block = new BlockExtractorPhysicalQuantityFromProperty(this.editor, this);
 
 
         if (block !== null) {

@@ -192,6 +192,12 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockExtractorPhysicalQuantityFromProperty'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockExtractorPhysicalQuantityFromProperty(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
 
         if(new_block != null){
             slots = new_block.getSlots('in');
