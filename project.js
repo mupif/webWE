@@ -57,6 +57,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'dowhile', 'DoWhile&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -341,6 +342,8 @@ class Block{
             block = new BlockModel(this.editor, this, {});
         if (name === "file")
             block = new BlockInputFile(this.editor, this, '');
+        if (name === "quantity_comparison")
+            block = new BlockQuantityComparison(this.editor, this);
 
 
         if (block !== null) {
@@ -1975,6 +1978,71 @@ class BlockWorkflow extends Block{
         html += this.getBlockHtml_footer();
         html += this.getBlockHtml_menu();
         return html;
+    }
+
+}
+
+class BlockQuantityComparison extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = 'QuantityComparison';
+
+        this.addInputSlot(new Slot(this, 'in', 'a', 'a', 'mupif.Property', true, null));
+        this.addInputSlot(new Slot(this, 'in', 'b', 'b', 'mupif.Property', true, null));
+
+        this.addOutputSlot(new Slot(this, 'out', 'a > b', 'a > b', 'Bool', false));
+        this.addOutputSlot(new Slot(this, 'out', 'a >= b', 'a >= b', 'Bool', false));
+        this.addOutputSlot(new Slot(this, 'out', 'a == b', 'a == b', 'Bool', false));
+        this.addOutputSlot(new Slot(this, 'out', 'a != b', 'a != b', 'Bool', false));
+        this.addOutputSlot(new Slot(this, 'out', 'a <= b', 'a <= b', 'Bool', false));
+        this.addOutputSlot(new Slot(this, 'out', 'a < b', 'a < b', 'Bool', false));
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let a = 'None';
+        let b = 'None';
+        let cs;
+        cs = this.getDataSlotWithName("a").getLinkedDataSlot();
+        if(cs != null)
+            a = cs.getParentBlock().generateOutputDataSlotGetFunction(cs);
+        cs = this.getDataSlotWithName("b").getLinkedDataSlot();
+        if(cs != null)
+            b = cs.getParentBlock().generateOutputDataSlotGetFunction(cs);
+        let operator = slot.name.replace('a', '').replace('b', '');
+        return a + operator + b;
+    }
+
+    generateCodeName(all_blocks, base_name='quantity_comparison_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockQuantityComparison';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_timeloop';
+    }
+
+    getBlockHtmlName(){
+        return 'Quantity Comparison';
     }
 
 }
@@ -3719,9 +3787,23 @@ class WorkflowEditor{
                 new_block.child_block_sort = json_data['child_block_sort'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockDoWhile'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockDoWhile(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
+            parent_block.addBlock(new_block);
+        }
         if(json_data['classname']==='BlockModel'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_working_directory']);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockQuantityComparison'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockQuantityComparison(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

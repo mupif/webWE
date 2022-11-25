@@ -172,9 +172,23 @@ class WorkflowEditor{
                 new_block.child_block_sort = json_data['child_block_sort'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockDoWhile'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockDoWhile(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
+            parent_block.addBlock(new_block);
+        }
         if(json_data['classname']==='BlockModel'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockModel(this, parent_block, json_data['metadata'], json_data['model_working_directory']);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockQuantityComparison'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockQuantityComparison(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
