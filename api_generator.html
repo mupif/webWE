@@ -1,0 +1,24 @@
+<html lang="en">
+<head>
+    <title>Model API generator</title>
+    <link rel="stylesheet" href="./StyleWE.css">
+    <script type="text/javascript" src="src/helpers.js"></script>
+    <script type="text/javascript" src="api_generator.js"></script>
+</head>
+<body>
+    <div id="mainpage_all">
+        <div style="display: flex;flex-direction: column;align-items: center;">
+            <h1 style="">Model API generator</h1>
+            <div style="height:20px"></div>
+            <h3>Insert model metadata:</h3>
+            <textarea id="data_input" style="width:800px;height:300px" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
+            <div style="height:20px"></div>
+            <button onclick="generateApiImplementation();">Generate</button>
+            <div style="height:20px"></div>
+            <textarea id="data_output" style="background-color:black;color:white;border:none;width:800px;" wrap="off" disabled></textarea>
+
+
+        </div>
+    </div>
+</body>
+</html>
