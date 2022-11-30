@@ -53,14 +53,14 @@ function generateApiImplementation(){
             }
             if (obj_id === null) {
                 code.push("\t\tif objectTypeID == " + outputs[i]['Type_ID'] + ":");
-                code.push("\t\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+                code.push("\t\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
             } else if (typeof obj_id == 'string') {
                 code.push("\t\tif objectTypeID == " + outputs[i]['Type_ID'] + " and objectID == \"" + obj_id + "\":");
-                code.push("\t\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+                code.push("\t\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
                     code.push("\t\tif objectTypeID == " + outputs[i]['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
-                    code.push("\t\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+                    code.push("\t\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
                 }
             }
         }
@@ -78,14 +78,14 @@ function generateApiImplementation(){
             }
             if (obj_id === null) {
                 code.push("\t\tif obj.isInstance(" + inputs[i]['Type'] + ") and obj.getDataID() == " + inputs[i]['Type_ID'] + ":");
-                code.push("\t\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+                code.push("\t\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
             } else if (typeof obj_id == 'string') {
                 code.push("\t\tif obj.isInstance(" + inputs[i]['Type'] + ") and obj.getDataID() == " + inputs[i]['Type_ID'] + " and objectID == \"" + obj_id + "\":");
-                code.push("\t\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+                code.push("\t\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
                     code.push("\t\tif obj.isInstance(" + inputs[i]['Type'] + ") and obj.getDataID() == " + inputs[i]['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
-                    code.push("\t\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+                    code.push("\t\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
                 }
             }
         }
@@ -95,7 +95,7 @@ function generateApiImplementation(){
     code.push("");
     
     code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
-    code.push("\t\traise Exception(\"Not implemented\")  # todo To be implemented..");
+    code.push("\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
     code.push("");
     
     
