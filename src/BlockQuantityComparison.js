@@ -40,6 +40,10 @@ class BlockQuantityComparison extends Block{
         return [];
     }
 
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();

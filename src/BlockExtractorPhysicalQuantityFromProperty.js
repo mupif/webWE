@@ -7,15 +7,6 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
         this.addOutputSlot(new Slot(this, 'out', 'quantity', 'quantity', 'mupif.PhysicalQuantity', false));
     }
 
-    generateOutputDataSlotGetFunction(slot, time=""){
-        let prop_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
-        if(prop_slot != null) {
-            let prop = prop_slot.getParentBlock().generateOutputDataSlotGetFunction(prop_slot);
-            return prop + '.getValue()';
-        }
-        return 'None'
-    }
-
     generateCodeName(all_blocks, base_name='quantity_from_property_'){
         super.generateCodeName(all_blocks, base_name);
     }
@@ -26,6 +17,19 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
 
     getInitializationCode(indent=0, metaDataStr="{}"){
         return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+    
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let prop_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
+        if(prop_slot != null) {
+            let prop = prop_slot.getParentBlock().generateOutputDataSlotGetFunction(prop_slot);
+            return prop + '.getValue()';
+        }
+        return 'None'
     }
 
     defineMenu() {
