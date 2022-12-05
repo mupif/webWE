@@ -555,6 +555,7 @@ class BlockDoWhile extends Block{
         this.name = 'DoWhile';
 
         this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'counter', 'counter', 'mupif.PhysicalQuantity'));
     }
 
     generateCodeName(all_blocks, base_name='dowhile_'){
@@ -576,15 +577,34 @@ class BlockDoWhile extends Block{
         return 'False';
     }
 
+    generateOutputDataSlotGetFunction(slot, time=""){
+        if(slot.name === 'counter') {
+            return this.code_name + "_counter";
+        }
+        return 'None'
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         let code = super.getExecutionCode();
 
         let var_compute = this.code_name + "_compute";
+        let var_counter = this.code_name + "_counter";
 
-        code.push(var_compute + " = True");
+        let ts = this.getTimestepVariableNameFromSelfOrParent();
+        if(timestep !== "")
+            ts = timestep;
+        let ti;
+        if(ts !== "None")
+            ti = ts + ".getTime()";
+        else
+            ti = "0*mupif.Q.s";
+        code.push(var_compute + " = " + this.getDo(ti));
 
+        code.push(var_counter + " = 0");
+        
         code.push("while " + var_compute + ":");
         let while_code = [];
+        while_code.push("\t" + var_counter + " += 1")
 
         let blocks = this.getBlocks();
         for(let i=0;i<blocks.length;i++){
@@ -594,16 +614,7 @@ class BlockDoWhile extends Block{
         code = code.concat(while_code);
 
         code.push("\t");
-        let ts = this.getTimestepVariableNameFromSelfOrParent();
-        if(timestep !== "")
-            ts = timestep;
-
-        let ti;
-        if(ts !== "None")
-            ti = ts + ".getTime()";
-        else
-            ti = "0*mupif.Q.s";
-        code.push("\t" + var_compute + " = "+this.getDo(ti));
+        code.push("\t" + var_compute + " = " + this.getDo(ti));
 
         return push_indents_before_each_line(code, indent);
     }
@@ -2024,6 +2035,10 @@ class BlockQuantityComparison extends Block{
     }
 
     getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
 
@@ -4180,15 +4195,6 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
         this.addOutputSlot(new Slot(this, 'out', 'quantity', 'quantity', 'mupif.PhysicalQuantity', false));
     }
 
-    generateOutputDataSlotGetFunction(slot, time=""){
-        let prop_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
-        if(prop_slot != null) {
-            let prop = prop_slot.getParentBlock().generateOutputDataSlotGetFunction(prop_slot);
-            return prop + '.getValue()';
-        }
-        return 'None'
-    }
-
     generateCodeName(all_blocks, base_name='quantity_from_property_'){
         super.generateCodeName(all_blocks, base_name);
     }
@@ -4199,6 +4205,19 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
 
     getInitializationCode(indent=0, metaDataStr="{}"){
         return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+    
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let prop_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
+        if(prop_slot != null) {
+            let prop = prop_slot.getParentBlock().generateOutputDataSlotGetFunction(prop_slot);
+            return prop + '.getValue()';
+        }
+        return 'None'
     }
 
     defineMenu() {
