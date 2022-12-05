@@ -37,5 +37,9 @@
         "Relation_description": [],
         "Relation_formulation": [],
         "Representation": ""
+    },
+    "Execution_settings": {
+        "Type": "Distributed",
+        "jobManName": "jobManName_to_be_defined"
     }
 }
