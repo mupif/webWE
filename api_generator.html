@@ -10,14 +10,12 @@
         <div style="display: flex;flex-direction: column;align-items: center;">
             <h1 style="">Model API generator</h1>
             <div style="height:20px"></div>
-            <h3>Insert model metadata:</h3>
+            <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
             <textarea id="data_input" style="width:800px;height:300px" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
             <div style="height:20px"></div>
             <button onclick="generateApiImplementation();">Generate</button>
             <div style="height:20px"></div>
             <textarea id="data_output" style="background-color:black;color:white;border:none;width:800px;" wrap="off" disabled></textarea>
-
-
         </div>
     </div>
 </body>

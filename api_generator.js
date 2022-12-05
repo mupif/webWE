@@ -30,7 +30,7 @@ function generateApiImplementation(){
     code.push("");
     
     code.push("@Pyro5.api.expose");
-    code.push("class MyModelClassName(mupif.Model):  # todo");
+    code.push("class MyModelClassName(mupif.Model):  # todo Update class name");
     
     code.push("\tdef __init__(self, metadata=None):");
     code.push("\t\t");
@@ -92,24 +92,24 @@ function generateApiImplementation(){
     } else {
         code.push("\t\tpass");
     }
-    code.push("");
+    // code.push("");
     
     code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
     code.push("\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
     code.push("");
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     elem_output.value = formatCodeToText(replace_tabs_with_spaces_for_each_line(code));
     textAreaAdjust(elem_output);
+}
+
+function insertEmptyTemplateMetadata(){
+    let elem_input = document.getElementById('data_input');
+
+    let client = new XMLHttpRequest();
+    client.open('GET', '/empty_md.json');
+    client.onreadystatechange = function() {
+        elem_input.value = client.responseText;
+        generateApiImplementation();
+    }
+    client.send();
 }

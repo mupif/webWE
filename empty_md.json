@@ -1,0 +1,41 @@
+{
+    "Name": "",
+    "ID": "",
+    "Description": "",
+    "Version_date": "",
+    "Geometry": "",
+    "Boundary_conditions": "",
+    "Inputs": [
+
+    ],
+    "Outputs": [
+
+    ],
+    "Solver": {
+        "Software": "",
+        "Type": "",
+        "Accuracy": "",
+        "Sensitivity": "",
+        "Complexity": "",
+        "Robustness": "",
+        "Estim_time_step_s": 1,
+        "Estim_comp_time_s": 1,
+        "Estim_execution_cost_EUR": 0.01,
+        "Estim_personnel_cost_EUR": 0.01,
+        "Required_expertise": "",
+        "Language": "",
+        "License": "",
+        "Creator": "",
+        "Version_date": "",
+        "Documentation": ""
+    },
+    "Physics": {
+        "Type": "",
+        "Entity": "",
+        "Equation": [],
+        "Equation_quantities": [],
+        "Relation_description": [],
+        "Relation_formulation": [],
+        "Representation": ""
+    }
+}
