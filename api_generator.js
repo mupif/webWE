@@ -185,6 +185,20 @@ function generateCodeFromMetadata(md){
     code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
     code.push("\t\traise NotImplementedError(\"Not implemented\")");
     code.push("");
+    
+    if(md['Execution_settings']['Type'] === 'Distributed') {
+        code.push("");
+        code.push("if __name__ == '__main__':");
+        code.push("\tns = mupif.pyroutil.connectNameserver()");
+        code.push("\tjobMan = mupif.SimpleJobManager(");
+        code.push("\t\tns=ns,");
+        code.push("\t\tappClass=" + md['Execution_settings']['Class'] + ",");
+        code.push("\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
+        code.push("\t\tjobManWorkDir='.',");
+        code.push("\t\tmaxJobs=10");
+        code.push("\t).runServer()");
+        code.push("");
+    }
 
     return formatCodeToText(replace_tabs_with_spaces_for_each_line(code));
 }
