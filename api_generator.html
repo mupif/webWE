@@ -3,8 +3,6 @@
     <title>Model API generator</title>
     <link rel="stylesheet" href="./StyleWE.css">
     <script type="text/javascript" src="src/helpers.js"></script>
-    <script type="text/javascript" src="api_generator.js"></script>
-    <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
 </head>
 <body>
     <div id="mainpage_all">
@@ -15,11 +13,13 @@
             <textarea id="data_input" style="width:800px;height:300px" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
             <div style="height:20px"></div>
             <button onclick="generateApiImplementation();">Generate</button>
-            <div id="error_json_format" style="display:none;color:red;"><br><h3><b>Problem with JSON format of inserted metadata</b></h3></div>
-            <div id="error_md_validation" style="display:none;color:red;"><br><h3><b>Failed validation of inserted metadata</b></h3></div>
+            <div id="elem_error" style="color:red;font-weight:bold;"></div>
+            
             <div style="height:20px"></div>
             <textarea id="data_output" style="background-color:black;color:white;border:none;width:800px;" wrap="off" disabled></textarea>
         </div>
     </div>
+
+    <script type="text/javascript" src="api_generator.js"></script>
 </body>
 </html>

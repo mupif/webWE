@@ -1,3 +1,6 @@
+let elem_input = document.getElementById('data_input');
+let elem_output = document.getElementById('data_output');
+let elem_error = document.getElementById('elem_error');
 
 function isValidJson(json) {
     try {
@@ -14,37 +17,29 @@ function textAreaAdjust(element) {
 }
 
 function clearApiImplementation(){
-    let elem_output = document.getElementById('data_output');
     elem_output.value = '';
 }
 
 function generateApiImplementation(){
     clearApiImplementation();
-    let elem_input = document.getElementById('data_input');
-    let elem_output = document.getElementById('data_output');
-
-    let elem_json_format_error = document.getElementById('error_json_format');
-    let elem_md_validation = document.getElementById('error_md_validation');
-    elem_md_validation.style.display = 'none';
-    elem_json_format_error.style.display = 'none';
+    elem_error.innerHTML = '<br>';
     
     if(isValidJson(elem_input.value)){
         let md = JSON.parse(elem_input.value);
-
-        let validation = checkMetadataFormat(md);
-        if(validation){
+        if(checkMetadataFormat(md)){
             elem_output.value = generateCodeFromMetadata(md);
             textAreaAdjust(elem_output);
-        } else {
-            elem_md_validation.style.display = 'block';
         }
     } else {
-        elem_json_format_error.style.display = 'block';
+        elem_error.innerHTML += '<h3>Invalid JSON format of inserted metadata</h3>';
     }
 }
 
+// ====================================================================================================
+// Metadata Validation
+// ====================================================================================================
+
 function insertEmptyTemplateMetadata(){
-    let elem_input = document.getElementById('data_input');
     let client = new XMLHttpRequest();
     client.open('GET', '/empty_md.json');
     client.onreadystatechange = function() {
@@ -54,28 +49,56 @@ function insertEmptyTemplateMetadata(){
     client.send();
 }
 
-function checkMetadataFormat(md){
-    // temporary basic validation
-    if(!("Name" in md)){return false;}
-    if(!("ID" in md)){return false;}
-    if(!("Inputs" in md)){return false;}
-    if(!("Outputs" in md)){return false;}
-    if(!("Execution_settings" in md)){return false;}
-    for(let i=0;i<md["Inputs"].length;i++){
-        if(!("Name" in md["Inputs"][i])){return false;}
-        if(!("Type_ID" in md["Inputs"][i])){return false;}
-        if(!("Type" in md["Inputs"][i])){return false;}
-        if(!("Required" in md["Inputs"][i])){return false;}
-        if(!("Set_at" in md["Inputs"][i])){return false;}
+function checkMetadataItem(md, key, obj_name, check_nonempty=false){
+    if(!(key in md)){
+        elem_error.innerHTML += '<h3>' + obj_name + ' is missing key \'' + key + '\'.</h3>';
+        return false;
     }
-    for(let i=0;i<md["Outputs"].length;i++){
-        if(!("Name" in md["Outputs"][i])){return false;}
-        if(!("Type_ID" in md["Outputs"][i])){return false;}
-        if(!("Type" in md["Outputs"][i])){return false;}
+    if(check_nonempty && (md[key] === '' || md[key] === null)){
+        elem_error.innerHTML += '<h3>' + obj_name + ' key \'' + key + '\' cannot be empty.</h3>';
+        return false;
     }
-    
     return true;
 }
+
+function checkMetadataSubItem(obj, keys, obj_name, check_nonempty=false){
+    let retval = true;
+    keys.forEach(k => {
+        if(!checkMetadataItem(obj, k, obj_name + ' item', check_nonempty)){retval = false;}
+    })
+    return retval;
+}
+
+function checkMetadataFormat(md){
+    // temporary basic validation
+    let keys = [
+        'Name',
+        'ID',
+        'Inputs',
+        'Outputs',
+        'Execution_settings'
+    ]
+    let retval = true;
+    keys.forEach(k => {
+        if(!checkMetadataItem(md, k, 'Metadata JSON')){retval = false;}
+    })
+    
+    if(!retval){return false;}
+    
+    for(let i=0;i<md["Inputs"].length;i++){
+        if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs')){retval = false;}
+    }
+    for(let i=0;i<md["Outputs"].length;i++){
+        if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs')){retval = false;}
+    }
+    if(!checkMetadataSubItem(md["Execution_settings"], ['Type', 'Class', 'Module', 'jobManName'], 'Execution_settings', true)){retval = false;}
+    
+    return retval;
+}
+
+// ====================================================================================================
+// Code Generation
+// ====================================================================================================
 
 function generateCodeFromMetadata(md){
     let md_str = "MD = " + JSON.stringify(md, null, 4);
@@ -95,7 +118,7 @@ function generateCodeFromMetadata(md){
     code.push("");
 
     code.push("@Pyro5.api.expose");
-    code.push("class MyModelClassName(mupif.Model):  # todo Update class name");
+    code.push("class " + md['Execution_settings']['Class'] + "(mupif.Model):");
 
     code.push("\tdef __init__(self, metadata=None):");
     code.push("\t\t");
@@ -160,7 +183,7 @@ function generateCodeFromMetadata(md){
     code.push("");
 
     code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
-    code.push("\t\traise NotImplementedError(\"Not implemented\")  # todo To be implemented..");
+    code.push("\t\traise NotImplementedError(\"Not implemented\")");
     code.push("");
 
     return formatCodeToText(replace_tabs_with_spaces_for_each_line(code));
