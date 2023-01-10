@@ -146,6 +146,8 @@ function focusOnEditor(){
     document.getElementById('nav_editor').style.backgroundColor = 'black';
     document.getElementById('nav_settings').style.backgroundColor = 'transparent';
     document.getElementById('nav_models').style.backgroundColor = 'transparent';
+
+    editor.generateWorkflowHtml()
 }
 
 function focusOnProjectSettings(){
