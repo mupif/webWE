@@ -18,6 +18,11 @@ function textAreaAdjust(element) {
 
 function clearApiImplementation(){
     elem_output.value = '';
+    setOutputElemVisibility(false);
+}
+
+function setOutputElemVisibility(val){
+    document.getElementById('data_output').style.visibility = val ? 'visible' : 'hidden';
 }
 
 function generateApiImplementation(){
@@ -29,6 +34,7 @@ function generateApiImplementation(){
         if(checkMetadataFormat(md)){
             elem_output.value = generateCodeFromMetadata(md);
             textAreaAdjust(elem_output);
+            setOutputElemVisibility(true);
         }
     } else {
         elem_error.innerHTML += '<h3>Invalid JSON format of inserted metadata</h3>';
