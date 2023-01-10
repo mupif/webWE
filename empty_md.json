@@ -40,8 +40,8 @@
     },
     "Execution_settings": {
         "Type": "Distributed",
-        "jobManName": "",
-        "Class": "",
-        "Module": ""
+        "jobManName": "New_Jobman_Name",
+        "Class": "NewClassName",
+        "Module": "new_module_name"
     }
 }
