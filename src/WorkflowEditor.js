@@ -123,6 +123,14 @@ class WorkflowEditor{
         return null;
     }
 
+    // getSlotByUID(uid){
+    //     let slots = this.workflowblock.getSlotsRecursive();
+    //     for(let i=0;i<slots.length;i++)
+    //         if(slots[i].id === uid)
+    //             return slots[i];
+    //     return null;
+    // }
+
     addBlockByJsonRecord(json_data){
         let parent_block;
         let new_block = null;
@@ -192,9 +200,9 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
-        if(json_data['classname']==='BlockExtractorPhysicalQuantityFromProperty'){
+        if(json_data['classname']==='BlockPropertyToQuantity'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
-            new_block = new BlockExtractorPhysicalQuantityFromProperty(this, parent_block);
+            new_block = new BlockPropertyToQuantity(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

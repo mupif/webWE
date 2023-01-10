@@ -10,6 +10,7 @@ class Slot{
         if(uid !== '')
             this.id = uid;
 
+        this.code_name = name;
         this.name = name;
         this.text = text;
         this.parent_block = parent_block;
@@ -68,7 +69,7 @@ class Slot{
 
     getParentBlock(){return this.parent_block;}
 
-    getCodeRepresentation(){return "self." + this.id;}
+    getCodeRepresentation(){return "self." + this.code_name;}
     
     getUnits(){return this.units;}
 

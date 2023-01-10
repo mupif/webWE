@@ -28,7 +28,7 @@ class BlockDoWhile extends Block{
 
     generateOutputDataSlotGetFunction(slot, time=""){
         if(slot.name === 'counter') {
-            return this.code_name + "_counter";
+            return this.code_name + "_counter * mupif.U.none";
         }
         return 'None'
     }
@@ -38,7 +38,9 @@ class BlockDoWhile extends Block{
 
         let var_compute = this.code_name + "_compute";
         let var_counter = this.code_name + "_counter";
-
+        
+        code.push(var_counter + " = 0");
+        
         let ts = this.getTimestepVariableNameFromSelfOrParent();
         if(timestep !== "")
             ts = timestep;
@@ -46,10 +48,8 @@ class BlockDoWhile extends Block{
         if(ts !== "None")
             ti = ts + ".getTime()";
         else
-            ti = "0*mupif.Q.s";
+            ti = "0*mupif.U.s";
         code.push(var_compute + " = " + this.getDo(ti));
-
-        code.push(var_counter + " = 0");
         
         code.push("while " + var_compute + ":");
         let while_code = [];

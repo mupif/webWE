@@ -303,9 +303,6 @@ function main(visual=false)
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');
         loadMetaDataFromJSONOnServer('examples/metadata/md02.json');
         loadMetaDataFromJSONOnServer('examples/metadata/md03.json');
-        loadMetaDataFromJSONOnServer('examples/metadata/md04.json');
-        loadMetaDataFromJSONOnServer('examples/metadata/md05.json');
-        loadMetaDataFromJSONOnServer('examples/metadata/md06.json');
     }
     
     if (example_id === 1) {

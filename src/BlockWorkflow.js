@@ -65,17 +65,19 @@ class BlockWorkflow extends Block{
             blocks[i].generateCodeName(blocks);
         let slots = this.getSlotsRecursive();
         for(let i=0;i<slots.length;i++)
-            slots[i].id = '';
-        slot_id = 0;
+            slots[i].code_name = '';
+        let slot_code_id = 0;
         for(let i=0;i<slots.length;i++)
-            if(!slots[i].external)
-                slots[i].id = generateNewSlotID();
+            if(!slots[i].external) {
+                slot_code_id += 1;
+                slots[i].code_name = 'slot_' + slot_code_id;
+            }
         slots = this.getAllExternalDataSlots('in');
         for(let i=0;i<slots.length;i++)
-            slots[i].id = 'external_output_'+(i+1);
+            slots[i].code_name = 'external_output_'+(i+1);
         slots = this.getAllExternalDataSlots('out');
         for(let i=0;i<slots.length;i++)
-            slots[i].id = 'external_input_'+(i+1);
+            slots[i].code_name = 'external_input_'+(i+1);
     }
 
     generateCodeForServer(){

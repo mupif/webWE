@@ -327,7 +327,7 @@ class Block{
         let block = null;
 
         if (name === "physicalquantity")
-            block = new BlockPhysicalQuantity(this.editor, this, 0, 'None');
+            block = new BlockPhysicalQuantity(this.editor, this, 0, 'none');
         if (name === "property")
             block = new BlockProperty(this.editor, this, '0.', 'mupif.DataID.PID_None', 'mupif.ValueType.Scalar', 'none');
         if (name === "timeloop")
@@ -341,7 +341,7 @@ class Block{
         if (name === "quantity_comparison")
             block = new BlockQuantityComparison(this.editor, this);
         if (name === "quantity_from_property")
-            block = new BlockExtractorPhysicalQuantityFromProperty(this.editor, this);
+            block = new BlockPropertyToQuantity(this.editor, this);
 
 
         if (block !== null) {

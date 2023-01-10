@@ -1,4 +1,4 @@
-class BlockExtractorPhysicalQuantityFromProperty extends Block{
+class BlockPropertyToQuantity extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
         this.name = this.getClassName().replace('Block', '');
@@ -7,7 +7,7 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
         this.addOutputSlot(new Slot(this, 'out', 'quantity', 'quantity', 'mupif.PhysicalQuantity', false));
     }
 
-    generateCodeName(all_blocks, base_name='quantity_from_property_'){
+    generateCodeName(all_blocks, base_name='property_to_quantity_'){
         super.generateCodeName(all_blocks, base_name);
     }
 
@@ -24,10 +24,10 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
     }
     
     generateOutputDataSlotGetFunction(slot, time=""){
-        let prop_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
-        if(prop_slot != null) {
-            let prop = prop_slot.getParentBlock().generateOutputDataSlotGetFunction(prop_slot);
-            return prop + '.getValue()';
+        let in_slot = this.getDataSlotWithName("property").getLinkedDataSlot();
+        if(in_slot != null) {
+            let subject = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
+            return subject + '.getValue()';
         }
         return 'None'
     }
@@ -38,7 +38,7 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
     }
 
     getClassName() {
-        return 'BlockExtractorPhysicalQuantityFromProperty';
+        return 'BlockPropertyToQuantity';
     }
 
     // #########################
@@ -50,7 +50,7 @@ class BlockExtractorPhysicalQuantityFromProperty extends Block{
     }
 
     getBlockHtmlName(){
-        return 'Quantity from Property';
+        return 'Property to Quantity';
     }
 
 }
