@@ -53,7 +53,8 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_from_property', 'Quantity&nbsp;from&nbsp;Property'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'property_to_quantity', 'Property&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -340,8 +341,10 @@ class Block{
             block = new BlockInputFile(this.editor, this, '');
         if (name === "quantity_comparison")
             block = new BlockQuantityComparison(this.editor, this);
-        if (name === "quantity_from_property")
+        if (name === "property_to_quantity")
             block = new BlockPropertyToQuantity(this.editor, this);
+        if (name === "quantity_to_property")
+            block = new BlockQuantityToProperty(this.editor, this);
 
 
         if (block !== null) {

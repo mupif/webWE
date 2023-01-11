@@ -3,8 +3,8 @@ class BlockQuantityToProperty extends Block{
         super(editor, parent_block);
         this.name = this.getClassName().replace('Block', '');
 
-        this.addOutputSlot(new Slot(this, 'in', 'quantity', 'quantity', 'mupif.PhysicalQuantity', true, null));
-        this.addInputSlot(new Slot(this, 'out', 'property', 'property', 'mupif.Property', false));
+        this.addInputSlot(new Slot(this, 'in', 'quantity', 'quantity', 'mupif.PhysicalQuantity', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'property', 'property', 'mupif.Property', false));
     }
 
     generateCodeName(all_blocks, base_name='quantity_to_property_'){
@@ -27,7 +27,7 @@ class BlockQuantityToProperty extends Block{
         let in_slot = this.getDataSlotWithName("quantity").getLinkedDataSlot();
         if(in_slot != null) {
             let subject = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
-            return 'mupif.property.ConstantProperty(quantity="' + subject + '", propID=mupif.DataID.ID_None, valueType=mupif.ValueType.Scalar, time=None)';
+            return 'mupif.property.ConstantProperty(quantity=' + subject + ', propID=mupif.DataID.ID_None, valueType=mupif.ValueType.Scalar, time=None)';
         }
         return 'None'
     }

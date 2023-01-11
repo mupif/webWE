@@ -58,7 +58,8 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_from_property', 'Quantity&nbsp;from&nbsp;Property'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'property_to_quantity', 'Property&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -345,8 +346,10 @@ class Block{
             block = new BlockInputFile(this.editor, this, '');
         if (name === "quantity_comparison")
             block = new BlockQuantityComparison(this.editor, this);
-        if (name === "quantity_from_property")
+        if (name === "property_to_quantity")
             block = new BlockPropertyToQuantity(this.editor, this);
+        if (name === "quantity_to_property")
+            block = new BlockQuantityToProperty(this.editor, this);
 
 
         if (block !== null) {
@@ -2129,8 +2132,8 @@ class BlockQuantityToProperty extends Block{
         super(editor, parent_block);
         this.name = this.getClassName().replace('Block', '');
 
-        this.addOutputSlot(new Slot(this, 'in', 'quantity', 'quantity', 'mupif.PhysicalQuantity', true, null));
-        this.addInputSlot(new Slot(this, 'out', 'property', 'property', 'mupif.Property', false));
+        this.addInputSlot(new Slot(this, 'in', 'quantity', 'quantity', 'mupif.PhysicalQuantity', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'property', 'property', 'mupif.Property', false));
     }
 
     generateCodeName(all_blocks, base_name='quantity_to_property_'){
@@ -2153,7 +2156,7 @@ class BlockQuantityToProperty extends Block{
         let in_slot = this.getDataSlotWithName("quantity").getLinkedDataSlot();
         if(in_slot != null) {
             let subject = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
-            return 'mupif.property.ConstantProperty(quantity="' + subject + '", propID=mupif.DataID.ID_None, valueType=mupif.ValueType.Scalar, time=None)';
+            return 'mupif.property.ConstantProperty(quantity=' + subject + ', propID=mupif.DataID.ID_None, valueType=mupif.ValueType.Scalar, time=None)';
         }
         return 'None'
     }
@@ -3502,6 +3505,12 @@ class WorkflowEditor{
         if(json_data['classname']==='BlockPropertyToQuantity'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockPropertyToQuantity(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockQuantityToProperty'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockQuantityToProperty(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
