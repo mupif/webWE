@@ -60,6 +60,8 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'property_to_quantity', 'Property&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_property', 'Number&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -350,6 +352,10 @@ class Block{
             block = new BlockPropertyToQuantity(this.editor, this);
         if (name === "quantity_to_property")
             block = new BlockQuantityToProperty(this.editor, this);
+        if (name === "number_to_quantity")
+            block = new BlockNumberToQuantity(this.editor, this);
+        if (name === "number_to_property")
+            block = new BlockNumberToProperty(this.editor, this);
 
 
         if (block !== null) {
@@ -582,7 +588,7 @@ class BlockDoWhile extends Block{
 
     generateOutputDataSlotGetFunction(slot, time=""){
         if(slot.name === 'counter') {
-            return this.code_name + "_counter * mupif.U.none";
+            return this.code_name + "_counter";
         }
         return 'None'
     }
@@ -2184,6 +2190,120 @@ class BlockQuantityToProperty extends Block{
 
 }
 
+class BlockNumberToQuantity extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'number', 'number', 'number', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'quantity', 'quantity', 'mupif.PhysicalQuantity', false));
+    }
+
+    generateCodeName(all_blocks, base_name='number_to_quantity_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+    
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let in_slot = this.getDataSlotWithName("number").getLinkedDataSlot();
+        if(in_slot != null) {
+            let subject = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
+            return subject + ' * mupif.U.none';
+        }
+        return 'None'
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockNumberToQuantity';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_timeloop';
+    }
+
+    getBlockHtmlName(){
+        return 'Number to Quantity';
+    }
+
+}
+
+class BlockNumberToProperty extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'number', 'number', 'number', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'property', 'property', 'mupif.Property', false));
+    }
+
+    generateCodeName(all_blocks, base_name='number_to_property_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+    
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let in_slot = this.getDataSlotWithName("number").getLinkedDataSlot();
+        if(in_slot != null) {
+            let subject = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
+            return 'mupif.property.ConstantProperty(quantity=' + subject + ' * mupif.U.none, propID=mupif.DataID.ID_None, valueType=mupif.ValueType.Scalar, time=None)';
+        }
+        return 'None'
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockNumberToProperty';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_timeloop';
+    }
+
+    getBlockHtmlName(){
+        return 'Number to Property';
+    }
+
+}
+
 let datalink_id = 0;
 function generateNewDatalinkID(){
     datalink_id += 1;
@@ -3162,10 +3282,23 @@ function myQuery_show_error(text){
     myQuery_show(html, 'note');
 }
 
-let slot_id = 0;
+let slot_id = 1;
+
 function generateNewSlotID(){
-    slot_id += 1;
-    return 'slot_'+slot_id;
+    let found = false;
+    let name = '';
+    while (!found) {
+        slot_id += 1;
+        name = 's'+slot_id;
+        found = true;
+        let slots = editor.workflowblock.getSlotsRecursive();
+        for(let i=0;i<slots.length;i++) {
+            if (slots[i].id === name) {
+                found = false;
+            }
+        }
+    }
+    return name;
 }
 
 class Slot{
@@ -3511,6 +3644,18 @@ class WorkflowEditor{
         if(json_data['classname']==='BlockQuantityToProperty'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockQuantityToProperty(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockNumberToQuantity'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockNumberToQuantity(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockNumberToProperty'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockNumberToProperty(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

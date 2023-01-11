@@ -28,7 +28,7 @@ class BlockDoWhile extends Block{
 
     generateOutputDataSlotGetFunction(slot, time=""){
         if(slot.name === 'counter') {
-            return this.code_name + "_counter * mupif.U.none";
+            return this.code_name + "_counter";
         }
         return 'None'
     }

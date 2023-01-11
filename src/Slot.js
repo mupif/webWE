@@ -1,7 +1,20 @@
-let slot_id = 0;
+let slot_id = 1;
+
 function generateNewSlotID(){
-    slot_id += 1;
-    return 'slot_'+slot_id;
+    let found = false;
+    let name = '';
+    while (!found) {
+        slot_id += 1;
+        name = 's'+slot_id;
+        found = true;
+        let slots = editor.workflowblock.getSlotsRecursive();
+        for(let i=0;i<slots.length;i++) {
+            if (slots[i].id === name) {
+                found = false;
+            }
+        }
+    }
+    return name;
 }
 
 class Slot{
