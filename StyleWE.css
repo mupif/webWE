@@ -84,13 +84,13 @@ div#workflowSubContainer{
 }
 
 div#modelListContainer, div#projectSettingsContainer, div#workflowContainer{
-    width:800px;
+    width:1400px;
     height:760px;
 }
 
 div#outerMessageContainer{
     display:none;
-    width:400px;
+    width:100px;
     height:740px;
     background-color: #3a3a3a;
     padding:10px;
