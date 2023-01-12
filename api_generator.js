@@ -133,56 +133,119 @@ function generateCodeFromMetadata(md){
     code.push("\t\tsuper().__init__(metadata=MD)");
     code.push("\t\tself.updateMetadata(metadata)");
     code.push("");
+    
+    // refactor inputs/outputs
+    let Inputs = [];
+    let Outputs = [];
+    let newitem;
+
+    if(inputs.length) {
+        inputs.forEach(item => {
+            obj_id = null;
+            if ('Obj_ID' in item) {
+                obj_id = item['Obj_ID'];
+            }
+            if (obj_id === null || typeof obj_id == 'string') {
+                newitem = JSON.parse(JSON.stringify(item));
+                Inputs.push(item);
+            } else if (obj_id.constructor.name === "Array") {
+                for (let ii = 0; ii < obj_id.length; ii++) {
+                    newitem = JSON.parse(JSON.stringify(item));
+                    newitem['Obj_ID'] = obj_id[ii];
+                    Inputs.push(newitem);
+                }
+            }
+        })
+    }
+    
+    if(outputs.length) {
+        outputs.forEach(item => {
+            obj_id = null;
+            if ('Obj_ID' in item) {
+                obj_id = item['Obj_ID'];
+            }
+            if (obj_id === null || typeof obj_id == 'string') {
+                newitem = JSON.parse(JSON.stringify(item));
+                Outputs.push(newitem);
+            } else if (obj_id.constructor.name === "Array") {
+                for (let ii = 0; ii < obj_id.length; ii++) {
+                    newitem = JSON.parse(JSON.stringify(item));
+                    newitem['Obj_ID'] = obj_id[ii];
+                    Outputs.push(newitem);
+                }
+            }
+        })
+    }
+    
+    // default values for inputs/outputs
+    if(Inputs.length || Outputs.length) {
+        Inputs.forEach(item => {
+            item['code_name'] = 'self.input_' + item['Name'].replaceAll(' ', '_').replaceAll('-', '_');
+            if ('Obj_ID' in item && item['Obj_ID'])
+                item['code_name'] += '_' + item['Obj_ID'].replaceAll(' ', '_').replaceAll('-', '_');
+        });
+        Outputs.forEach(item => {
+            item['code_name'] = 'self.input_' + item['Name'].replaceAll(' ', '_').replaceAll('-', '_');
+            if ('Obj_ID' in item && item['Obj_ID'])
+                item['code_name'] += '_' + item['Obj_ID'].replaceAll(' ', '_').replaceAll('-', '_');
+        });
+
+        Inputs.forEach(item => {code.push("\t\t" + item['code_name'] + " = None");})
+        Outputs.forEach(item => {code.push("\t\t" + item['code_name'] + " = None");})
+
+        code.push("");
+    }
 
     code.push("\tdef initialize(self, workdir='', metadata=None, validateMetaData=True, **kwargs):");
     code.push("\t\tsuper().initialize(workdir=workdir, metadata=metadata, validateMetaData=validateMetaData, **kwargs)");
     code.push("");
 
     code.push("\tdef get(self, objectTypeID, time=None, objectID=\"\"):");
-    if(outputs.length) {
-        for (let i = 0; i < outputs.length; i++) {
+    if(Outputs.length) {
+        Outputs.forEach(item => {
             obj_id = null;
-            if ('Obj_ID' in outputs[i]) {
-                obj_id = outputs[i]['Obj_ID'];
+            if ('Obj_ID' in item) {
+                obj_id = item['Obj_ID'];
             }
             if (obj_id === null) {
-                code.push("\t\tif objectTypeID == " + outputs[i]['Type_ID'] + ":");
+                code.push("\t\tif objectTypeID == " + item['Type_ID'] + ":");
+                code.push("\t\t\t" + item['code_name'] + " = obj");
                 code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
             } else if (typeof obj_id == 'string') {
-                code.push("\t\tif objectTypeID == " + outputs[i]['Type_ID'] + " and objectID == \"" + obj_id + "\":");
-                code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
+                code.push("\t\tif objectTypeID == " + item['Type_ID'] + " and objectID == \"" + obj_id + "\":");
+                code.push("\t\t\t" + item['code_name'] + " = obj");
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
-                    code.push("\t\tif objectTypeID == " + outputs[i]['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
-                    code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
+                    code.push("\t\tif objectTypeID == " + item['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
+                    code.push("\t\t\t" + item['code_name'] + " = obj");
                 }
             }
-        }
+        })
     } else {
         code.push("\t\tpass");
     }
     code.push("");
 
     code.push("\tdef set(self, obj, objectID=\"\"):");
-    if(inputs.length) {
-        for (let i = 0; i < inputs.length; i++) {
+    if(Inputs.length) {
+        Inputs.forEach(item => {
             obj_id = null;
-            if ('Obj_ID' in inputs[i]) {
-                obj_id = inputs[i]['Obj_ID'];
+            if ('Obj_ID' in item) {
+                obj_id = item['Obj_ID'];
             }
             if (obj_id === null) {
-                code.push("\t\tif obj.isInstance(" + inputs[i]['Type'] + ") and obj.getDataID() == " + inputs[i]['Type_ID'] + ":");
-                code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
+                code.push("\t\tif obj.isInstance(" + item['Type'] + ") and obj.getDataID() == " + item['Type_ID'] + ":");
+                code.push("\t\t\t" + item['code_name'] + " = obj");
             } else if (typeof obj_id == 'string') {
-                code.push("\t\tif obj.isInstance(" + inputs[i]['Type'] + ") and obj.getDataID() == " + inputs[i]['Type_ID'] + " and objectID == \"" + obj_id + "\":");
-                code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
+                code.push("\t\tif obj.isInstance(" + item['Type'] + ") and obj.getDataID() == " + item['Type_ID'] + " and objectID == \"" + obj_id + "\":");
+                code.push("\t\t\t" + item['code_name'] + " = obj");
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
-                    code.push("\t\tif obj.isInstance(" + inputs[i]['Type'] + ") and obj.getDataID() == " + inputs[i]['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
-                    code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
+                    code.push("\t\tif obj.isInstance(" + item['Type'] + ") and obj.getDataID() == " + item['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
+                    code.push("\t\t\t" + item['code_name'] + " = obj");
                 }
             }
-        }
+        })
     } else {
         code.push("\t\tpass");
     }
@@ -195,10 +258,11 @@ function generateCodeFromMetadata(md){
     if(md['Execution_settings']['Type'] === 'Distributed') {
         code.push("");
         code.push("if __name__ == '__main__':");
+        code.push("\timport " + md['Execution_settings']['Module']);
         code.push("\tns = mupif.pyroutil.connectNameserver()");
         code.push("\tjobMan = mupif.SimpleJobManager(");
         code.push("\t\tns=ns,");
-        code.push("\t\tappClass=" + md['Execution_settings']['Class'] + ",");
+        code.push("\t\tappClass=" + md['Execution_settings']['Module'] + "." + md['Execution_settings']['Class'] + ",");
         code.push("\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
         code.push("\t\tjobManWorkDir='.',");
         code.push("\t\tmaxJobs=10");
