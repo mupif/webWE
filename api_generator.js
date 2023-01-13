@@ -258,10 +258,11 @@ function generateCodeFromMetadata(md){
     if(md['Execution_settings']['Type'] === 'Distributed') {
         code.push("");
         code.push("if __name__ == '__main__':");
+        code.push("\timport " + md['Execution_settings']['Module']);
         code.push("\tns = mupif.pyroutil.connectNameserver()");
         code.push("\tjobMan = mupif.SimpleJobManager(");
         code.push("\t\tns=ns,");
-        code.push("\t\tappClass=" + md['Execution_settings']['Class'] + ",");
+        code.push("\t\tappClass=" + md['Execution_settings']['Module'] + "." + md['Execution_settings']['Class'] + ",");
         code.push("\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
         code.push("\t\tjobManWorkDir='.',");
         code.push("\t\tmaxJobs=10");
