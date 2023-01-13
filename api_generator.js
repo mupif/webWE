@@ -209,13 +209,19 @@ function generateCodeFromMetadata(md){
             }
             if (obj_id === null) {
                 code.push("\t\tif objectTypeID == " + item['Type_ID'] + ":");
+                code.push("\t\t\tif " + item['code_name'] + " is None:");
+                code.push("\t\t\t\traise ValueError(\"Value not defined\")");
                 code.push("\t\t\treturn " + item['code_name']);
             } else if (typeof obj_id == 'string') {
                 code.push("\t\tif objectTypeID == " + item['Type_ID'] + " and objectID == \"" + obj_id + "\":");
+                code.push("\t\t\tif " + item['code_name'] + " is None:");
+                code.push("\t\t\t\traise ValueError(\"Value not defined\")");
                 code.push("\t\t\treturn " + item['code_name']);
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
                     code.push("\t\tif objectTypeID == " + item['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
+                    code.push("\t\t\tif " + item['code_name'] + " is None:");
+                    code.push("\t\t\t\traise ValueError(\"Value not defined\")");
                     code.push("\t\t\treturn " + item['code_name']);
                 }
             }
@@ -249,8 +255,16 @@ function generateCodeFromMetadata(md){
         code.push("\t\tpass");
     }
     code.push("");
-
+    
     code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
+    let required_inputs = Inputs.filter(inp => inp['Required'] === true);
+    if (required_inputs.length) {
+        code.push("\t\tfor inp in [" + required_inputs.map(inp => inp['code_name']).join(', ') + "]:");
+        code.push("\t\t\tif inp is None:");
+        code.push("\t\t\t\traise ValueError(\"A required input was not defined\")");
+    }
+    
+    code.push("\t\t");
     code.push("\t\traise NotImplementedError(\"Not implemented\")");
     code.push("");
     
