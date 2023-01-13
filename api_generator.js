@@ -209,15 +209,14 @@ function generateCodeFromMetadata(md){
             }
             if (obj_id === null) {
                 code.push("\t\tif objectTypeID == " + item['Type_ID'] + ":");
-                code.push("\t\t\t" + item['code_name'] + " = obj");
-                code.push("\t\t\traise NotImplementedError(\"Not implemented\")");
+                code.push("\t\t\treturn " + item['code_name']);
             } else if (typeof obj_id == 'string') {
                 code.push("\t\tif objectTypeID == " + item['Type_ID'] + " and objectID == \"" + obj_id + "\":");
-                code.push("\t\t\t" + item['code_name'] + " = obj");
+                code.push("\t\t\treturn " + item['code_name']);
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
                     code.push("\t\tif objectTypeID == " + item['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
-                    code.push("\t\t\t" + item['code_name'] + " = obj");
+                    code.push("\t\t\treturn " + item['code_name']);
                 }
             }
         })
