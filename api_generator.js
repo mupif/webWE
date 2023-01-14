@@ -277,7 +277,6 @@ function generateCodeFromMetadata(md){
         code.push("\t\tns=ns,");
         code.push("\t\tappClass=" + md['Execution_settings']['Module'] + "." + md['Execution_settings']['Class'] + ",");
         code.push("\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
-        code.push("\t\tjobManWorkDir='.',");
         code.push("\t\tmaxJobs=10");
         code.push("\t).runServer()");
         code.push("");
