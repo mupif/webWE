@@ -255,6 +255,14 @@ function generateCodeFromMetadata(md){
         code.push("\t\tpass");
     }
     code.push("");
+
+    code.push("\tdef getApplicationSignature(self):");
+    code.push("\t\treturn \"" + md['Execution_settings']['Class'] + "\"");
+    code.push("");
+
+    code.push("\tdef getAPIVersion(self):");
+    code.push("\t\treturn 1");
+    code.push("");
     
     code.push("\tdef solveStep(self, tstep, stageID=0, runInBackground=False):");
     let required_inputs = Inputs.filter(inp => inp['Required'] === true);
@@ -272,9 +280,8 @@ function generateCodeFromMetadata(md){
         code.push("");
         code.push("if __name__ == '__main__':");
         code.push("\timport " + md['Execution_settings']['Module']);
-        code.push("\tns = mupif.pyroutil.connectNameserver()");
-        code.push("\tjobMan = mupif.SimpleJobManager(");
-        code.push("\t\tns=ns,");
+        code.push("\tmupif.SimpleJobManager(");
+        code.push("\t\tns=mupif.pyroutil.connectNameserver(),");
         code.push("\t\tappClass=" + md['Execution_settings']['Module'] + "." + md['Execution_settings']['Class'] + ",");
         code.push("\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
         code.push("\t\tmaxJobs=10");
