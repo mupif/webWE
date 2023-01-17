@@ -47,7 +47,7 @@ function generateApiImplementation(){
 
 function insertEmptyTemplateMetadata(){
     let client = new XMLHttpRequest();
-    client.open('GET', '/empty_md.json');
+    client.open('GET', './empty_md.json');
     client.onreadystatechange = function() {
         elem_input.value = client.responseText;
         generateApiImplementation();
