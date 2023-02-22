@@ -6,10 +6,106 @@
     "Geometry": "",
     "Boundary_conditions": "",
     "Inputs": [
-
+        {
+            "Name": "Input property",
+            "Type": "mupif.Property",
+            "Required": true,
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "s",
+            "Obj_ID": "",
+            "Set_at": "timestep"
+        },
+        {
+            "Name": "Input field",
+            "Type": "mupif.Field",
+            "Required": true,
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "m",
+            "Obj_ID": "",
+            "Set_at": "timestep"
+        },
+        {
+            "Name": "Input string",
+            "Type": "mupif.String",
+            "Required": true,
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": "",
+            "Set_at": "timestep"
+        },
+        {
+            "Name": "Input file",
+            "Type": "mupif.PyroFile",
+            "Required": true,
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": "",
+            "Set_at": "timestep"
+        },
+        {
+            "Name": "Input heavystruct",
+            "Type": "mupif.HeavyStruct",
+            "Required": true,
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": "",
+            "Set_at": "timestep"
+        },
+        {
+            "Name": "Input data array",
+            "Type": "mupif.MupifObjectList",
+            "Required": true,
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": "",
+            "Set_at": "timestep",
+            "ValueType": "Scalar"
+        }
     ],
     "Outputs": [
-
+        {
+            "Name": "Output property",
+            "Type": "mupif.Property",
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "s",
+            "Obj_ID": "",
+            "ValueType": "Scalar"
+        },
+        {
+            "Name": "Output field",
+            "Type": "mupif.Field",
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "m",
+            "Obj_ID": ""
+        },
+        {
+            "Name": "Output string",
+            "Type": "mupif.String",
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": ""
+        },
+        {
+            "Name": "Output file",
+            "Type": "mupif.PyroFile",
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": ""
+        },
+        {
+            "Name": "Output heavystruct",
+            "Type": "mupif.HeavyStruct",
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": ""
+        },
+        {
+            "Name": "Output data array",
+            "Type": "mupif.MupifObjectList",
+            "Type_ID": "mupif.DataID.ID_None",
+            "Units": "",
+            "Obj_ID": ""
+        }
     ],
     "Solver": {
         "Software": "",
