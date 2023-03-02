@@ -20,6 +20,7 @@ if __name__ == '__main__':
         '../src/BlockQuantityToProperty.js',
         '../src/BlockNumberToQuantity.js',
         '../src/BlockNumberToProperty.js',
+        '../src/BlockDataListLength.js',
         '../src/Datalink.js',
         '../src/helpers.js',
         '../src/Main.js',

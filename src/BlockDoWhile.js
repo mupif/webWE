@@ -4,7 +4,7 @@ class BlockDoWhile extends Block{
         this.name = 'DoWhile';
 
         this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true, null));
-        this.addOutputSlot(new Slot(this, 'out', 'counter', 'counter', 'mupif.PhysicalQuantity'));
+        this.addOutputSlot(new Slot(this, 'out', 'counter', 'counter', 'number'));
     }
 
     generateCodeName(all_blocks, base_name='dowhile_'){

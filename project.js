@@ -62,6 +62,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_property', 'Number&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'datalist_length', 'DataList&nbsp;Length'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -356,6 +357,8 @@ class Block{
             block = new BlockNumberToQuantity(this.editor, this);
         if (name === "number_to_property")
             block = new BlockNumberToProperty(this.editor, this);
+        if (name === "datalist_length")
+            block = new BlockDataListLength(this.editor, this);
 
 
         if (block !== null) {
@@ -564,7 +567,7 @@ class BlockDoWhile extends Block{
         this.name = 'DoWhile';
 
         this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true, null));
-        this.addOutputSlot(new Slot(this, 'out', 'counter', 'counter', 'mupif.PhysicalQuantity'));
+        this.addOutputSlot(new Slot(this, 'out', 'counter', 'counter', 'number'));
     }
 
     generateCodeName(all_blocks, base_name='dowhile_'){
@@ -2304,6 +2307,70 @@ class BlockNumberToProperty extends Block{
 
 }
 
+class BlockDataListLength extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'DataList', 'DataList', 'mupif.DataList[*]', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'length', 'length', 'number', false));
+    }
+
+    generateCodeName(all_blocks, base_name='datalist_length_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+
+    /**
+     * 
+     * @param {Slot} slot
+     * @param {string} time
+     * @returns {string}*/
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let in_slot = this.getDataSlotWithName("DataList").getLinkedDataSlot();
+        if(in_slot != null) {
+            // if(in_slot.type.startsWith('mupif.DataList')) {
+            let subject = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
+            return 'len(' + subject + '.objs)';
+            // }
+        }
+        return 'None'
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockDataListLength';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_timeloop';
+    }
+
+    getBlockHtmlName(){
+        return 'DataList Length';
+    }
+
+}
+
 let datalink_id = 0;
 function generateNewDatalinkID(){
     datalink_id += 1;
@@ -3302,6 +3369,21 @@ function generateNewSlotID(){
 }
 
 class Slot{
+    /**
+     * 
+     * @param {Block} parent_block
+     * @param {string} inout
+     * @param {string} name
+     * @param {string} text
+     * @param {string} type
+     * @param {boolean} required
+     * @param {string|null} obj_type
+     * @param {string} obj_id
+     * @param {string} uid
+     * @param {string} set_at
+     * @param {string} units
+     * @param {string} value_type
+     */
     constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id='', uid='', set_at='', units='', value_type=''){
         this.id = generateNewSlotID();
         if(uid !== '')
@@ -3411,6 +3493,17 @@ class Slot{
 }
 
 class SlotExt extends Slot{
+    /**
+     * 
+     * @param {Block} parent_block
+     * @param {string} inout
+     * @param {string} name
+     * @param {string} text
+     * @param {string} type
+     * @param {boolean} required
+     * @param {string} obj_type
+     * @param {string} uid
+     */
     constructor(parent_block, inout, name, text, type, required=true, obj_type='None', uid=''){
         super(parent_block, inout, name, text, type, required, obj_type, name, uid);
         this.external = true;
@@ -3451,9 +3544,9 @@ class WorkflowEditor{
     }
 
     /**
-     * @param s1
-     * @param s2
-     * @returns {Datalink}*/
+     * @param {Slot} s1
+     * @param {Slot} s2
+     * @returns {Datalink} */
     addDatalink(s1, s2){
         if(s1 && s2) {
             if (s1 !== s2) {
@@ -3656,6 +3749,12 @@ class WorkflowEditor{
         if(json_data['classname']==='BlockNumberToProperty'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockNumberToProperty(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockDataListLength'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockDataListLength(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

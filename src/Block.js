@@ -57,6 +57,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_property', 'Number&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'datalist_length', 'DataList&nbsp;Length'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -351,6 +352,8 @@ class Block{
             block = new BlockNumberToQuantity(this.editor, this);
         if (name === "number_to_property")
             block = new BlockNumberToProperty(this.editor, this);
+        if (name === "datalist_length")
+            block = new BlockDataListLength(this.editor, this);
 
 
         if (block !== null) {

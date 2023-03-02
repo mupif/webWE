@@ -16,9 +16,9 @@ class WorkflowEditor{
     }
 
     /**
-     * @param s1
-     * @param s2
-     * @returns {Datalink}*/
+     * @param {Slot} s1
+     * @param {Slot} s2
+     * @returns {Datalink} */
     addDatalink(s1, s2){
         if(s1 && s2) {
             if (s1 !== s2) {
@@ -221,6 +221,12 @@ class WorkflowEditor{
         if(json_data['classname']==='BlockNumberToProperty'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockNumberToProperty(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockDataListLength'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockDataListLength(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

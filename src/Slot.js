@@ -18,6 +18,21 @@ function generateNewSlotID(){
 }
 
 class Slot{
+    /**
+     * 
+     * @param {Block} parent_block
+     * @param {string} inout
+     * @param {string} name
+     * @param {string} text
+     * @param {string} type
+     * @param {boolean} required
+     * @param {string|null} obj_type
+     * @param {string} obj_id
+     * @param {string} uid
+     * @param {string} set_at
+     * @param {string} units
+     * @param {string} value_type
+     */
     constructor(parent_block, inout, name, text, type, required=true, obj_type=null, obj_id='', uid='', set_at='', units='', value_type=''){
         this.id = generateNewSlotID();
         if(uid !== '')
@@ -127,6 +142,17 @@ class Slot{
 }
 
 class SlotExt extends Slot{
+    /**
+     * 
+     * @param {Block} parent_block
+     * @param {string} inout
+     * @param {string} name
+     * @param {string} text
+     * @param {string} type
+     * @param {boolean} required
+     * @param {string} obj_type
+     * @param {string} uid
+     */
     constructor(parent_block, inout, name, text, type, required=true, obj_type='None', uid=''){
         super(parent_block, inout, name, text, type, required, obj_type, name, uid);
         this.external = true;
