@@ -49,21 +49,19 @@ class BlockDoWhile extends Block{
             ti = ts + ".getTime()";
         else
             ti = "0*mupif.U.s";
-        code.push(var_compute + " = " + this.getDo(ti));
+        code.push(var_compute + " = True");
         
         code.push("while " + var_compute + ":");
-        let while_code = [];
-        while_code.push("\t" + var_counter + " += 1")
+
+        code.push("\t" + var_counter + " += 1")
+
+        code.push("\t" + var_compute + " = " + this.getDo(ti));
+        code.push("\tif " + var_compute + ":")
 
         let blocks = this.getBlocks();
         for(let i=0;i<blocks.length;i++){
-            while_code = while_code.concat(blocks[i].getExecutionCode(1, timestep, solvefunc));
+            code = code.concat(blocks[i].getExecutionCode(2, timestep, solvefunc));
         }
-
-        code = code.concat(while_code);
-
-        code.push("\t");
-        code.push("\t" + var_compute + " = " + this.getDo(ti));
 
         return push_indents_before_each_line(code, indent);
     }
