@@ -2,6 +2,7 @@ import mupif
 import copy
 import Pyro5
 import threading
+import time
 import mupif_examples_models
 import field_export
 import logging
@@ -26,22 +27,26 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
                 {
                     "Name": "model_1",
                     "Module": "mupif_examples_models",
-                    "Class": "ThermalNonstatModel"
+                    "Class": "ThermalNonstatModel",
+                    "Instantiate": True
                 },
                 {
                     "Name": "model_2",
                     "Module": "mupif_examples_models",
-                    "Class": "MechanicalModel"
+                    "Class": "MechanicalModel",
+                    "Instantiate": True
                 },
                 {
                     "Name": "model_3",
                     "Module": "field_export",
-                    "Class": "field_export_to_image"
+                    "Class": "field_export_to_image",
+                    "Instantiate": True
                 },
                 {
                     "Name": "model_4",
                     "Module": "field_export",
-                    "Class": "field_export_to_image"
+                    "Class": "field_export_to_image",
+                    "Instantiate": True
                 }
             ]
         }
@@ -89,7 +94,7 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
     def solve(self, runInBackground=False):
         pass
         
-        # execution code of timeloop_1 (TimeLoop)
+        # execution code of timeloop_1 (Timeloop)
         timeloop_1_time = self.constant_physical_quantity_1
         timeloop_1_target_time = self.constant_physical_quantity_2
         timeloop_1_compute = True
@@ -109,19 +114,19 @@ class ThermoMechanicalExecutionWorkflow_01(mupif.Workflow):
             self.getModel('model_1').set(self.constant_property_1, 'Cauchy top')
             self.getModel('model_1').set(self.constant_property_2, 'Dirichlet left')
             self.getModel('model_1').set(self.constant_property_2, 'Dirichlet right')
-            self.getModel('model_1').solveStep(timeloop_1_time_step)
+            self.getModel('model_1').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
             
             # execution code of model_2 (Plane stress linear elastic)
             self.getModel('model_2').set(self.getModel('model_1').get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), ''), '')
-            self.getModel('model_2').solveStep(timeloop_1_time_step)
+            self.getModel('model_2').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
             
             # execution code of model_3 (Field export to image)
             self.getModel('model_3').set(self.getModel('model_1').get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), ''), '')
-            self.getModel('model_3').solveStep(timeloop_1_time_step)
+            self.getModel('model_3').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
             
             # execution code of model_4 (Field export to image)
             self.getModel('model_4').set(self.getModel('model_2').get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), ''), '')
-            self.getModel('model_4').solveStep(timeloop_1_time_step)
+            self.getModel('model_4').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
         
 
 

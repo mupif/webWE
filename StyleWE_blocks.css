@@ -18,24 +18,28 @@ div.we_block_selected div.we_block{
     border-color:black;
 }
 
-div.we_block_workflow{
-    background-color:#cccccc;
-}
-
 div.we_block_model{
     background-color:#99ebff;
 }
 
-div.we_block_timeloop{
+div.we_block_default{
     background-color:#cccccc;
 }
 
-div.we_block_property{
+div.we_block_allocate_model_at_runtime{
+    background-color: #95b14a;
+}
+
+div.we_block_run_in_background{
+    background-color: #eee04f;
+}
+
+div.we_block_data{
     background-color:#ff80b3;
 }
 
-div.we_block_physicalquantity{
-    background-color:#ff80b3;
+div.we_block_helper{
+    background-color: #bea7e8;
 }
 
 div.we_block div.bl_header{

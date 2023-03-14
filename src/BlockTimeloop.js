@@ -1,7 +1,7 @@
 class BlockTimeloop extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
-        this.name = 'TimeLoop';
+        this.name = this.getClassName().replace('Block', '');
         this.defines_timestep = true;
 
         this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false, null, '', '', '', 'none', 'Scalar'));
@@ -125,7 +125,7 @@ class BlockTimeloop extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_default';
     }
 
     getBlockHtmlName(){

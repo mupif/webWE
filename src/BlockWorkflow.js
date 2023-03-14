@@ -1,7 +1,7 @@
 class BlockWorkflow extends Block{
     constructor(editor, parent_block){
         super(editor, null);
-        this.name = 'Workflow';
+        this.name = this.getClassName().replace('Block', '');
 
         this.project_name = 'My unnamed project';
         this.project_classname = 'MyUnnamedProject';
@@ -221,6 +221,7 @@ class BlockWorkflow extends Block{
             code.push("import copy");
             code.push("import Pyro5");
             code.push("import threading");
+            code.push("import time");
             
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
@@ -502,7 +503,7 @@ class BlockWorkflow extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_workflow';
+        return 'we_block we_block_default';
     }
 
     getBlockHtmlName(){

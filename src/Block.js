@@ -35,6 +35,28 @@ class Block{
         return "None"
     }
 
+    /** @returns {Block} */
+    getParentBlock(){
+        return this.parent_block;
+    }
+
+    /** @returns {boolean} */
+    getHasParentBlock(){
+        return this.parent_block !== null;
+    }
+
+    /** @returns {Block[]} */
+    getParentBlockChain(){
+        let chain = [];
+        if(this.getHasParentBlock()){
+            chain = this.getParentBlock().getParentBlockChain();
+            chain.push(this.getParentBlock());
+        }
+        return chain;
+    }
+    
+    
+
     getMenu(){
         return this.menu_record;
     }
@@ -58,6 +80,11 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_property', 'Number&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'datalist_length', 'DataList&nbsp;Length'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'allocate_model_at_runtime', 'Allocate&nbsp;model&nbsp;at&nbsp;runtime'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'run_in_background', 'Run&nbsp;in&nbsp;background'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'variable', 'Variable'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'get_item_from_datalist', 'Get&nbsp;item&nbsp;from&nbsp;datalist'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'wait_for_background_processes', 'Wait&nbsp;for&nbsp;background&nbsp;processes'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -354,6 +381,16 @@ class Block{
             block = new BlockNumberToProperty(this.editor, this);
         if (name === "datalist_length")
             block = new BlockDataListLength(this.editor, this);
+        if (name === "allocate_model_at_runtime")
+            block = new BlockAllocateModelAtRuntime(this.editor, this);
+        if (name === "run_in_background")
+            block = new BlockRunInBackground(this.editor, this);
+        if (name === "variable")
+            block = new BlockVariable(this.editor, this);
+        if (name === "get_item_from_datalist")
+            block = new BlockGetItemFromDataList(this.editor, this);
+        if (name === "wait_for_background_processes")
+            block = new BlockWaitForBackgroundProcesses(this.editor, this);
 
 
         if (block !== null) {

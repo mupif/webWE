@@ -84,7 +84,7 @@ class BlockDoWhile extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_default';
     }
 
     getBlockHtmlName(){

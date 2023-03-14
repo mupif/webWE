@@ -58,7 +58,7 @@ class BlockQuantityComparison extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){

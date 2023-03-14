@@ -2,6 +2,7 @@ import mupif
 import copy
 import Pyro5
 import threading
+import time
 import example02
 import field_export
 import logging
@@ -26,17 +27,20 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
                 {
                     "Name": "model_1",
                     "Module": "example02",
-                    "Class": "ThermoMechanicalClassWorkflow_01"
+                    "Class": "ThermoMechanicalClassWorkflow_01",
+                    "Instantiate": True
                 },
                 {
                     "Name": "model_2",
                     "Module": "field_export",
-                    "Class": "field_export_to_image"
+                    "Class": "field_export_to_image",
+                    "Instantiate": True
                 },
                 {
                     "Name": "model_3",
                     "Module": "field_export",
-                    "Class": "field_export_to_image"
+                    "Class": "field_export_to_image",
+                    "Instantiate": True
                 }
             ]
         }
@@ -81,7 +85,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
     def solve(self, runInBackground=False):
         pass
         
-        # execution code of timeloop_1 (TimeLoop)
+        # execution code of timeloop_1 (Timeloop)
         timeloop_1_time = self.constant_physical_quantity_1
         timeloop_1_target_time = self.constant_physical_quantity_2
         timeloop_1_compute = True
@@ -99,15 +103,15 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
             
             # execution code of model_1 (Thermo-mechanical class workflow)
             self.getModel('model_1').set(self.constant_property_1, 'top_temperature')
-            self.getModel('model_1').solveStep(timeloop_1_time_step)
+            self.getModel('model_1').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
             
             # execution code of model_2 (Field export to image)
             self.getModel('model_2').set(self.getModel('model_1').get(mupif.DataID.FID_Temperature, timeloop_1_time_step.getTime(), 'temperature'), '')
-            self.getModel('model_2').solveStep(timeloop_1_time_step)
+            self.getModel('model_2').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
             
             # execution code of model_3 (Field export to image)
             self.getModel('model_3').set(self.getModel('model_1').get(mupif.DataID.FID_Displacement, timeloop_1_time_step.getTime(), 'displacement'), '')
-            self.getModel('model_3').solveStep(timeloop_1_time_step)
+            self.getModel('model_3').solveStep(tstep=timeloop_1_time_step, runInBackground=False)
         
 
 

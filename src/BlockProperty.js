@@ -144,7 +144,7 @@ class BlockProperty extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_property';
+        return 'we_block we_block_data';
     }
 
     getBlockHtmlName(){

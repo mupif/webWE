@@ -96,7 +96,7 @@ class BlockPhysicalQuantity extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_physicalquantity';
+        return 'we_block we_block_data';
     }
 
     getBlockHtmlName(){

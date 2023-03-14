@@ -40,6 +40,28 @@ class Block{
         return "None"
     }
 
+    /** @returns {Block} */
+    getParentBlock(){
+        return this.parent_block;
+    }
+
+    /** @returns {boolean} */
+    getHasParentBlock(){
+        return this.parent_block !== null;
+    }
+
+    /** @returns {Block[]} */
+    getParentBlockChain(){
+        let chain = [];
+        if(this.getHasParentBlock()){
+            chain = this.getParentBlock().getParentBlockChain();
+            chain.push(this.getParentBlock());
+        }
+        return chain;
+    }
+    
+    
+
     getMenu(){
         return this.menu_record;
     }
@@ -63,6 +85,11 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_property', 'Number&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'datalist_length', 'DataList&nbsp;Length'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'allocate_model_at_runtime', 'Allocate&nbsp;model&nbsp;at&nbsp;runtime'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'run_in_background', 'Run&nbsp;in&nbsp;background'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'variable', 'Variable'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'get_item_from_datalist', 'Get&nbsp;item&nbsp;from&nbsp;datalist'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'wait_for_background_processes', 'Wait&nbsp;for&nbsp;background&nbsp;processes'), 'Add&nbsp;block');
     }
 
     addAddExternalSlotItems(){
@@ -359,6 +386,16 @@ class Block{
             block = new BlockNumberToProperty(this.editor, this);
         if (name === "datalist_length")
             block = new BlockDataListLength(this.editor, this);
+        if (name === "allocate_model_at_runtime")
+            block = new BlockAllocateModelAtRuntime(this.editor, this);
+        if (name === "run_in_background")
+            block = new BlockRunInBackground(this.editor, this);
+        if (name === "variable")
+            block = new BlockVariable(this.editor, this);
+        if (name === "get_item_from_datalist")
+            block = new BlockGetItemFromDataList(this.editor, this);
+        if (name === "wait_for_background_processes")
+            block = new BlockWaitForBackgroundProcesses(this.editor, this);
 
 
         if (block !== null) {
@@ -647,7 +684,7 @@ class BlockDoWhile extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_default';
     }
 
     getBlockHtmlName(){
@@ -863,11 +900,28 @@ class BlockModel extends Block {
         super.generateCodeName(all_blocks, base_name);
     }
 
+    /** @returns {BlockAllocateModelAtRuntime} */
+    getParentAllocateModelAtRuntimeBlock(){
+        let res = null;
+        let parent_blocks = this.getParentBlockChain();
+        parent_blocks.forEach(b => {
+            if(b.getClassName() === 'BlockAllocateModelAtRuntime'){res = b;}
+        });
+        return res;
+    }
+
+    /** @returns {BlockRunInBackground} */
+    getParentRunInBackgroundBlock(){
+        let res = null;
+        let parent_blocks = this.getParentBlockChain();
+        parent_blocks.forEach(b => {
+            if(b.getClassName() === 'BlockRunInBackground'){res = b;}
+        });
+        return res;
+    }
+
     getInitCode(indent = 0) {
         return [];
-        let code = super.getInitCode();
-        code.push("self." + this.code_name + " = None  # instances of models are created in the initialize function");
-        return push_indents_before_each_line(code, indent);
     }
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
@@ -879,6 +933,24 @@ class BlockModel extends Block {
             timestep = this.getTimestepVariableNameFromSelfOrParent();
 
         let code = super.getExecutionCode();
+        
+        let model_name = "'" + this.code_name + "'";
+        
+        let parent_allocate_at_runtime_block = this.getParentAllocateModelAtRuntimeBlock();
+        if(parent_allocate_at_runtime_block !== null){
+            model_name = "model_name";
+            code.push(model_name + " = self._generateNewModelName(base='" + this.code_name + "')");
+            code.push("self._allocateModelByName(name='" + this.code_name + "', name_new=" + model_name + ")");
+            code.push("self.getModel(" + model_name + ").initialize(metadata=self._getInitializationMetadata())");
+            code.push(parent_allocate_at_runtime_block.getModelNamesVariable() + ".append(" + model_name + ")");
+        }
+
+        let run_in_background = "False"
+        let parent_run_in_background_block = this.getParentRunInBackgroundBlock();
+        if(parent_run_in_background_block !== null){
+            run_in_background = "True"
+            code.push(parent_run_in_background_block.getModelNamesVariable() + ".append(" + model_name + ")");
+        }
 
         if(timestep === "None" && solvefunc) {
             code.push(this.code_name + "_virtual_timestep = mupif.timestep.TimeStep(time=0*mupif.Q.s, dt=1*mupif.Q.s, targetTime=1*mupif.Q.s)");
@@ -895,23 +967,25 @@ class BlockModel extends Block {
                     obj_id = this.input_slots[i].obj_id;
                     if (typeof obj_id === 'string')
                         obj_id = "'" + obj_id + "'";
-                    code.push("self.getModel('" + this.code_name + "').set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                    code.push("self.getModel(" + model_name + ").set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
                 }
             }
         }
 
-        code.push("self.getModel('" + this.code_name + "').solveStep(" + timestep + ")");
+        code.push("self.getModel(" + model_name + ").solveStep(tstep=" + timestep + ", runInBackground=" + run_in_background + ")");
 
         return push_indents_before_each_line(code, indent);
     }
 
     getAllocationMetadata(indent=0){
+        let instantiate = this.getParentAllocateModelAtRuntimeBlock() === null;
         let code;
         if(this.exec_type === "Distributed") {
             code = [
                 "{",
                 "\t\"Name\": \"" + this.code_name + "\",",
-                "\t\"Jobmanager\": \"" + this.exec_settings_jobmanagername + "\"",
+                "\t\"Jobmanager\": \"" + this.exec_settings_jobmanagername + "\",",
+                "\t\"Instantiate\": " + (instantiate ? "True" : "False") + "",
                 "}"
             ];
         }else{
@@ -919,7 +993,8 @@ class BlockModel extends Block {
                 "{",
                 "\t\"Name\": \"" + this.code_name + "\",",
                 "\t\"Module\": \"" + this.model_module + "\",",
-                "\t\"Class\": \"" + this.model_name + "\"",
+                "\t\"Class\": \"" + this.model_name + "\",",
+                "\t\"Instantiate\": " + (instantiate ? "True" : "False") + "",
                 "}"
             ];
         }
@@ -1140,7 +1215,7 @@ class BlockPhysicalQuantity extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_physicalquantity';
+        return 'we_block we_block_data';
     }
 
     getBlockHtmlName(){
@@ -1306,7 +1381,7 @@ class BlockProperty extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_property';
+        return 'we_block we_block_data';
     }
 
     getBlockHtmlName(){
@@ -1333,7 +1408,7 @@ class BlockProperty extends Block{
 class BlockTimeloop extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
-        this.name = 'TimeLoop';
+        this.name = this.getClassName().replace('Block', '');
         this.defines_timestep = true;
 
         this.addInputSlot(new Slot(this, 'in', 'start_time', 'start_time', 'mupif.PhysicalQuantity', false, null, '', '', '', 'none', 'Scalar'));
@@ -1457,7 +1532,7 @@ class BlockTimeloop extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_default';
     }
 
     getBlockHtmlName(){
@@ -1469,7 +1544,7 @@ class BlockTimeloop extends Block{
 class BlockWorkflow extends Block{
     constructor(editor, parent_block){
         super(editor, null);
-        this.name = 'Workflow';
+        this.name = this.getClassName().replace('Block', '');
 
         this.project_name = 'My unnamed project';
         this.project_classname = 'MyUnnamedProject';
@@ -1689,6 +1764,7 @@ class BlockWorkflow extends Block{
             code.push("import copy");
             code.push("import Pyro5");
             code.push("import threading");
+            code.push("import time");
             
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
@@ -1970,7 +2046,7 @@ class BlockWorkflow extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_workflow';
+        return 'we_block we_block_default';
     }
 
     getBlockHtmlName(){
@@ -2070,7 +2146,7 @@ class BlockQuantityComparison extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){
@@ -2127,7 +2203,7 @@ class BlockPropertyToQuantity extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){
@@ -2184,7 +2260,7 @@ class BlockQuantityToProperty extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){
@@ -2241,7 +2317,7 @@ class BlockNumberToQuantity extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){
@@ -2298,7 +2374,7 @@ class BlockNumberToProperty extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){
@@ -2333,10 +2409,9 @@ class BlockDataListLength extends Block{
     }
 
     /**
-     * 
      * @param {Slot} slot
      * @param {string} time
-     * @returns {string}*/
+     * @returns {string} */
     generateOutputDataSlotGetFunction(slot, time=""){
         let in_slot = this.getDataSlotWithName("DataList").getLinkedDataSlot();
         if(in_slot != null) {
@@ -2362,11 +2437,360 @@ class BlockDataListLength extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){
         return 'DataList Length';
+    }
+
+}
+
+class BlockAllocateModelAtRuntime extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addOutputSlot(new Slot(this, 'out', 'model_names', 'model_names', 'string[]', false));
+    }
+
+    generateCodeName(all_blocks, base_name='allocate_model_at_runtime_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        return this.getModelNamesVariable();
+    }
+    
+    getModelNamesVariable(){return "self."+this.code_name+"_model_names";}
+
+    getInitCode(indent=0){
+        let code = super.getInitCode();
+        code.push(this.getModelNamesVariable() + " = []");
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        let var_time_step = "tstep";
+        if(timestep !== ""){
+            var_time_step = timestep
+        }
+        let code = [];
+        code.push(this.getModelNamesVariable() + " = []");
+
+        let blocks = this.getBlocks();
+        for(let i=0;i<blocks.length;i++){
+            code = code.concat(blocks[i].getExecutionCode(0, var_time_step, solvefunc));
+        }
+
+        return push_indents_before_each_line(code, indent);
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+        this.addAddBlockItems();
+        this.addOrderingMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockAllocateModelAtRuntime';
+    }
+
+    getDictForJSON() {
+        let dict = super.getDictForJSON();
+        dict['child_block_sort'] = this.child_block_sort;
+        return dict;
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_allocate_model_at_runtime';
+    }
+
+    getBlockHtmlName(){
+        return 'Allocate Model At Runtime';
+    }
+
+}
+
+class BlockRunInBackground extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addOutputSlot(new Slot(this, 'out', 'model_names', 'model_names', 'string[]', false));
+    }
+
+    generateCodeName(all_blocks, base_name='run_in_background_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        return this.getModelNamesVariable();
+    }
+    
+    getModelNamesVariable(){return "self."+this.code_name+"_model_names";}
+
+    getInitCode(indent=0){
+        let code = super.getInitCode();
+        code.push(this.getModelNamesVariable() + " = []");
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        let var_time_step = "tstep";
+        if(timestep !== ""){
+            var_time_step = timestep
+        }
+        let code = [];
+        code.push(this.getModelNamesVariable() + " = []");
+
+        let blocks = this.getBlocks();
+        for(let i=0;i<blocks.length;i++){
+            code = code.concat(blocks[i].getExecutionCode(0, var_time_step, solvefunc));
+        }
+
+        return push_indents_before_each_line(code, indent);
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+        this.addAddBlockItems();
+        this.addOrderingMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockRunInBackground';
+    }
+
+    getDictForJSON() {
+        let dict = super.getDictForJSON();
+        dict['child_block_sort'] = this.child_block_sort;
+        return dict;
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_run_in_background';
+    }
+
+    getBlockHtmlName(){
+        return 'Run in background';
+    }
+
+}
+
+class BlockWaitForBackgroundProcesses extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'model_names', 'model_names', 'string[]', true, null));
+        this.addInputSlot(new Slot(this, 'in', 'checking_period', 'checking_period', 'mupif.PhysicalQuantity', false, null));
+    }
+
+    generateCodeName(all_blocks, base_name='wait_for_background_processes_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        let code = super.getExecutionCode();
+        let cn = this.getCodeName()
+        let var_all_done = cn + "_all_done"
+        let var_model_name = cn + "_model_name"
+
+        let in_slot_model_names = this.getDataSlotWithName("model_names").getLinkedDataSlot();
+        let model_names = "[]"
+        if(in_slot_model_names != null) {
+            model_names = in_slot_model_names.getParentBlock().generateOutputDataSlotGetFunction(in_slot_model_names);
+        }
+
+        code.push(var_all_done + " = False");
+        code.push("while not " + var_all_done + ":");
+        code.push("\ttime.sleep(60)");
+        code.push("\t" + var_all_done + " = True");
+        code.push("\tfor " + var_model_name + " in " + model_names + ":");
+        code.push("\t\tif not self.getModel(" + var_model_name + ").isSolved():");
+        code.push("\t\t\t" + var_all_done + " = False");
+        code.push("\tfor " + var_model_name + " in " + model_names + ":");
+        code.push("\t\tself.getModel(" + var_model_name + ").finishStep(tstep)");
+
+        return push_indents_before_each_line(code, indent);
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockWaitForBackgroundProcesses';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_data';
+    }
+
+    getBlockHtmlName(){
+        return 'Wait for background processes';
+    }
+
+}
+
+class BlockVariable extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'in', 'in', '*', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'out', 'out', '*', false));
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        return "self." + this.code_name;
+    }
+
+    generateCodeName(all_blocks, base_name='variable_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        let code = super.getInitCode();
+
+        let var_value = "self." + this.code_name;
+
+        code.push(var_value + " = None");
+
+        return push_indents_before_each_line(code, indent);
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        let code = super.getExecutionCode();
+
+        let in_slot = this.getDataSlotWithName("in").getLinkedDataSlot();
+        let val = "None"
+        if(in_slot != null) {
+            val = in_slot.getParentBlock().generateOutputDataSlotGetFunction(in_slot);
+        }
+
+        let var_value = this.code_name;
+
+        code.push("self." + var_value + " = " + val);
+
+        return push_indents_before_each_line(code, indent);
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockVariable';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_data';
+    }
+
+    getBlockHtmlName(){
+        return 'Variable';
+    }
+
+}
+
+class BlockGetItemFromDataList extends Block{
+    constructor(editor, parent_block){
+        super(editor, parent_block);
+        this.name = this.getClassName().replace('Block', '');
+
+        this.addInputSlot(new Slot(this, 'in', 'datalist', 'datalist', 'mupif.DataList[*]', true, null));
+        this.addInputSlot(new Slot(this, 'in', 'number', 'number', 'number', true, null));
+        this.addOutputSlot(new Slot(this, 'out', 'item', 'item', '*', false));
+    }
+
+    generateOutputDataSlotGetFunction(slot, time=""){
+        let in_slot_datalist = this.getDataSlotWithName("datalist").getLinkedDataSlot();
+        let in_slot_number = this.getDataSlotWithName("number").getLinkedDataSlot();
+        if(in_slot_datalist != null && in_slot_number != null) {
+            let datalist = in_slot_datalist.getParentBlock().generateOutputDataSlotGetFunction(in_slot_datalist);
+            let number = in_slot_number.getParentBlock().generateOutputDataSlotGetFunction(in_slot_number);
+            return datalist + ".objs[int(" + number + ")-1] if 0 <= int(" + number + ")-1 < len(" + datalist + ".objs) else None";
+        }
+        return 'None'
+    }
+
+    generateCodeName(all_blocks, base_name='get_item_from_datalist_'){
+        super.generateCodeName(all_blocks, base_name);
+    }
+
+    getInitCode(indent=0){
+        return [];
+    }
+
+    getInitializationCode(indent=0, metaDataStr="{}"){
+        return [];
+    }
+
+    getExecutionCode(indent=0, timestep="", solvefunc=false){
+        return [];
+    }
+
+    defineMenu() {
+        super.defineMenu();
+        this.addMoveMenuItems();
+    }
+
+    getClassName() {
+        return 'BlockGetItemFromDataList';
+    }
+
+    // #########################
+    // ########## NEW ##########
+    // #########################
+
+    getBlockHtmlClass(){
+        return 'we_block we_block_helper';
+    }
+
+    getBlockHtmlName(){
+        return 'Get item from DataList';
     }
 
 }
@@ -3708,6 +4132,22 @@ class WorkflowEditor{
                 new_block.child_block_sort = json_data['child_block_sort'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockAllocateModelAtRuntime'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockAllocateModelAtRuntime(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockRunInBackground'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockRunInBackground(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
+            parent_block.addBlock(new_block);
+        }
         if(json_data['classname']==='BlockDoWhile'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockDoWhile(this, parent_block);
@@ -3755,6 +4195,24 @@ class WorkflowEditor{
         if(json_data['classname']==='BlockDataListLength'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockDataListLength(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockVariable'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockVariable(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockGetItemFromDataList'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockGetItemFromDataList(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockWaitForBackgroundProcesses'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockWaitForBackgroundProcesses(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

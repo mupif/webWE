@@ -180,6 +180,22 @@ class WorkflowEditor{
                 new_block.child_block_sort = json_data['child_block_sort'];
             parent_block.addBlock(new_block);
         }
+        if(json_data['classname']==='BlockAllocateModelAtRuntime'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockAllocateModelAtRuntime(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockRunInBackground'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockRunInBackground(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            if('child_block_sort' in json_data)
+                new_block.child_block_sort = json_data['child_block_sort'];
+            parent_block.addBlock(new_block);
+        }
         if(json_data['classname']==='BlockDoWhile'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockDoWhile(this, parent_block);
@@ -227,6 +243,24 @@ class WorkflowEditor{
         if(json_data['classname']==='BlockDataListLength'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
             new_block = new BlockDataListLength(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockVariable'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockVariable(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockGetItemFromDataList'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockGetItemFromDataList(this, parent_block);
+            new_block.code_name = json_data['uid'];
+            parent_block.addBlock(new_block);
+        }
+        if(json_data['classname']==='BlockWaitForBackgroundProcesses'){
+            parent_block = this.getBlockByUID(json_data['parent_uid']);
+            new_block = new BlockWaitForBackgroundProcesses(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

@@ -110,11 +110,28 @@ class BlockModel extends Block {
         super.generateCodeName(all_blocks, base_name);
     }
 
+    /** @returns {BlockAllocateModelAtRuntime} */
+    getParentAllocateModelAtRuntimeBlock(){
+        let res = null;
+        let parent_blocks = this.getParentBlockChain();
+        parent_blocks.forEach(b => {
+            if(b.getClassName() === 'BlockAllocateModelAtRuntime'){res = b;}
+        });
+        return res;
+    }
+
+    /** @returns {BlockRunInBackground} */
+    getParentRunInBackgroundBlock(){
+        let res = null;
+        let parent_blocks = this.getParentBlockChain();
+        parent_blocks.forEach(b => {
+            if(b.getClassName() === 'BlockRunInBackground'){res = b;}
+        });
+        return res;
+    }
+
     getInitCode(indent = 0) {
         return [];
-        let code = super.getInitCode();
-        code.push("self." + this.code_name + " = None  # instances of models are created in the initialize function");
-        return push_indents_before_each_line(code, indent);
     }
 
     getInitializationCode(indent = 0, metaDataStr = "{}") {
@@ -126,6 +143,24 @@ class BlockModel extends Block {
             timestep = this.getTimestepVariableNameFromSelfOrParent();
 
         let code = super.getExecutionCode();
+        
+        let model_name = "'" + this.code_name + "'";
+        
+        let parent_allocate_at_runtime_block = this.getParentAllocateModelAtRuntimeBlock();
+        if(parent_allocate_at_runtime_block !== null){
+            model_name = "model_name";
+            code.push(model_name + " = self._generateNewModelName(base='" + this.code_name + "')");
+            code.push("self._allocateModelByName(name='" + this.code_name + "', name_new=" + model_name + ")");
+            code.push("self.getModel(" + model_name + ").initialize(metadata=self._getInitializationMetadata())");
+            code.push(parent_allocate_at_runtime_block.getModelNamesVariable() + ".append(" + model_name + ")");
+        }
+
+        let run_in_background = "False"
+        let parent_run_in_background_block = this.getParentRunInBackgroundBlock();
+        if(parent_run_in_background_block !== null){
+            run_in_background = "True"
+            code.push(parent_run_in_background_block.getModelNamesVariable() + ".append(" + model_name + ")");
+        }
 
         if(timestep === "None" && solvefunc) {
             code.push(this.code_name + "_virtual_timestep = mupif.timestep.TimeStep(time=0*mupif.Q.s, dt=1*mupif.Q.s, targetTime=1*mupif.Q.s)");
@@ -142,23 +177,25 @@ class BlockModel extends Block {
                     obj_id = this.input_slots[i].obj_id;
                     if (typeof obj_id === 'string')
                         obj_id = "'" + obj_id + "'";
-                    code.push("self.getModel('" + this.code_name + "').set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
+                    code.push("self.getModel(" + model_name + ").set(" + linked_slot.getParentBlock().generateOutputDataSlotGetFunction(linked_slot, timestep_time) + ", " + obj_id + ")");
                 }
             }
         }
 
-        code.push("self.getModel('" + this.code_name + "').solveStep(" + timestep + ")");
+        code.push("self.getModel(" + model_name + ").solveStep(tstep=" + timestep + ", runInBackground=" + run_in_background + ")");
 
         return push_indents_before_each_line(code, indent);
     }
 
     getAllocationMetadata(indent=0){
+        let instantiate = this.getParentAllocateModelAtRuntimeBlock() === null;
         let code;
         if(this.exec_type === "Distributed") {
             code = [
                 "{",
                 "\t\"Name\": \"" + this.code_name + "\",",
-                "\t\"Jobmanager\": \"" + this.exec_settings_jobmanagername + "\"",
+                "\t\"Jobmanager\": \"" + this.exec_settings_jobmanagername + "\",",
+                "\t\"Instantiate\": " + (instantiate ? "True" : "False") + "",
                 "}"
             ];
         }else{
@@ -166,7 +203,8 @@ class BlockModel extends Block {
                 "{",
                 "\t\"Name\": \"" + this.code_name + "\",",
                 "\t\"Module\": \"" + this.model_module + "\",",
-                "\t\"Class\": \"" + this.model_name + "\"",
+                "\t\"Class\": \"" + this.model_name + "\",",
+                "\t\"Instantiate\": " + (instantiate ? "True" : "False") + "",
                 "}"
             ];
         }

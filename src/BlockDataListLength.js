@@ -24,10 +24,9 @@ class BlockDataListLength extends Block{
     }
 
     /**
-     * 
      * @param {Slot} slot
      * @param {string} time
-     * @returns {string}*/
+     * @returns {string} */
     generateOutputDataSlotGetFunction(slot, time=""){
         let in_slot = this.getDataSlotWithName("DataList").getLinkedDataSlot();
         if(in_slot != null) {
@@ -53,7 +52,7 @@ class BlockDataListLength extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_timeloop';
+        return 'we_block we_block_helper';
     }
 
     getBlockHtmlName(){

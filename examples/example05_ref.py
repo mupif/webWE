@@ -2,6 +2,7 @@ import mupif
 import copy
 import Pyro5
 import threading
+import time
 import mupif_examples_models
 import logging
 log = logging.getLogger()
@@ -34,12 +35,14 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
                 {
                     "Name": "model_1",
                     "Module": "mupif_examples_models",
-                    "Class": "ThermalNonstatModel"
+                    "Class": "ThermalNonstatModel",
+                    "Instantiate": True
                 },
                 {
                     "Name": "model_2",
                     "Module": "mupif_examples_models",
-                    "Class": "MechanicalModel"
+                    "Class": "MechanicalModel",
+                    "Instantiate": True
                 }
             ]
         }
@@ -115,10 +118,10 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
         self.getModel('model_1').set(self.external_input_1, 'Cauchy top')
         self.getModel('model_1').set(self.constant_property_1, 'Dirichlet bottom')
         self.getModel('model_1').set(self.constant_property_1, 'Dirichlet left')
-        self.getModel('model_1').solveStep(tstep)
+        self.getModel('model_1').solveStep(tstep=tstep, runInBackground=False)
         
         # execution code of model_2 (Plane stress linear elastic)
         self.getModel('model_2').set(self.getModel('model_1').get(mupif.DataID.FID_Temperature, tstep.getTime(), ''), '')
-        self.getModel('model_2').solveStep(tstep)
+        self.getModel('model_2').solveStep(tstep=tstep, runInBackground=False)
 
 
