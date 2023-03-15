@@ -5,6 +5,7 @@ class BlockVariable extends Block{
 
         this.addInputSlot(new Slot(this, 'in', 'in', 'in', '*', true, null));
         this.addOutputSlot(new Slot(this, 'out', 'out', 'out', '*', false));
+        this.getDataSlotWithName('out').setRedirectionForParams(this.getDataSlotWithName('in'));
     }
 
     generateOutputDataSlotGetFunction(slot, time=""){

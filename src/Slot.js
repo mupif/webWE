@@ -42,7 +42,6 @@ class Slot{
         this.name = name;
         this.text = text;
         this.parent_block = parent_block;
-        // this.code_name = "";
         this.units = units;
         this.value_type = value_type;
 
@@ -55,10 +54,30 @@ class Slot{
         if(this.inout === 'in')
             this.max_connections = 1;
         this.external = false;
+        /** @type {Slot} */
+        this.redirect_for_slot_params = null
         
         this.set_at = set_at;
     }
 
+    /** @returns {boolean} */
+    getRedirectionForParams(){
+        return this.redirect_for_slot_params !== null;
+    }
+
+    /** @param slot {Slot} */
+    setRedirectionForParams(slot){
+        this.redirect_for_slot_params = slot;
+    }
+    
+    /** @returns {Slot|null} */
+    getRedirectedSlot(){
+        if(this.redirect_for_slot_params){
+            return this.redirect_for_slot_params.getLinkedDataSlot();
+        }
+        return null;
+    }
+    
     connected(){
         let all_datalinks = this.getParentBlock().editor.datalinks;
         for(let i=0;i<all_datalinks.length;i++)
@@ -91,15 +110,51 @@ class Slot{
         return null;
     }
 
-    getDataID(){return this.obj_type;}
+    getDataID(){
+        if(this.getRedirectionForParams()){
+            let s = this.getRedirectedSlot();
+            if(s){
+                return s.getDataID();
+            }
+        }
+        return this.obj_type;
+    }
 
     getObjectID(){return this.obj_id;}
+
+    getDataType(){
+        if(this.getRedirectionForParams()){
+            let s = this.getRedirectedSlot();
+            if(s){
+                return s.getDataType();
+            }
+        }
+        return this.type;
+    }
+
+    getSetAt(){
+        if(this.getRedirectionForParams()){
+            let s = this.getRedirectedSlot();
+            if(s){
+                return s.getSetAt();
+            }
+        }
+        return this.set_at;
+    }
 
     getParentBlock(){return this.parent_block;}
 
     getCodeRepresentation(){return "self." + this.code_name;}
     
-    getUnits(){return this.units;}
+    getUnits(){
+        if(this.getRedirectionForParams()){
+            let s = this.getRedirectedSlot();
+            if(s){
+                return s.getUnits();
+            }
+        }
+        return this.units;
+    }
 
     getUID(){return this.id;}
 
@@ -107,7 +162,15 @@ class Slot{
 
     getClassName(){return 'Slot';}
 
-    getValueType(){return this.value_type;}
+    getValueType(){
+        if(this.getRedirectionForParams()){
+            let s = this.getRedirectedSlot();
+            if(s){
+                return s.getValueType();
+            }
+        }
+        return this.value_type;
+    }
 
     getDictForJSON(){
         return {

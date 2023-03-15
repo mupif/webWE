@@ -20,6 +20,10 @@ class BlockWorkflow extends Block{
         this.script_name_base = '';
     }
 
+    /**
+     * 
+     * @param inout
+     * @returns {Slot[]} */
     getAllExternalDataSlots(inout){
         return this.getSlots(inout);
     }
@@ -135,51 +139,45 @@ class BlockWorkflow extends Block{
                 code.push("\t\t\t},");
             }
 
-            let slots;
             let params;
-            let s;
             let n_slots_printed;
             n_slots_printed = 0;
             code.push("\t\t\t\"Inputs\": [");
-            slots = this.getAllExternalDataSlots("out");
-            for (let i = 0; i < slots.length; i++) {
-                s = slots[i];
+            this.getAllExternalDataSlots("out").forEach(s => {
                 if (s.connected()) {
                     if (n_slots_printed)
                         code = addCommaToLastLine(code);
-                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
+                    params = "\"Name\": \"" + s.getName() + "\", \"Type\": \"" + s.getLinkedDataSlot().getDataType() + "\", " +
                         "\"Required\": True, \"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.name + "\", " +
+                        "\"Obj_ID\": \"" + s.getName() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
-                        "\"Set_at\": \""+(s.getLinkedDataSlot().set_at === 'initialization' ? 'initialization' : 'timestep')+"\"";
-                    if(s.getLinkedDataSlot().type === 'mupif.Property')
+                        "\"Set_at\": \""+(s.getLinkedDataSlot().getSetAt() === 'initialization' ? 'initialization' : 'timestep')+"\"";
+                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "}");
                     n_slots_printed += 1;
                 }
-            }
+            })
             code.push("\t\t\t],");
 
             n_slots_printed = 0;
             code.push("\t\t\t\"Outputs\": [");
-            slots = this.getAllExternalDataSlots("in");
-            for (let i = 0; i < slots.length; i++) {
-                s = slots[i];
+            this.getAllExternalDataSlots("in").forEach(s => {
                 if (s.connected()) {
                     if (n_slots_printed)
                         code = addCommaToLastLine(code);
-                    params = "\"Name\": \"" + s.name + "\", \"Type\": \"" + s.getLinkedDataSlot().type + "\", " +
+                    params = "\"Name\": \"" + s.getName() + "\", \"Type\": \"" + s.getLinkedDataSlot().getDataType() + "\", " +
                         "\"description\": \"\", " +
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
-                        "\"Obj_ID\": \"" + s.name + "\", " +
+                        "\"Obj_ID\": \"" + s.getName() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
-                    if(s.getLinkedDataSlot().type === 'mupif.Property')
+                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "}");
                     n_slots_printed += 1;
                 }
-            }
+            })
             code.push("\t\t\t],");
 
             code.push("\t\t\t\"Models\": [");
@@ -254,9 +252,6 @@ class BlockWorkflow extends Block{
 
             extend_array(code, this.generateMetadata(class_code));
 
-            let slots;
-            let s;
-
             code.push("\t\t}");
             code.push("\t\tsuper().__init__(metadata=MD)");
             code.push("\t\tself.updateMetadata(metadata)");
@@ -264,16 +259,14 @@ class BlockWorkflow extends Block{
 
             if (class_code) {
                 // initialization of workflow inputs
-                slots = this.getAllExternalDataSlots("out");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
+                this.getAllExternalDataSlots("out").forEach(s => {
                     if (s.connected()) {
                         code.push("");
-                        code.push("\t\t# initialization code of external input ("+slots[i].obj_id+")");
+                        code.push("\t\t# initialization code of external input ("+s.getObjectID()+")");
                         code.push("\t\t" + s.getCodeRepresentation() + " = None");
                         code.push("\t\t# It should be defined from outside using set() method.");
                     }
-                }
+                })
             }
 
             // init codes of child blocks
@@ -305,14 +298,13 @@ class BlockWorkflow extends Block{
             let linked_slot;
             let timestep_time = "None";
             for (let i = 0; i < allBlocksRecursive.length; i++) {
-                slots = allBlocksRecursive[i].getSlots('in');
-                for (let si = 0; si < slots.length; si++) {
-                    if (slots[si].set_at === 'initialization') {
+                allBlocksRecursive[i].getSlots('in').forEach(s => {
+                    if (s.getSetAt() === 'initialization') {
                         let obj_id;
-                        linked_slot = slots[si].getLinkedDataSlot();
+                        linked_slot = s.getLinkedDataSlot();
                         if (linked_slot != null) {
                             if(!(linked_slot instanceof SlotExt)){
-                                obj_id = slots[si].obj_id;
+                                obj_id = s.getObjectID();
                                 if (typeof obj_id === 'string')
                                     obj_id = "'" + obj_id + "'";
                                 code.push("");
@@ -320,7 +312,7 @@ class BlockWorkflow extends Block{
                             }
                         }
                     }
-                }
+                })
             }
             
             if (class_code) {
@@ -340,23 +332,21 @@ class BlockWorkflow extends Block{
                     code.push("\t\t# in case of " + value_types[vi]);
                     code.push("\t\tif obj.isInstance(" + value_types[vi] + "):");
                     code.push("\t\t\tpass");
-                    slots = this.getAllExternalDataSlots("out");
-                    for (let i = 0; i < slots.length; i++) {
-                        s = slots[i];
+                    this.getAllExternalDataSlots("out").forEach(s => {
                         if (s.connected()) {
-                            if (s.getLinkedDataSlot().type === value_types[vi]) {
-                                code.push("\t\t\tif objectID == '" + s.name + "':");
+                            if (s.getLinkedDataSlot().getDataType() === value_types[vi]) {
+                                code.push("\t\t\tif objectID == '" + s.getName() + "':");
                                 code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
 
                                 if(s.getLinkedDataSlot().set_at === 'initialization') {
                                     linked_model = s.getLinkedDataSlot().getParentBlock();
                                     if (linked_model instanceof BlockModel) {
-                                        code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().obj_id + "')");
+                                        code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().getObjectID() + "')");
                                     }
                                 }
                             }
                         }
-                    }
+                    })
                 }
                 
                 // --------------------------------------------------
@@ -367,14 +357,12 @@ class BlockWorkflow extends Block{
                 code.push("\t# get method for all external outputs");
                 code.push("\tdef get(self, objectTypeID, time=None, objectID=''):");
 
-                slots = this.getAllExternalDataSlots("in");
-                for (let i = 0; i < slots.length; i++) {
-                    s = slots[i];
+                this.getAllExternalDataSlots("in").forEach(s => {
                     if (s.connected()) {
                         code.push("\t\tif objectID == '" + s.name + "':");
                         code.push("\t\t\treturn " + s.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(s.getLinkedDataSlot(), 'time'));
                     }
-                }
+                })
 
                 code.push("");
                 code.push("\t\treturn None");
