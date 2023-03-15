@@ -77,7 +77,8 @@ class Slot{
         }
         return null;
     }
-    
+
+    /** @returns {boolean} */
     connected(){
         let all_datalinks = this.getParentBlock().editor.datalinks;
         for(let i=0;i<all_datalinks.length;i++)

@@ -295,8 +295,7 @@ function main(visual=false)
 
     // MAIN CODE
 
-    let workflow = new BlockWorkflow(editor, null);
-    editor.workflowblock = workflow;
+    editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
     if(visual) {

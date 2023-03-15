@@ -15,7 +15,7 @@ if __name__ == '__main__':
         '../src/BlockProperty.js',
         '../src/BlockTimeloop.js',
         '../src/BlockWorkflow.js',
-        '../src/BlockQuantityComparison.js',
+        '../src/BlockValueComparison.js',
         '../src/BlockPropertyToQuantity.js',
         '../src/BlockQuantityToProperty.js',
         '../src/BlockNumberToQuantity.js',

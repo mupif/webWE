@@ -74,7 +74,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'dowhile', 'DoWhile&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'value_comparison', 'Value&nbsp;comparison'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'property_to_quantity', 'Property&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
@@ -369,8 +369,8 @@ class Block{
             block = new BlockModel(this.editor, this, {});
         if (name === "file")
             block = new BlockInputFile(this.editor, this, '');
-        if (name === "quantity_comparison")
-            block = new BlockQuantityComparison(this.editor, this);
+        if (name === "value_comparison")
+            block = new BlockValueComparison(this.editor, this);
         if (name === "property_to_quantity")
             block = new BlockPropertyToQuantity(this.editor, this);
         if (name === "quantity_to_property")

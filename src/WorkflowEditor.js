@@ -210,9 +210,9 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
-        if(json_data['classname']==='BlockQuantityComparison'){
+        if(json_data['classname']==='BlockValueComparison'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
-            new_block = new BlockQuantityComparison(this, parent_block);
+            new_block = new BlockValueComparison(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }

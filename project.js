@@ -79,7 +79,7 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'dowhile', 'DoWhile&nbsp;Loop'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'model', 'Model'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'file', 'File'), 'Add&nbsp;block');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_comparison', 'Quantity&nbsp;comparison'), 'Add&nbsp;block');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'value_comparison', 'Value&nbsp;comparison'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'property_to_quantity', 'Property&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'quantity_to_property', 'Quantity&nbsp;to&nbsp;Property'), 'Add&nbsp;block');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_block', 'number_to_quantity', 'Number&nbsp;to&nbsp;Quantity'), 'Add&nbsp;block');
@@ -374,8 +374,8 @@ class Block{
             block = new BlockModel(this.editor, this, {});
         if (name === "file")
             block = new BlockInputFile(this.editor, this, '');
-        if (name === "quantity_comparison")
-            block = new BlockQuantityComparison(this.editor, this);
+        if (name === "value_comparison")
+            block = new BlockValueComparison(this.editor, this);
         if (name === "property_to_quantity")
             block = new BlockPropertyToQuantity(this.editor, this);
         if (name === "quantity_to_property")
@@ -2072,13 +2072,17 @@ class BlockWorkflow extends Block{
 
 }
 
-class BlockQuantityComparison extends Block{
+class BlockValueComparison extends Block{
     constructor(editor, parent_block){
         super(editor, parent_block);
         this.name = this.getClassName().replace('Block', '');
 
-        this.addInputSlot(new Slot(this, 'in', 'a', 'a', 'mupif.Property', true, null));
-        this.addInputSlot(new Slot(this, 'in', 'b', 'b', 'mupif.Property', true, null));
+        this.addInputSlot(new Slot(this, 'in', 'a', 'a', '*', true, null));
+        this.addInputSlot(new Slot(this, 'in', 'b', 'b', '*', true, null));
+        // this.addInputSlot(new Slot(this, 'in', 'a_number', 'a (number)', 'number', true, null));
+        // this.addInputSlot(new Slot(this, 'in', 'b_number', 'b (number)', 'number', true, null));
+        // this.addInputSlot(new Slot(this, 'in', 'a_quantity', 'a (quantity)', 'mupif.PhysicalQuantity', true, null));
+        // this.addInputSlot(new Slot(this, 'in', 'b_quantity', 'b (quantity)', 'mupif.PhysicalQuantity', true, null));
 
         this.addOutputSlot(new Slot(this, 'out', 'a > b', 'a > b', 'Bool', false));
         this.addOutputSlot(new Slot(this, 'out', 'a >= b', 'a >= b', 'Bool', false));
@@ -2089,20 +2093,24 @@ class BlockQuantityComparison extends Block{
     }
 
     generateOutputDataSlotGetFunction(slot, time=""){
-        let a = 'None';
-        let b = 'None';
-        let cs;
-        cs = this.getDataSlotWithName("a").getLinkedDataSlot();
-        if(cs != null)
-            a = cs.getParentBlock().generateOutputDataSlotGetFunction(cs);
-        cs = this.getDataSlotWithName("b").getLinkedDataSlot();
-        if(cs != null)
-            b = cs.getParentBlock().generateOutputDataSlotGetFunction(cs);
-        let operator = slot.name.replace('a', '').replace('b', '');
-        return a + operator + b;
+        let a = null;
+        let b = null;
+        let sa = null;
+        let sb = null;
+        if(this.getDataSlotWithName("a").connected() && this.getDataSlotWithName("a").connected() ){
+            sa = this.getDataSlotWithName("a");
+            sb = this.getDataSlotWithName("a");
+            a = sa.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(sa);
+            b = sb.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(sb);
+        }
+        if(a && b){
+            let operator = slot.name.replace('a', '').replace('b', '');
+            return a + operator + b;
+        }
+        return 'False';
     }
 
-    generateCodeName(all_blocks, base_name='quantity_comparison_'){
+    generateCodeName(all_blocks, base_name='value_comparison_'){
         super.generateCodeName(all_blocks, base_name);
     }
 
@@ -2124,7 +2132,7 @@ class BlockQuantityComparison extends Block{
     }
 
     getClassName() {
-        return 'BlockQuantityComparison';
+        return 'BlockValueComparison';
     }
 
     // #########################
@@ -2136,7 +2144,7 @@ class BlockQuantityComparison extends Block{
     }
 
     getBlockHtmlName(){
-        return 'Quantity Comparison';
+        return 'Value Comparison';
     }
 
 }
@@ -3264,8 +3272,7 @@ function main(visual=false)
 
     // MAIN CODE
 
-    let workflow = new BlockWorkflow(editor, null);
-    editor.workflowblock = workflow;
+    editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
     if(visual) {
@@ -3839,7 +3846,8 @@ class Slot{
         }
         return null;
     }
-    
+
+    /** @returns {boolean} */
     connected(){
         let all_datalinks = this.getParentBlock().editor.datalinks;
         for(let i=0;i<all_datalinks.length;i++)
@@ -4212,9 +4220,9 @@ class WorkflowEditor{
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
-        if(json_data['classname']==='BlockQuantityComparison'){
+        if(json_data['classname']==='BlockValueComparison'){
             parent_block = this.getBlockByUID(json_data['parent_uid']);
-            new_block = new BlockQuantityComparison(this, parent_block);
+            new_block = new BlockValueComparison(this, parent_block);
             new_block.code_name = json_data['uid'];
             parent_block.addBlock(new_block);
         }
