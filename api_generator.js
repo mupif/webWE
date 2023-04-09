@@ -181,12 +181,12 @@ function generateCodeFromMetadata(md){
     if(Inputs.length || Outputs.length) {
         Inputs.forEach(item => {
             item['code_name'] = 'self.input_' + item['Name'].replaceAll(' ', '_').replaceAll('-', '_');
-            if ('Obj_ID' in item && item['Obj_ID'])
+            if ('Obj_ID' in item && item['Obj_ID'] && item['Name'] !== item['Obj_ID'])
                 item['code_name'] += '_' + item['Obj_ID'].replaceAll(' ', '_').replaceAll('-', '_');
         });
         Outputs.forEach(item => {
             item['code_name'] = 'self.output_' + item['Name'].replaceAll(' ', '_').replaceAll('-', '_');
-            if ('Obj_ID' in item && item['Obj_ID'])
+            if ('Obj_ID' in item && item['Obj_ID'] && item['Name'] !== item['Obj_ID'])
                 item['code_name'] += '_' + item['Obj_ID'].replaceAll(' ', '_').replaceAll('-', '_');
         });
 
