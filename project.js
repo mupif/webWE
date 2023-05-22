@@ -2097,9 +2097,9 @@ class BlockValueComparison extends Block{
         let b = null;
         let sa = null;
         let sb = null;
-        if(this.getDataSlotWithName("a").connected() && this.getDataSlotWithName("a").connected() ){
+        if(this.getDataSlotWithName("a").connected() && this.getDataSlotWithName("b").connected() ){
             sa = this.getDataSlotWithName("a");
-            sb = this.getDataSlotWithName("a");
+            sb = this.getDataSlotWithName("b");
             a = sa.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(sa);
             b = sb.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(sb);
         }
