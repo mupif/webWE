@@ -24,10 +24,10 @@ class BlockValueComparison extends Block{
         let sa = null;
         let sb = null;
         if(this.getDataSlotWithName("a").connected() && this.getDataSlotWithName("b").connected() ){
-            sa = this.getDataSlotWithName("a");
-            sb = this.getDataSlotWithName("b");
-            a = sa.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(sa);
-            b = sb.getLinkedDataSlot().getParentBlock().generateOutputDataSlotGetFunction(sb);
+            sa = this.getDataSlotWithName("a").getLinkedDataSlot();
+            sb = this.getDataSlotWithName("b").getLinkedDataSlot();
+            a = sa.getParentBlock().generateOutputDataSlotGetFunction(sa);
+            b = sb.getParentBlock().generateOutputDataSlotGetFunction(sb);
         }
         if(a && b){
             let operator = slot.name.replace('a', '').replace('b', '');

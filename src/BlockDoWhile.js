@@ -3,7 +3,7 @@ class BlockDoWhile extends Block{
         super(editor, parent_block);
         this.name = 'DoWhile';
 
-        this.addInputSlot(new Slot(this, 'in', 'do', 'do', 'mupif.Property', true, null));
+        this.addInputSlot(new Slot(this, 'in', 'condition', 'condition', 'mupif.Property', true, null));
         this.addOutputSlot(new Slot(this, 'out', 'counter', 'counter', 'number'));
     }
 
@@ -19,8 +19,8 @@ class BlockDoWhile extends Block{
         return [];
     }
 
-    getDo(time){
-        let connected_slot = this.getDataSlotWithName("do").getLinkedDataSlot();
+    getCondition(time){
+        let connected_slot = this.getDataSlotWithName("condition").getLinkedDataSlot();
         if(connected_slot!=null)
             return connected_slot.getParentBlock().generateOutputDataSlotGetFunction(connected_slot, time);
         return 'False';
@@ -55,7 +55,7 @@ class BlockDoWhile extends Block{
 
         code.push("\t" + var_counter + " += 1")
 
-        code.push("\t" + var_compute + " = " + this.getDo(ti));
+        code.push("\t" + var_compute + " = " + this.getCondition(ti));
         code.push("\tif " + var_compute + ":")
 
         let blocks = this.getBlocks();
