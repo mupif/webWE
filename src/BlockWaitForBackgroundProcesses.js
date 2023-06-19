@@ -38,8 +38,8 @@ class BlockWaitForBackgroundProcesses extends Block{
         code.push("\tfor " + var_model_name + " in " + model_names + ":");
         code.push("\t\tif not self.getModel(" + var_model_name + ").isSolved():");
         code.push("\t\t\t" + var_all_done + " = False");
-        code.push("\tfor " + var_model_name + " in " + model_names + ":");
-        code.push("\t\tself.getModel(" + var_model_name + ").finishStep(tstep)");
+        code.push("for " + var_model_name + " in " + model_names + ":");
+        code.push("\tself.getModel(" + var_model_name + ").finishStep(tstep)");
 
         return push_indents_before_each_line(code, indent);
     }
