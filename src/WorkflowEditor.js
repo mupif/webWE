@@ -87,7 +87,7 @@ class WorkflowEditor{
     }
 
     getMetadata(){
-        return replaceAllInStr(formatCodeToText(this.workflowblock.generateMetadataJson()), 'True', 'true');
+        return replaceAllInStr(replaceAllInStr(formatCodeToText(this.workflowblock.generateMetadataJson()), 'True', 'true'), 'False', 'false');
     }
 
     getServerCode(){
