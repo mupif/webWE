@@ -53,7 +53,7 @@
         },
         {
             "Name": "Input data array",
-            "Type": "mupif.MupifObjectList",
+            "Type": "mupif.DataList[mupif.Property]",
             "Required": true,
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "",
@@ -101,7 +101,7 @@
         },
         {
             "Name": "Output data array",
-            "Type": "mupif.MupifObjectList",
+            "Type": "mupif.DataList[mupif.Property]",
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "",
             "Obj_ID": ""
@@ -110,15 +110,15 @@
     "Solver": {
         "Software": "",
         "Type": "",
-        "Accuracy": "",
-        "Sensitivity": "",
-        "Complexity": "",
-        "Robustness": "",
+        "Accuracy": "Unknown",
+        "Sensitivity": "Unknown",
+        "Complexity": "Unknown",
+        "Robustness": "Unknown",
         "Estim_time_step_s": 1,
         "Estim_comp_time_s": 1,
         "Estim_execution_cost_EUR": 0.01,
         "Estim_personnel_cost_EUR": 0.01,
-        "Required_expertise": "",
+        "Required_expertise": "User",
         "Language": "",
         "License": "",
         "Creator": "",
@@ -126,8 +126,8 @@
         "Documentation": ""
     },
     "Physics": {
-        "Type": "",
-        "Entity": "",
+        "Type": "Other",
+        "Entity": "Other",
         "Equation": [],
         "Equation_quantities": [],
         "Relation_description": [],
