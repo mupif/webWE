@@ -23,6 +23,7 @@ function clearApiImplementation(){
 
 function setOutputElemVisibility(val){
     document.getElementById('data_output').style.visibility = val ? 'visible' : 'hidden';
+    document.getElementById('download_output').style.visibility = val ? 'visible' : 'hidden';
 }
 
 function generateApiImplementation(){
@@ -39,6 +40,16 @@ function generateApiImplementation(){
     } else {
         elem_error.innerHTML += '<h3>Invalid JSON format of inserted metadata</h3>';
     }
+}
+
+function getModuleNameFromMetaData(){
+    if(isValidJson(elem_input.value)){
+        let md = JSON.parse(elem_input.value);
+        if(checkMetadataFormat(md)){
+            return md['Execution_settings']['Module'];
+        }
+    }
+    return "undefined"
 }
 
 // ====================================================================================================
@@ -290,4 +301,16 @@ function generateCodeFromMetadata(md){
     }
 
     return formatCodeToText(replace_tabs_with_spaces_for_each_line(code));
+}
+
+function downloadCode() {
+    let code = elem_output.value;
+    let filename = getModuleNameFromMetaData() + ".py";
+    let element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(code));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }

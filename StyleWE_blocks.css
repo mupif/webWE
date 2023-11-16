@@ -8,6 +8,8 @@ div.we_block{
     font-size:10px;
     line-height:12px;
     position:relative;
+    padding-bottom: 8px;
+    border-radius: 8px;
 }
 
 div.we_block_selected{
@@ -50,6 +52,7 @@ div.we_block div.bl_header{
     font-size:12px;
     line-height:14px;
     border-bottom: 2px solid black;
+    border-radius: 6px 6px 0 0;
 }
 
 div.we_block_selected div.bl_header{

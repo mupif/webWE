@@ -1,6 +1,8 @@
 <html lang="en">
 <head>
     <title>Workflow Editor</title>
+    <link rel="stylesheet" href="./StyleBase.css">
+    <link rel="stylesheet" href="./StyleCommon.css">
     <link rel="stylesheet" href="./StyleWE.css">
     <link rel="stylesheet" href="./StyleWE_blocks.css">
     <link rel="stylesheet" href="./StyleMyQuery.css">
@@ -46,63 +48,74 @@
     <div id="myQuery_curtain" onclick="myQuery_hide();"></div>
     <div id="myQuery_input"></div>
 </div>
-<table id="main_table" cellspacing="0">
-    <tr>
-        <td colspan="3">
-            <div style="width: 800px;display: flex; flex-direction: row; justify-content: flex-start; gap: 100px;">
-                <div style="background-color: white;"><img src="mupif-logo.png" style="width: 100px;"></div>
-                <div id="div_caption">Workflow Editor and Code Generator for MuPIF</div>
-            </div>
-<!--            <div id="div_caption">MuPIF Workflow Editor and Code Generator</div>-->
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div id="menu_new">
-                <div class="melem_separator">navigation:</div>
-                <div class="melem" id="nav_editor" onclick="focusOnEditor();">Editor</div>
-                <div class="melem" id="nav_settings" onclick="editor.selectSettingsAndUpdate();">Settings</div>
-                <div class="melem" id="nav_models" onclick="focusOnModelList();">Models</div>
 
 
-                <div class="melem_separator">menu:</div>
-                <div class="melem">Project
-                    <div class="msubmenu">
-                        <div class="melem" onclick="editor.menu_download_json();">Save to JSON</div>
-                        <div class="melem" id="">
-                            <form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;" id="form_json_data">
-                                <label for="form_json_file_selector" style="display:block;width:100%;height:100%;">
-                                    Load from JSON
-                                    <input type="file" id="form_json_file_selector" name="json_file" style="display:none;width:100px;" onchange="loadJsonProjectFileContent();">
-                                </label>
-                                <input type="hidden" value="Load from JSON" name="file_upload">
-                            </form>
+<div id="mainpage_all">
+
+    <div class="vbox">
+
+        <div class="hbox gap20 justify_content_flex_start align_items_flex_start header">
+            <a href="../" class="cursor_pointer"><div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="mupif_logo"></div></a>
+            <h1>Workflow Editor and Code Generator</h1>
+        </div>
+
+        <div class="vbox">
+            <div class="hbox">
+                
+                <div id="menu_new" class="vbox gap10">
+                    
+                    <div></div>
+                    <div class="vbox">
+                        <div class="melem_separator">navigation:</div>
+                        <div class="melem" id="nav_editor" onclick="focusOnEditor();">Editor</div>
+                        <div class="melem" id="nav_settings" onclick="editor.selectSettingsAndUpdate();">Settings</div>
+                        <div class="melem" id="nav_models" onclick="focusOnModelList();">Models</div>
+                    </div>
+                        
+                    <div></div>
+                    <div class="vbox">
+                        <div class="melem_separator">menu:</div>
+                        <div class="melem">Project >
+                            <div class="msubmenu">
+                                <div class="melem" onclick="editor.menu_download_json();">Save to JSON</div>
+                                <div class="melem" id="">
+                                    <form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;" id="form_json_data">
+                                        <label for="form_json_file_selector" style="display:block;width:100%;height:100%;">
+                                            Load from JSON
+                                            <input type="file" id="form_json_file_selector" name="json_file" style="display:none;width:100px;" onchange="loadJsonProjectFileContent();">
+                                        </label>
+                                        <input type="hidden" value="Load from JSON" name="file_upload">
+                                    </form>
+                                </div>
+                                <div class="melem" onclick="editor.menu_download_exec_code();">Generate Python Execution code</div>
+                                <div class="melem" onclick="editor.menu_download_class_code();">Generate Python Class code</div>
+                            </div>
                         </div>
-                        <div class="melem" onclick="editor.menu_download_exec_code();">Generate Python Execution code</div>
-                        <div class="melem" onclick="editor.menu_download_class_code();">Generate Python Class code</div>
+                    </div>
+
+                </div>
+                
+                <div>
+                    <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
+                        <div id="workflowSubContainer">
+
+                        </div>
+                    </div>
+
+                    <div id="projectSettingsContainer">
+                        <div id="block_list_of_settings"></div>
+                    </div>
+                    
+                    <div id="modelListContainer">
+                        <div id="block_list_of_models"></div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-            </div>
-        </td>
-        <td>
-            <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
-                <div id="workflowSubContainer">
+    </div>
 
-                </div>
-            </div>
+</div>
 
-            <div id="projectSettingsContainer">
-                <div id="block_list_of_settings"></div>
-            </div>
-            <div id="modelListContainer">
-                <div id="block_list_of_models"></div>
-            </div>
-        </td>
-        <td>
-            <div id="outerMessageContainer"><div id="messageContainer"></div></div>
-        </td>
-    </tr>
-</table>
 </body>
 </html>

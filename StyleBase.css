@@ -1,0 +1,91 @@
+*, *::before, *::after {
+    font-kerning: normal;
+    font-variant-numeric: lining-nums proportional-nums;
+    font-variant-ligatures: common-ligatures contextual;
+    outline: none;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+:root { font-size: 12px; font-family: Arial, Helvetica, sans-serif; letter-spacing: 0.04em; }
+
+.hbox { display: flex; flex-direction: row; }
+.vbox { display: flex; flex-direction: column; }
+.wrap { flex-wrap: wrap; }
+
+.gap4 { gap: 4px; }
+.gap6 { gap: 6px; }
+.gap10 { gap: 10px; }
+.gap20 { gap: 20px; }
+
+.font_bold { font-weight: bold; }
+
+.align_items_flex_start { align-items: flex-start; }
+.align_items_flex_end { align-items: flex-end; }
+.align_items_center { align-items: center; }
+.align_items_stretch { align-items: stretch; }
+
+.justify_content_flex_start { justify-content: flex-start; }
+.justify_content_flex_end { justify-content: flex-end; }
+.justify_content_center { justify-content: center; }
+.justify_content_space_between { justify-content: space-between; }
+.justify_content_space_around { justify-content: space-around; }
+.justify_content_space_evenly { justify-content: space-evenly; }
+
+h1, .h1 { font-size: 2.4rem; line-height: 1.2em; font-weight: bold; }
+h2, .h2 { font-size: 2.0rem; line-height: 1.25em; font-weight: bold; }
+h3, .h3 { font-size: 1.6rem; line-height: 1.3em; font-weight: bold; }
+h4, .h4 { font-size: 1.4rem; line-height: 1.35em; font-weight: bold; }
+h5, .h5 { font-size: 1.2rem; line-height: 1.4em; font-weight: bold; }
+h6, .h6 { font-size: 1.0rem; line-height: 1.4em; font-weight: bold; }
+
+.p1 { font-size: 1.6rem; line-height: 1.2em; }
+.p2 { font-size: 1.4rem; line-height: 1.25em; }
+.p3 { font-size: 1.2rem; line-height: 1.3em; }
+.p4 { font-size: 1.0rem; line-height: 1.35em; }
+.p5 { font-size: 0.875rem; line-height: 1.4em; }
+.p6 { font-size: 0.75rem; line-height: 1.4em; }
+
+a {all: unset;}
+
+button, .button, .button_big {
+    /*background-color: #ebebeb;*/
+    background-color: white;
+    color: black;
+    border: 1px solid grey;
+    cursor: default;
+}
+button:hover, .button:hover, .button_big:hover {
+    background-color: silver;
+}
+button, .button, .button_big {
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 1.2rem; line-height: 1.3em;
+}
+.button_big {
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 1.6rem; line-height: 1.2em;
+}
+
+.link {
+    color: blue;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cursor_pointer {
+    cursor: pointer;
+}
+
+.width10 { width: 10px; }
+.width20 { width: 20px; }
+.width30 { width: 30px; }
+.width40 { width: 40px; }
+.width50 { width: 50px; }
+.width100 { width: 100px; }
+.width150 { width: 150px; }
+.width200 { width: 200px; }
+.width250 { width: 250px; }
+.width300 { width: 300px; }

@@ -1,0 +1,29 @@
+body {
+    background-color: #ececec;
+    /*background-color: white;*/
+    color:black;
+}
+
+.mupif_logo_bgcolor {
+    /*background-color: #ececec;*/
+    background-color: white;
+}
+
+.mupif_logo {
+    width: 120px;
+}
+
+.header {
+    padding: 6px;
+    /*width: 1000px;*/
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+
+.mainpage_all {
+    width: 100%;
+}
+
+.mainpage_content {
+    padding: 20px;
+}

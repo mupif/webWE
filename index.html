@@ -1,46 +1,27 @@
 <html lang="en">
 <head>
-    <title>Workflow</title>
-    <link rel="stylesheet" href="./StyleWE.css">
+    <title>MuPIF web tools</title>
+    <link rel="stylesheet" href="./StyleBase.css">
+    <link rel="stylesheet" href="./StyleCommon.css">
 </head>
 <body>
-<div id="mainpage_all">
-
-    <div style="display: flex;flex-direction: column;align-items: center;">
-        <div style="width: 800px;display: flex; flex-direction: row; justify-content: flex-start; gap: 100px;">
-            <div style="background-color: white;"><img src="mupif-logo.png" style="width: 100px;"></div>
-            <h1 style="">Workflow Editor and Code Generator for MuPIF</h1>
+    <div id="mainpage_all">
+        
+        <div class="vbox">
+    
+            <div class="hbox gap20 justify_content_flex_start align_items_flex_start header">
+                <div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="mupif_logo"></div>
+                <h1>Web tools for Model API and Workflow development</h1>
+<!--                <a href="../" class="button_big">Back</a>-->
+            </div>
+            
+            <div class="mainpage_content vbox align_items_center gap20">
+                <a href="./api_generator.html" class="button_big">Model API generator</a>
+                <a href="./index_wecg.html" class="button_big">Workflow editor and code generator</a>
+            </div>
+            
         </div>
+    
     </div>
-
-
-<table class="mainpage_list_examples" cellspacing="0">
-    <tr>
-        <td class="caption b_b">MENU</td>
-    </tr>
-    <tr>
-        <td><a href="main.html" target="_blank">Workflow Editor Application - empty project</a></td>
-    </tr>
-    <tr>
-        <td><a href="main.html?example_id=1" target="_blank">Example 01 - thermo-mechanical execution workflow</a></td>
-    </tr>
-    <tr>
-        <td><a href="main.html?example_id=2" target="_blank">Example 02 - thermo-mechanical class workflow</a></td>
-    </tr>
-    <tr>
-        <td><a href="main.html?example_id=3" target="_blank">Example 03 - execution workflow containing the Exmaple 02 thermo-mechanical class workflow</a></td>
-    </tr>
-</table>
-
-<h3 style="margin-top:20px;">For running code from these examples, it is necessary to download the following files into the same directory:</h3>
-<table class="" cellspacing="0" style="margin:10px auto 0 auto;">
-    <tr><td><a href="examples/mupif_examples_models.py" class="link_file" download>mupif_examples_models.py</a></td></tr>
-    <tr><td><a href="examples/mupif_examples_meshgen.py" class="link_file" download>mupif_examples_meshgen.py</a></td></tr>
-    <tr><td><a href="examples/field_export.py" class="link_file" download>field_export.py</a></td></tr>
-    <tr><td><a href="examples/inputT.in" class="link_file" download>inputT.in</a></td></tr>
-    <tr><td><a href="examples/inputM.in" class="link_file" download>inputM.in</a></td></tr>
-</table>
-
-</div>
 </body>
 </html>

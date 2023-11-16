@@ -1,26 +1,33 @@
 <html lang="en">
 <head>
     <title>Model API generator</title>
-    <link rel="stylesheet" href="./StyleWE.css">
+    <link rel="stylesheet" href="./StyleBase.css">
+    <link rel="stylesheet" href="./StyleCommon.css">
     <script type="text/javascript" src="src/helpers.js"></script>
 </head>
 <body>
     <div id="mainpage_all">
-        <div style="display: flex;flex-direction: column;align-items: center;">
-            <div style="width: 800px;display: flex; flex-direction: row; justify-content: flex-start; gap: 100px;">
-                <div style="background-color: white;"><img src="mupif-logo.png" style="width: 100px;"></div>
-                <h1 style="">Model API generator for MuPIF</h1>
+
+        <div class="vbox">
+
+            <div class="hbox gap20 justify_content_flex_start align_items_flex_start header">
+                <a href="../" class="cursor_pointer"><div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="mupif_logo"></div></a>
+                <h1>Model API generator</h1>
             </div>
-            <div style="height:20px"></div>
-            <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
-            <textarea id="data_input" style="width:800px;height:300px" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
-            <div style="height:20px"></div>
-            <button onclick="generateApiImplementation();">Generate</button>
-            <div id="elem_error" style="color:red;font-weight:bold;"></div>
+
+            <div class="mainpage_content vbox align_items_center gap20">
+
+                <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
+                <textarea id="data_input" style="width:800px;height:300px" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
+
+                <div id="elem_error" style="color:red;font-weight:bold;"></div>
+
+                <button id="download_output" style="background-color:white;color:black;border:none;visibility: hidden;" onclick="downloadCode();">Download API implementation</button>
+                <textarea id="data_output" style="background-color:white;color:black;border:none;width:800px;visibility: hidden;" wrap="off" disabled></textarea>
+            </div>
             
-            <div style="height:20px"></div>
-            <textarea id="data_output" style="background-color:white;color:black;border:none;width:800px;visibility: hidden;" wrap="off" disabled></textarea>
         </div>
+        
     </div>
 
     <script type="text/javascript" src="api_generator.js"></script>

@@ -3120,7 +3120,7 @@ function focusOnEditor(){
     document.getElementById('projectSettingsContainer').style.display = 'none';
     document.getElementById('modelListContainer').style.display = 'none';
 
-    document.getElementById('nav_editor').style.backgroundColor = 'black';
+    document.getElementById('nav_editor').style.backgroundColor = 'gray';
     document.getElementById('nav_settings').style.backgroundColor = 'transparent';
     document.getElementById('nav_models').style.backgroundColor = 'transparent';
 
@@ -3133,7 +3133,7 @@ function focusOnProjectSettings(){
     document.getElementById('modelListContainer').style.display = 'none';
 
     document.getElementById('nav_editor').style.backgroundColor = 'transparent';
-    document.getElementById('nav_settings').style.backgroundColor = 'black';
+    document.getElementById('nav_settings').style.backgroundColor = 'gray';
     document.getElementById('nav_models').style.backgroundColor = 'transparent';
 }
 
@@ -3144,7 +3144,7 @@ function focusOnModelList(){
 
     document.getElementById('nav_editor').style.backgroundColor = 'transparent';
     document.getElementById('nav_settings').style.backgroundColor = 'transparent';
-    document.getElementById('nav_models').style.backgroundColor = 'black';
+    document.getElementById('nav_models').style.backgroundColor = 'gray';
 }
 
 function deleteMetaDataByListID(list_id){
