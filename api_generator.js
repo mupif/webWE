@@ -22,7 +22,7 @@ function clearApiImplementation(){
 }
 
 function setOutputElemVisibility(val){
-    document.getElementById('data_output').style.visibility = val ? 'visible' : 'hidden';
+    // document.getElementById('data_output').style.visibility = val ? 'visible' : 'hidden';
     document.getElementById('download_output').style.visibility = val ? 'visible' : 'hidden';
 }
 
@@ -34,7 +34,7 @@ function generateApiImplementation(){
         let md = JSON.parse(elem_input.value);
         if(checkMetadataFormat(md)){
             elem_output.value = generateCodeFromMetadata(md);
-            textAreaAdjust(elem_output);
+            // textAreaAdjust(elem_output);
             setOutputElemVisibility(true);
         }
     } else {
