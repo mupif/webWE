@@ -14,16 +14,39 @@
                 <a href="../" class="cursor_pointer"><div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="mupif_logo"></div></a>
                 <h1>Model API generator</h1>
             </div>
+            
+            <div class="hbox header p2" style="padding: 16px;">
+                This tool generates Model API implementation for given Model metadata.
+                The user must provide a valid metadata json, which must contain all information according to the <a class="link" href="" style="display: contents;">schema definition</a>. If the user doesn't have the metadata, the "Fill empty template" button can be used to get a valid template to modify.
+                <br>The essential part of this tool is the code generation of the Model's inputs and outputs, for which it generates class variables, checks for compulsory inputs being filled, and also the content of the "get" and "set" functions.
+                When the Model API implementation is generated, the user only needs to download it and modify its "solveStep" method.
+            </div>
 
-            <div class="mainpage_content vbox align_items_center gap20">
+            <div class="mainpage_content vbox align_items_stretch gap20">
+                <div class="hbox gap20">
+                    <div class="vbox align_items_center" style="flex: 1 1 0;">
+                        <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
+                    </div>
+                    <div class="vbox align_items_center" style="flex: 1 1 0;">
+                        <div id="elem_error" style="color:red;font-weight:bold;"></div>
+                        <button id="download_output" style="background-color:white;color:black;border:none;visibility: hidden;" onclick="downloadCode();">Download Model API implementation</button>
+                    </div>
+                </div>
+                <div class="hbox gap20">
+                    <div class="vbox align_items_stretch" style="flex: 1 1 0;">
+                        <div class="p2">Model metadata:</div>
+                        <textarea id="data_input" style="width:100%;height:500px;resize: vertical;" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
+                    </div>
+                    <div class="vbox align_items_stretch" style="flex: 1 1 0;">
+                        <div class="p2">Model implementation:</div>
+                        <textarea id="data_output" style="background-color:white;color:black;border:none;width:100%;height:500px;resize: vertical;visibility: hidden;" wrap="off" disabled></textarea>
+                    </div>
+                </div>
+            </div>
 
-                <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
-                <textarea id="data_input" style="width:800px;height:300px" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
-
-                <div id="elem_error" style="color:red;font-weight:bold;"></div>
-
-                <button id="download_output" style="background-color:white;color:black;border:none;visibility: hidden;" onclick="downloadCode();">Download API implementation</button>
-                <textarea id="data_output" style="background-color:white;color:black;border:none;width:800px;visibility: hidden;" wrap="off" disabled></textarea>
+            <div class="hbox justify_content_center gap20" style="padding-bottom: 50px;">
+                <div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="footer_logo"></div>
+                <div class="mupif_logo_bgcolor"><img src="musicode-logo.png" class="footer_logo"></div>
             </div>
             
         </div>

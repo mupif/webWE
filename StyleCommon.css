@@ -13,6 +13,10 @@ body {
     width: 120px;
 }
 
+.footer_logo {
+    height: 50px;
+}
+
 .header {
     padding: 6px;
     /*width: 1000px;*/

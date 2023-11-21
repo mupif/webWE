@@ -46,7 +46,7 @@ example03.py (execution workflow)
 
 #### 1) Generate the Python scripts
 
-A) The web version at http://mupif.org/wecg/ provides examples of basic thermo-mechanical workflows.
+A) The web version at http://mupif.org/tools/index_wecg.html provides examples of basic thermo-mechanical workflows.
 The generated code can be downloaded to be run locally. Please save it with suggested filenames.
 From the first, second and third workflow download files `example01.py`, `example02.py` and `example03.py`, respectively.
 
