@@ -28,18 +28,18 @@
                         <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
                     </div>
                     <div class="vbox align_items_center" style="flex: 1 1 0;">
-                        <div id="elem_error" style="color:red;font-weight:bold;"></div>
+                        <div id="elem_error" class="vbox gap6" style="color:red;"></div>
                         <button id="download_output" style="background-color:white;color:black;border:none;visibility: hidden;" onclick="downloadCode();">Download Model API implementation</button>
                     </div>
                 </div>
                 <div class="hbox gap20">
                     <div class="vbox align_items_stretch" style="flex: 1 1 0;">
                         <div class="p2">Model metadata:</div>
-                        <textarea id="data_input" style="width:100%;height:500px;resize: vertical;" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();"></textarea>
+                        <textarea id="data_input" style="width:100%;height:500px;resize: vertical;" wrap="off" onchange="generateApiImplementation();" onkeyup="generateApiImplementation();" spellcheck="false"></textarea>
                     </div>
                     <div class="vbox align_items_stretch" style="flex: 1 1 0;">
                         <div class="p2">Model implementation:</div>
-                        <textarea id="data_output" style="background-color:white;color:black;border:none;width:100%;height:500px;resize: vertical;" wrap="off" disabled></textarea>
+                        <textarea id="data_output" style="background-color:white;color:black;border:none;width:100%;height:500px;resize: vertical;" wrap="off" disabled spellcheck="false"></textarea>
                     </div>
                 </div>
             </div>

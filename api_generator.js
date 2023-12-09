@@ -66,29 +66,33 @@ function insertEmptyTemplateMetadata(){
     client.send();
 }
 
-function checkMetadataItem(md, key, obj_name, check_nonempty=false){
+function checkMetadataItem(md, key, obj_name, check_nonempty=false, enum_values=[]){
     if(!(key in md)){
-        elem_error.innerHTML += '<h3>' + obj_name + ' is missing key \'' + key + '\'.</h3>';
+        elem_error.innerHTML += '<div class="p4">' + obj_name + ' is missing key "' + key + '".</div>';
         return false;
     }
     if(check_nonempty && (md[key] === '' || md[key] === null)){
-        elem_error.innerHTML += '<h3>' + obj_name + ' key \'' + key + '\' cannot be empty.</h3>';
+        elem_error.innerHTML += '<div class="p4">' + obj_name + ' item "' + key + '" cannot be empty.</div>';
+        return false;
+    }
+    if(enum_values.length > 0 && !enum_values.includes(md[key])){
+        elem_error.innerHTML += '<div class="p4">' + obj_name + ' item "' + key + '" must be chosen from [' + enum_values.map(v => '"'+v+'"').join(', ') + '].</div>';
         return false;
     }
     return true;
 }
 
-function checkMetadataSubItem(obj, keys, obj_name, check_nonempty=false){
+function checkMetadataSubItem(obj, keys, obj_name, check_nonempty=false, enum_values=[]){
     let retval = true;
     keys.forEach(k => {
-        if(!checkMetadataItem(obj, k, obj_name + ' item', check_nonempty)){retval = false;}
+        if(!checkMetadataItem(obj, k, obj_name, check_nonempty, enum_values)){retval = false;}
     })
     return retval;
 }
 
 function checkMetadataFormat(md){
     // temporary basic validation
-    let keys = [
+    let base_keys = [
         'Name',
         'ID',
         'Inputs',
@@ -96,19 +100,56 @@ function checkMetadataFormat(md){
         'Execution_settings'
     ]
     let retval = true;
-    keys.forEach(k => {
-        if(!checkMetadataItem(md, k, 'Metadata JSON')){retval = false;}
+    base_keys.forEach(k => {
+        if(!checkMetadataItem(md, k, 'Metadata', true)){retval = false;}
     })
     
-    if(!retval){return false;}
+    const physics_meta = {
+        "Type": ['Electronic', 'Atomistic', 'Molecular', 'Mesoscopic', 'Continuum', 'Other'],
+        "Entity": ['Atom', 'Electron', 'Grains', 'Finite volume', 'Other'],
+    }
+    const physics_keys = Object.keys(physics_meta);
+    const solver_meta = {
+        "Software": null,
+        "Language": null,
+        "License": null,
+        "Creator": null,
+        "Version_date": null,
+        "Documentation": null,
+        "Estim_time_step_s": null,
+        "Estim_comp_time_s": null,
+        "Estim_execution_cost_EUR": null,
+        "Estim_personnel_cost_EUR": null,
+        "Required_expertise": ["None", "User", "Expert"],
+        "Accuracy": ["Low", "Medium", "High", "Unknown"],
+        "Sensitivity": ["Low", "Medium", "High", "Unknown"],
+        "Complexity": ["Low", "Medium", "High", "Unknown"],
+        "Robustness": ["Low", "Medium", "High", "Unknown"],
+    }
+    const solver_keys = Object.keys(solver_meta);
     
     for(let i=0;i<md["Inputs"].length;i++){
-        if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs')){retval = false;}
+        if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs', true)){retval = false;}
     }
     for(let i=0;i<md["Outputs"].length;i++){
-        if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs')){retval = false;}
+        if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs', true)){retval = false;}
     }
     if(!checkMetadataSubItem(md["Execution_settings"], ['Type', 'Class', 'Module', 'jobManName'], 'Execution_settings', true)){retval = false;}
+    
+    if(!checkMetadataSubItem(md["Physics"], physics_keys, 'Physics')){retval = false;}
+    physics_keys.forEach(k => {
+        if (physics_meta[k] !== null) {
+            if(!checkMetadataSubItem(md["Physics"], [k], 'Physics', false, physics_meta[k])){retval = false;}
+        }
+    })
+    
+    if(!checkMetadataSubItem(md["Solver"], solver_keys, 'Solver')){retval = false;}
+    solver_keys.forEach(k => {
+        if (solver_meta[k] !== null) {
+            if(!checkMetadataSubItem(md["Solver"], [k], 'Solver', false, solver_meta[k])){retval = false;}
+        }
+    })
+    
     
     return retval;
 }

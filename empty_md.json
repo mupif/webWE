@@ -110,15 +110,15 @@
     "Solver": {
         "Software": "",
         "Type": "",
-        "Accuracy": "Unknown",
-        "Sensitivity": "Unknown",
-        "Complexity": "Unknown",
-        "Robustness": "Unknown",
+        "Accuracy": "",
+        "Sensitivity": "",
+        "Complexity": "",
+        "Robustness": "",
         "Estim_time_step_s": 1,
         "Estim_comp_time_s": 1,
         "Estim_execution_cost_EUR": 0.01,
         "Estim_personnel_cost_EUR": 0.01,
-        "Required_expertise": "User",
+        "Required_expertise": "",
         "Language": "",
         "License": "",
         "Creator": "",
@@ -126,8 +126,8 @@
         "Documentation": ""
     },
     "Physics": {
-        "Type": "Other",
-        "Entity": "Other",
+        "Type": "",
+        "Entity": "",
         "Equation": [],
         "Equation_quantities": [],
         "Relation_description": [],
@@ -136,8 +136,8 @@
     },
     "Execution_settings": {
         "Type": "Distributed",
-        "jobManName": "New_Jobman_Name",
-        "Class": "NewClassName",
-        "Module": "new_module_name"
+        "jobManName": "InstitutionName.ModelName",
+        "Class": "",
+        "Module": ""
     }
 }
