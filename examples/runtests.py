@@ -5,6 +5,21 @@ from termcolor import colored
 rp = os.path.realpath(__file__)
 dirname = "%s%s" % (os.path.dirname(rp), os.path.sep)
 
+os.system("rm -f ./example01.py")
+os.system("rm -f ./example02.py")
+os.system("rm -f ./example03.py")
+os.system("rm -f ./example04.py")
+os.system("rm -f ./example05.py")
+os.system("rm -f ./example05_server.py")
+os.system("rm -f ./example06.py")
+
+os.system("rm -f ./example01_copy.json")
+os.system("rm -f ./example02_copy.json")
+os.system("rm -f ./example03_copy.json")
+os.system("rm -f ./example04_copy.json")
+os.system("rm -f ./example05_copy.json")
+os.system("rm -f ./example06_copy.json")
+
 os.system("python unify.py")
 
 tests = [
