@@ -1,0 +1,192 @@
+{
+    "type": "object",
+    "properties": {
+        "blocks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "classname": {"type": "string"},
+                    "uid": {"type": "string"},
+                    "parent_uid": {"type": "string"},
+                    "slot_in_uids": {"type": "array", "items": {"type": "string"}},
+                    "slot_out_uids": {"type": "array", "items": {"type": "string"}},
+                    "ext_slots": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "type": {"type": "string"},
+                                "obj_type": {"type": "string"},
+                                "obj_id": {"type": "string"},
+                                "inout": {"type": "string"},
+                                "uid": {"type": "string"}
+                            },
+                            "required": ["name", "type", "obj_type", "obj_id", "inout", "uid"]
+                        }
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "ClassName": {"type": "string"},
+                            "ModuleName": {"type": "string"},
+                            "Name": {"type": "string"},
+                            "ID": {"type": "string"},
+                            "Inputs": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Name": {"type": "string"},
+                                        "Type_ID": {"type": "string"},
+                                        "Type": {"type": "string"},
+                                        "Obj_ID": {"type": ["array", "string"]},
+                                        "Required": {"type": "boolean"},
+                                        "Set_at": {"type": "string", "enum": ["initialization", "timestep"]}
+                                    },
+                                    "required": ["Name", "Type_ID", "Type", "Required", "Set_at"],
+                                    "anyOf": [
+                                        {"required": ["ValueType"]},
+                                        {
+                                            "not": {
+                                                "properties": {
+                                                    "Type": {"const": "mupif.Property"}
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "Outputs": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Name": {"type": "string"},
+                                        "Type_ID": {"type": "string"},
+                                        "Type": {"type": "string"},
+                                        "Obj_ID": {"type": ["array", "string"]}
+                                    },
+                                    "required": ["Name", "Type_ID", "Type"],
+                                    "anyOf": [
+                                        {"required": ["ValueType"]},
+                                        {
+                                            "not": {
+                                                "properties": {
+                                                    "Type": {"const": "mupif.Property"}
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "Execution_settings": {
+                                "type": "object",
+                                "properties": {
+                                    "Type": {"type": "string", "enum": ["Local", "Distributed"]},
+                                    "jobManName": {"type": "string"},
+                                    "Module": {"type": "string"},
+                                    "Class": {"type": "string"}
+                                },
+                                "anyOf": [
+                                    {
+                                        "allOf": [
+                                            { "required": ["jobManName"] },
+                                            {
+                                                "properties": {
+                                                    "Type": { "const": "Distributed" }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "allOf": [
+                                            { "required": ["Module", "Class"] },
+                                            {
+                                                "properties": {
+                                                    "Type": { "const": "Local" }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "required": ["Name", "ID", "Inputs", "Outputs", "Execution_settings"]
+                    },
+                    "model_working_directory": {"type": "string"}
+                },
+                "required": ["classname", "uid", "parent_uid"],
+                "allOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "not": {
+                                    "properties": {
+                                        "classname": { "const": "BlockWorkflow" }
+                                    }
+                                }
+                            },
+                            { "required": ["ext_slots"] }
+                        ]
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "properties": {
+                                    "classname": { "const": "BlockWorkflow" }
+                                }
+                            },
+                            { "required": ["slot_in_uids", "slot_out_uids"] }
+                        ]
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "not": {
+                                    "properties": {
+                                        "classname": { "const": "BlockModel" }
+                                    }
+                                }
+                            },
+                            { "required": ["metadata", "model_working_directory"] }
+                        ]
+                    }
+                ]
+            }
+        },
+        "datalinks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "ds1_uid": {"type": "string"},
+                    "ds2_uid": {"type": "string"}
+                },
+                "required": ["ds1_uid", "ds2_uid"]
+            }
+        },
+        "settings": {
+            "type": "object",
+            "properties": {
+                "project_name": {"type": "string"},
+                "project_classname": {"type": "string"},
+                "project_id": {"type": "string"},
+                "project_nshost": {"type": "string"},
+                "project_nsport": {"type": "string"},
+                "connection_type": {"type": "string", "enum": ["Local", "Distributed"]},
+                "jobman_settings": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"}
+                    },
+                    "required": ["name"]
+                },
+                "script_name_base": {"type": "string"}
+            },
+            "required": ["project_name", "project_classname", "project_id", "connection_type"]
+        },
+        "required": ["blocks", "datalinks", "settings"]
+    }
+}
