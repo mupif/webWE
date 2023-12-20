@@ -153,7 +153,7 @@ class BlockWorkflow extends Block{
                         "\"Obj_ID\": \"" + s.getName() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\", " +
                         "\"Set_at\": \""+(s.getLinkedDataSlot().getSetAt() === 'initialization' ? 'initialization' : 'timestep')+"\"";
-                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property')
+                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property' || s.getLinkedDataSlot().getDataType() === 'mupif.Function')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "}");
                     n_slots_printed += 1;
@@ -172,7 +172,7 @@ class BlockWorkflow extends Block{
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
                         "\"Obj_ID\": \"" + s.getName() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
-                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property')
+                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property' || s.getLinkedDataSlot().getDataType() === 'mupif.Function')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "}");
                     n_slots_printed += 1;
@@ -326,7 +326,7 @@ class BlockWorkflow extends Block{
                 code.push("\tdef set(self, obj, objectID=''):");
 
                 let linked_model;
-                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field", "mupif.HeavyStruct", "mupif.String"];
+                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field", "mupif.HeavyStruct", "mupif.String", "mupif.Function"];
                 for(let vi=0;vi<value_types.length;vi++){
                     code.push("");
                     code.push("\t\t# in case of " + value_types[vi]);
