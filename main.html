@@ -117,5 +117,12 @@
 
 </div>
 
+<script type="text/javascript">
+    function reRender(){
+        editor.generateWorkflowHtml();
+    }
+    new ResizeObserver(reRender).observe(document.getElementById('workflowContainer'));
+</script>
+
 </body>
 </html>
