@@ -194,9 +194,9 @@ class Slot{
 
         let html = '';
         if(temp_inout === 'in')
-            html = '<div class="slot_input" id="'+this.id+'" onmousedown="anyClick(event, \'\',\'\',\''+this.id+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;"><div class="slot_marker" onmousedown="datalink_creation_begin(\''+this.getUID()+'\')" onmouseup="datalink_creation_finalize(\''+this.getUID()+'\');"><div class="slot_point" id="point_'+this.getUID()+'"></div></div>'+this.name+'</div>';
+            html = '<div class="slot_input" id="'+this.id+'" onmousedown="anyClick(event, \'\',\'\',\''+this.id+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;"><div class="slot_marker" onmousedown="datalink_creation_begin(\''+this.getUID()+'\')" onmouseup="datalink_creation_finalize(\''+this.getUID()+'\');"><div class="slot_point" id="point_'+this.getUID()+'"></div></div><div class="slot_name">'+this.name+'</div></div>';
         if(temp_inout === 'out')
-            html = '<div class="slot_output" id="'+this.id+'" onmousedown="anyClick(event, \'\',\'\',\''+this.id+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;">'+this.name+'<div class="slot_marker" onmousedown="datalink_creation_begin(\''+this.getUID()+'\')" onmouseup="datalink_creation_finalize(\''+this.getUID()+'\');"><div class="slot_point" id="point_'+this.getUID()+'"></div></div></div>';
+            html = '<div class="slot_output" id="'+this.id+'" onmousedown="anyClick(event, \'\',\'\',\''+this.id+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;"><div class="slot_name">'+this.name+'</div><div class="slot_marker" onmousedown="datalink_creation_begin(\''+this.getUID()+'\')" onmouseup="datalink_creation_finalize(\''+this.getUID()+'\');"><div class="slot_point" id="point_'+this.getUID()+'"></div></div></div>';
         return html;
     }
 

@@ -53,18 +53,27 @@ div#workflowContainer{
 
     display:none;
 
-    resize: both;
+    resize: none;
 }
 
 div#workflowSubContainer{
-    padding-bottom:300px;
-    padding-right:100px;
+    padding: 20px;
+    
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 div#modelListContainer, div#projectSettingsContainer, div#workflowContainer{
-    /*width:1400px;*/
-    width:1400px;
-    height:760px;
+
+}
+
+div#contentView{
+    height: 800px;
+}
+
+div.contentView{
+    flex: 1 0 0;
 }
 
 b.message{
@@ -109,11 +118,8 @@ table.mainpage_list_examples td a{
 
 div#menu_new{
     width:180px;
-    /*display:block;*/
-    /*background-color:#3a3a3a;*/
     z-index: 100;
     cursor: default;
-    /*height:760px;*/
 }
 
 div#menu_new .melem_separator{
@@ -231,3 +237,13 @@ table.settings td input{
     font-size:12px;
     line-height:18px;
 }
+
+div.settings_section{
+    border: 1px solid gray;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    padding: 12px;
+    box-shadow: 6px 6px 6px 1px rgba(50, 50, 50, .5);
+}
+
+div.side_space{width: 10px;}

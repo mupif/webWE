@@ -474,13 +474,13 @@ class Block{
         let html = '';
         html += this.getBlockHtml_header();
         html += this.getBlockHtml_params();
-        html += '<table cellspacing="0" class="table_over_content">';
-        html += '<tr><td>';
+        html += '<div class="block_over_content">';
+        html += '<div>';
         html += this.getBlockHtml_slots_input();
-        html += '</td><td>';
+        html += '</div><div>';
         html += this.getBlockHtml_slots_output();
-        html += '</td></tr>';
-        html += '</table>';
+        html += '</div>';
+        html += '</div>';
         html += this.getBlockHtml_content();
         html += this.getBlockHtml_footer();
         html += this.getBlockHtml_menu();
@@ -526,14 +526,19 @@ class Block{
     }
 
     getBlockHtml_content(){
-        let html = '<div class="bl_content">';
         let n_blocks = this.blocks.length;
-        for(let i=0;i<n_blocks;i++) {
-            html += this.blocks[i].getBlockHtml();
-            if(this.child_block_sort === 'vertical')
-                html += '<br>';
+        let html = '';
+        if(n_blocks > 0) {
+            if (this.child_block_sort === 'vertical')
+                html += '<div class="bl_content bl_content_vertical">';
+            else
+                html += '<div class="bl_content bl_content_horizontal">';
+
+            for (let i = 0; i < n_blocks; i++) {
+                html += this.blocks[i].getBlockHtml();
+            }
+            html += '</div>';
         }
-        html += '</div>';
         return html;
     }
 

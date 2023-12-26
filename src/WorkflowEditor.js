@@ -364,8 +364,12 @@ class WorkflowEditor{
     updateHtmlOfProjectSettings(){
         let slots;
         let slot;
+        
+        let html = '';
 
-        let html = '<h2><b>Project settings</b></h2>';
+        html += '<div class="settings_section">';
+        
+        html += '<h2><b>Project settings</b></h2>';
         html += '<table cellspacing="0" class="settings">';
 
         html += '<tr><td colspan="10" style="height:10px;"></td>';
@@ -430,9 +434,13 @@ class WorkflowEditor{
 
         html += '</table>';
 
+        html += '</div>';
+
         //
 
-        html += '<h2 style="margin-top:30px;"><b>External data slots</b></h2>';
+        html += '<div class="settings_section">';
+        
+        html += '<h2><b>External data slots</b></h2>';
         html += '<table class="tbl_ext_slots" cellspacing="0">';
 
         html += '<tr><td colspan="10" style="height:10px;"></td>';
@@ -481,6 +489,8 @@ class WorkflowEditor{
         html += '</tr>';
 
         html += '</table>';
+
+        html += '</div>';
 
         document.getElementById('block_list_of_settings').innerHTML = html;
     }

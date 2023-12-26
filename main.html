@@ -95,7 +95,7 @@
 
                 </div>
                 
-                <div>
+                <div class="vbox contentView" id="contentView">
                     <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
                         <div id="workflowSubContainer">
 
@@ -110,6 +110,8 @@
                         <div id="block_list_of_models"></div>
                     </div>
                 </div>
+                
+                <div class="side_space"></div>
             </div>
         </div>
 
@@ -122,6 +124,15 @@
         editor.generateWorkflowHtml();
     }
     new ResizeObserver(reRender).observe(document.getElementById('workflowContainer'));
+
+    function windowResize(){
+        document.getElementById('contentView').style.height = (window.innerHeight-100).toString() + 'px';
+    }
+    
+    addEventListener("resize", (event) => {
+        windowResize();
+    });
+    windowResize();
 </script>
 
 </body>
