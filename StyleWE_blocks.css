@@ -281,4 +281,5 @@ div.block_over_content{
     /*gap: 16px;*/
     justify-content: space-between;
     padding-top: 4px;
+    gap: 10px;
 }

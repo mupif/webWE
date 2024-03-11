@@ -93,7 +93,7 @@ class ThermoMechanicalExecutionWorkflow_02(mupif.Workflow):
         while timeloop_1_compute:
             timeloop_1_time_step_number += 1
         
-            timeloop_1_dt = min([self.constant_physical_quantity_3, self.model_1.getCriticalTimeStep(), self.model_2.getCriticalTimeStep(), self.model_3.getCriticalTimeStep()])
+            timeloop_1_dt = min([self.constant_physical_quantity_3, self.getModel('model_1').getCriticalTimeStep(), self.getModel('model_2').getCriticalTimeStep(), self.getModel('model_3').getCriticalTimeStep()])
             timeloop_1_time = min(timeloop_1_time.inUnitsOf('s').getValue()+timeloop_1_dt.inUnitsOf('s').getValue(), timeloop_1_target_time.inUnitsOf('s').getValue())*mupif.U.s
         
             if timeloop_1_time.inUnitsOf('s').getValue() + 1.e-6 > timeloop_1_target_time.inUnitsOf('s').getValue():

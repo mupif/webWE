@@ -100,15 +100,15 @@ class BlockPhysicalQuantity extends Block{
     }
 
     getBlockHtmlName(){
-        return 'Physical Quantity';
+        return 'Quantity';
     }
 
     getBlockHtml_params(){
         let html = '';
         html += '<div class="bl_params">';
-        html += 'Value = <b>\'' + this.value + '\'</b>';
+        html += 'Value = <b>' + this.value + '</b>';
         html += '<br>';
-        html += 'Units = <b>\'' + this.units + '\'</b>';
+        html += 'Units = <b>' + this.units + '</b>';
 
         html += '</div>';
         return html;

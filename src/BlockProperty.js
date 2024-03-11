@@ -94,11 +94,11 @@ class BlockProperty extends Block{
             let q_html = '';
             q_html += '<b>Choose PropertyID:</b>&nbsp;';
             q_html += '<select id="myQuery_temp_val">';
-            for(let i=0;i<mupif_PropertyID.length;i++) {
-                q_html += '<option value="'+mupif_PropertyID[i]+'"';
-                if(this.property_id === 'mupif.DataID.'+mupif_PropertyID[i])
+            for(let i=0;i<mupif_DataID.length;i++) {
+                q_html += '<option value="'+mupif_DataID[i]+'"';
+                if(this.property_id === 'mupif.DataID.'+mupif_DataID[i])
                     q_html += ' selected';
-                q_html += '>'+mupif_PropertyID[i]+'</option>';
+                q_html += '>'+mupif_DataID[i]+'</option>';
             }
             q_html += '</select>';
             q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
@@ -154,13 +154,13 @@ class BlockProperty extends Block{
     getBlockHtml_params(){
         let html = '';
         html += '<div class="bl_params">';
-        html += 'Value = <b>\'' + this.value + '\'</b>';
+        html += 'Value = <b>' + this.value + '</b>';
         html += '<br>';
-        html += 'Units = <b>\'' + this.units + '\'</b>';
+        html += 'Units = <b>' + this.units + '</b>';
         html += '<br>';
-        html += 'ValueType = <b>\'' + this.value_type.replace('mupif.ValueType.', '') + '\'</b>';
+        html += 'ValueType = <b>' + this.value_type.replace('mupif.ValueType.', '') + '</b>';
         html += '<br>';
-        html += 'PropertyID = <b>\'' + this.property_id.replace('mupif.DataID.', '') + '\'</b>';
+        html += 'PropertyID = <b>' + this.property_id.replace('mupif.DataID.', '') + '</b>';
 
         html += '</div>';
         return html;

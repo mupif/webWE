@@ -72,6 +72,7 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
 
     # set method for all external inputs
     def set(self, obj, objectID=''):
+        pass
 
         # in case of mupif.PyroFile
         if obj.isInstance(mupif.PyroFile):
@@ -88,18 +89,6 @@ class ThermoMechanicalClassWorkflow_01(mupif.Workflow):
             pass
             if objectID == 'top_temperature':
                 self.external_input_1 = obj
-
-        # in case of mupif.Field
-        if obj.isInstance(mupif.Field):
-            pass
-
-        # in case of mupif.HeavyStruct
-        if obj.isInstance(mupif.HeavyStruct):
-            pass
-
-        # in case of mupif.String
-        if obj.isInstance(mupif.String):
-            pass
 
     # get method for all external outputs
     def get(self, objectTypeID, time=None, objectID=''):

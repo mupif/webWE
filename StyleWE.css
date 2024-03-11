@@ -57,7 +57,7 @@ div#workflowContainer{
 }
 
 div#workflowSubContainer{
-    padding: 20px;
+    padding: 20px 20px 300px 20px;
     
     display:flex;
     flex-direction: row;

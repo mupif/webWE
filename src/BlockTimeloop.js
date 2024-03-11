@@ -75,7 +75,7 @@ class BlockTimeloop extends Block{
         for(let i=0;i<model_blocks.length;i++) {
             if (!first)
                 dt_code += ", ";
-            dt_code += "self." + model_blocks[i].code_name + ".getCriticalTimeStep()";
+            dt_code += "self.getModel('" + model_blocks[i].code_name + "').getCriticalTimeStep()";
             first = false;
         }
         dt_code += "])";

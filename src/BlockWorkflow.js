@@ -324,29 +324,41 @@ class BlockWorkflow extends Block{
                 code.push("");
                 code.push("\t# set method for all external inputs");
                 code.push("\tdef set(self, obj, objectID=''):");
+                code.push("\t\tpass");
 
+                let anyOfThisValueType;
                 let linked_model;
                 let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field", "mupif.HeavyStruct", "mupif.String", "mupif.Function"];
                 for(let vi=0;vi<value_types.length;vi++){
-                    code.push("");
-                    code.push("\t\t# in case of " + value_types[vi]);
-                    code.push("\t\tif obj.isInstance(" + value_types[vi] + "):");
-                    code.push("\t\t\tpass");
+                    anyOfThisValueType = false;
                     this.getAllExternalDataSlots("out").forEach(s => {
                         if (s.connected()) {
                             if (s.getLinkedDataSlot().getDataType() === value_types[vi]) {
-                                code.push("\t\t\tif objectID == '" + s.getName() + "':");
-                                code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
-
-                                if(s.getLinkedDataSlot().set_at === 'initialization') {
-                                    linked_model = s.getLinkedDataSlot().getParentBlock();
-                                    if (linked_model instanceof BlockModel) {
-                                        code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().getObjectID() + "')");
-                                    }
-                                }
+                                anyOfThisValueType = true;
                             }
                         }
                     })
+                    if(anyOfThisValueType) {
+                        code.push("");
+                        code.push("\t\t# in case of " + value_types[vi]);
+                        code.push("\t\tif obj.isInstance(" + value_types[vi] + "):");
+                        code.push("\t\t\tpass");
+                        this.getAllExternalDataSlots("out").forEach(s => {
+                            if (s.connected()) {
+                                if (s.getLinkedDataSlot().getDataType() === value_types[vi]) {
+                                    code.push("\t\t\tif objectID == '" + s.getName() + "':");
+                                    code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
+
+                                    if (s.getLinkedDataSlot().set_at === 'initialization') {
+                                        linked_model = s.getLinkedDataSlot().getParentBlock();
+                                        if (linked_model instanceof BlockModel) {
+                                            code.push("\t\t\t\tself.getModel('" + linked_model.getCodeName() + "').set(" + s.getCodeRepresentation() + ", '" + s.getLinkedDataSlot().getObjectID() + "')");
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
                 }
                 
                 // --------------------------------------------------
