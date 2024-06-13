@@ -11,7 +11,8 @@
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "s",
             "Obj_ID": "",
-            "Set_at": "timestep"
+            "Set_at": "timestep",
+            "ValueType": "Scalar"
         },
         {
             "Name": "Input field",
@@ -29,7 +30,8 @@
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "",
             "Obj_ID": "",
-            "Set_at": "timestep"
+            "Set_at": "timestep",
+            "ValueType": "Scalar"
         },
         {
             "Name": "Input file",
@@ -81,7 +83,8 @@
             "Type": "mupif.String",
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "",
-            "Obj_ID": ""
+            "Obj_ID": "",
+            "ValueType": "Scalar"
         },
         {
             "Name": "Output file",
@@ -102,7 +105,8 @@
             "Type": "mupif.DataList[mupif.Property]",
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "",
-            "Obj_ID": ""
+            "Obj_ID": "",
+            "ValueType": "Scalar"
         }
     ],
     "Solver": {
