@@ -38,6 +38,10 @@ div.we_block_run_in_background{
     background-color: #eee04f;
 }
 
+div.we_block_wait_for_background_processes{
+    background-color: #eee04f;
+}
+
 div.we_block_data{
     background-color:#ff80b3;
 }

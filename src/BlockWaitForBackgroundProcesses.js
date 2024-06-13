@@ -58,7 +58,7 @@ class BlockWaitForBackgroundProcesses extends Block{
     // #########################
 
     getBlockHtmlClass(){
-        return 'we_block we_block_data';
+        return 'we_block we_block_wait_for_background_processes';
     }
 
     getBlockHtmlName(){
