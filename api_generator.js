@@ -82,6 +82,22 @@ function checkMetadataItem(md, key, obj_name, check_nonempty=false, enum_values=
     return true;
 }
 
+function checkMetadataItemValueType(md, key, obj_name, check_nonempty=false, enum_values=[]){
+    if(!(key in md)){
+        elem_error.innerHTML += '<div class="p4">' + obj_name + ' is missing key "' + key + '".</div>';
+        return false;
+    }
+    if(check_nonempty && (md[key] === '' || md[key] === null)){
+        elem_error.innerHTML += '<div class="p4">' + obj_name + ' item "' + key + '" cannot be empty.</div>';
+        return false;
+    }
+    if(enum_values.length > 0 && !enum_values.includes(md[key])){
+        elem_error.innerHTML += '<div class="p4">' + obj_name + ' item "' + key + '" must be chosen from [' + enum_values.map(v => '"'+v+'"').join(', ') + '].</div>';
+        return false;
+    }
+    return true;
+}
+
 function checkMetadataSubItem(obj, keys, obj_name, check_nonempty=false, enum_values=[]){
     let retval = true;
     keys.forEach(k => {
@@ -132,8 +148,20 @@ function checkMetadataFormat(md){
         if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs', true)){
             retval = false;
         }else{
-            if(md["Inputs"][i]["Type"] === "mupif.Property" || md["Inputs"][i]["Type"] === "mupif.String" || md["Inputs"][i]["Type"] === "mupif.TemporalProperty" || md["Inputs"][i]["Type"] === "mupif.Field" || md["Inputs"][i]["Type"] === "mupif.TemporalField"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"){
+            if(
+                md["Inputs"][i]["Type"] === "mupif.Property"
+                || md["Inputs"][i]["Type"] === "mupif.String"
+                || md["Inputs"][i]["Type"] === "mupif.TemporalProperty"
+                || md["Inputs"][i]["Type"] === "mupif.Field"
+                || md["Inputs"][i]["Type"] === "mupif.TemporalField"
+                || md["Inputs"][i]["Type"] === "mupif.Function"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Function]"
+            ){
                 if(!checkMetadataSubItem(md["Inputs"][i], ['ValueType'], 'Inputs', true)){
                     retval = false;
                 }
@@ -147,8 +175,20 @@ function checkMetadataFormat(md){
         if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs', true)){
             retval = false;
         }else{
-            if(md["Outputs"][i]["Type"] === "mupif.Property" || md["Outputs"][i]["Type"] === "mupif.String" || md["Outputs"][i]["Type"] === "mupif.TemporalProperty" || md["Inputs"][i]["Type"] === "mupif.Field" || md["Inputs"][i]["Type"] === "mupif.TemporalField"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"){
+            if(
+                md["Outputs"][i]["Type"] === "mupif.Property"
+                || md["Outputs"][i]["Type"] === "mupif.String"
+                || md["Outputs"][i]["Type"] === "mupif.TemporalProperty"
+                || md["Inputs"][i]["Type"] === "mupif.Field"
+                || md["Inputs"][i]["Type"] === "mupif.TemporalField"
+                || md["Inputs"][i]["Type"] === "mupif.Function"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Function]"
+            ){
                 if(!checkMetadataSubItem(md["Outputs"][i], ['ValueType'], 'Outputs', true)){
                     retval = false;
                 }

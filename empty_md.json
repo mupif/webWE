@@ -21,7 +21,8 @@
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "m",
             "Obj_ID": "",
-            "Set_at": "timestep"
+            "Set_at": "timestep",
+            "ValueType": "Scalar"
         },
         {
             "Name": "Input string",
@@ -76,7 +77,8 @@
             "Type": "mupif.Field",
             "Type_ID": "mupif.DataID.ID_None",
             "Units": "m",
-            "Obj_ID": ""
+            "Obj_ID": "",
+            "ValueType": "Scalar"
         },
         {
             "Name": "Output string",
