@@ -132,7 +132,8 @@ function checkMetadataFormat(md){
         if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs', true)){
             retval = false;
         }else{
-            if(md["Inputs"][i]["Type"] === "mupif.Property" || md["Inputs"][i]["Type"] === "mupif.String" || md["Inputs"][i]["Type"] === "mupif.TemporalProperty"){
+            if(md["Inputs"][i]["Type"] === "mupif.Property" || md["Inputs"][i]["Type"] === "mupif.String" || md["Inputs"][i]["Type"] === "mupif.TemporalProperty" || md["Inputs"][i]["Type"] === "mupif.Field" || md["Inputs"][i]["Type"] === "mupif.TemporalField"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"){
                 if(!checkMetadataSubItem(md["Inputs"][i], ['ValueType'], 'Inputs', true)){
                     retval = false;
                 }
@@ -146,7 +147,8 @@ function checkMetadataFormat(md){
         if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs', true)){
             retval = false;
         }else{
-            if(md["Outputs"][i]["Type"] === "mupif.Property" || md["Outputs"][i]["Type"] === "mupif.String" || md["Outputs"][i]["Type"] === "mupif.TemporalProperty"){
+            if(md["Outputs"][i]["Type"] === "mupif.Property" || md["Outputs"][i]["Type"] === "mupif.String" || md["Outputs"][i]["Type"] === "mupif.TemporalProperty" || md["Inputs"][i]["Type"] === "mupif.Field" || md["Inputs"][i]["Type"] === "mupif.TemporalField"
+                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]" || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"){
                 if(!checkMetadataSubItem(md["Outputs"][i], ['ValueType'], 'Outputs', true)){
                     retval = false;
                 }
