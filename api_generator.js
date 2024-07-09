@@ -129,10 +129,32 @@ function checkMetadataFormat(md){
     const solver_keys = Object.keys(solver_meta);
     
     for(let i=0;i<md["Inputs"].length;i++){
-        if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs', true)){retval = false;}
+        if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs', true)){
+            retval = false;
+        }else{
+            if(md["Inputs"][i]["Type"] === "mupif.Property" || md["Inputs"][i]["Type"] === "mupif.String" || md["Inputs"][i]["Type"] === "mupif.TemporalProperty"){
+                if(!checkMetadataSubItem(md["Inputs"][i], ['ValueType'], 'Inputs', true)){
+                    retval = false;
+                }
+                if(!['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'].includes(md["Inputs"][i]["ValueType"])){
+                    retval = false;
+                }
+            }
+        }
     }
     for(let i=0;i<md["Outputs"].length;i++){
-        if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs', true)){retval = false;}
+        if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs', true)){
+            retval = false;
+        }else{
+            if(md["Outputs"][i]["Type"] === "mupif.Property" || md["Outputs"][i]["Type"] === "mupif.String" || md["Outputs"][i]["Type"] === "mupif.TemporalProperty"){
+                if(!checkMetadataSubItem(md["Outputs"][i], ['ValueType'], 'Outputs', true)){
+                    retval = false;
+                }
+                if(!['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'].includes(md["Outputs"][i]["ValueType"])){
+                    retval = false;
+                }
+            }
+        }
     }
     if(!checkMetadataSubItem(md["Execution_settings"], ['Type', 'Class', 'Module', 'jobManName'], 'Execution_settings', true)){retval = false;}
     
