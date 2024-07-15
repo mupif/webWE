@@ -66,6 +66,29 @@ function insertEmptyTemplateMetadata(){
     client.send();
 }
 
+const setAtValues = ['initialization', 'timestep'];
+const valueTypes = ['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'];
+const dataTypes = [
+    'mupif.Property',
+    'mupif.TemporalProperty',
+    'mupif.Field',
+    'mupif.TemporalField',
+    'mupif.Function',
+    'mupif.HeavyStruct',
+    'mupif.PyroFile',
+    'mupif.String',
+    'mupif.GrainState',
+    'mupif.DataList[mupif.Property]',
+    'mupif.DataList[mupif.TemporalProperty]',
+    'mupif.DataList[mupif.Field]',
+    'mupif.DataList[mupif.TemporalField]',
+    'mupif.DataList[mupif.Function]',
+    'mupif.DataList[mupif.HeavyStruct]',
+    'mupif.DataList[mupif.PyroFile]',
+    'mupif.DataList[mupif.String]',
+    'mupif.DataList[mupif.GrainState]'
+];
+
 function checkMetadataItem(md, key, obj_name, check_nonempty=false, enum_values=[]){
     if(!(key in md)){
         elem_error.innerHTML += '<div class="p4">' + obj_name + ' is missing key "' + key + '".</div>';
@@ -82,20 +105,61 @@ function checkMetadataItem(md, key, obj_name, check_nonempty=false, enum_values=
     return true;
 }
 
-function checkMetadataItemValueType(md, key, obj_name, check_nonempty=false, enum_values=[]){
-    if(!(key in md)){
-        elem_error.innerHTML += '<div class="p4">' + obj_name + ' is missing key "' + key + '".</div>';
-        return false;
+function checkMetadataInputOrOutput(md, inputOrOutput, num){
+    const name = inputOrOutput + ' #' + num;
+    let retval = true;
+    const keys = inputOrOutput === 'Input' ? ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'] : ['Name', 'Type_ID', 'Type'];
+    
+    keys.forEach(key => {
+        if(!(key in md)){
+            elem_error.innerHTML += '<div class="p4">' + name + ' is missing key "' + key + '".</div>';
+            retval = false;
+        }
+    })
+    if(retval){
+        if(!dataTypes.includes(md['Type'])){
+            elem_error.innerHTML += '<div class="p4">"Type" of ' + name + ' must be chosen from [' + dataTypes.map(v => '"'+v+'"').join(', ') + '].</div>';
+            retval = false;
+        }
+        if('Required' in md) {
+            if (![true, false].includes(md['Required'])) {
+                elem_error.innerHTML += '<div class="p4">"Required" of ' + name + ' must be chosen from [true, false].</div>';
+                retval = false;
+            }
+        }
+        if('Set_at' in md) {
+            if (!setAtValues.includes(md['Set_at'])) {
+                elem_error.innerHTML += '<div class="p4">"Set_at" of ' + name + ' must be chosen from [' + setAtValues.map(v => '"'+v+'"').join(', ') + '].</div>';
+                retval = false;
+            }
+        }
     }
-    if(check_nonempty && (md[key] === '' || md[key] === null)){
-        elem_error.innerHTML += '<div class="p4">' + obj_name + ' item "' + key + '" cannot be empty.</div>';
-        return false;
+    
+    if("Type" in md){
+        if(
+            md["Type"] === "mupif.Property"
+            || md["Type"] === "mupif.String"
+            || md["Type"] === "mupif.TemporalProperty"
+            || md["Type"] === "mupif.Field"
+            || md["Type"] === "mupif.TemporalField"
+            || md["Type"] === "mupif.Function"
+            || md["Type"] === "mupif.DataList[mupif.Property]"
+            || md["Type"] === "mupif.DataList[mupif.String]"
+            || md["Type"] === "mupif.DataList[mupif.TemporalProperty]"
+            || md["Type"] === "mupif.DataList[mupif.Field]"
+            || md["Type"] === "mupif.DataList[mupif.TemporalField]"
+            || md["Type"] === "mupif.DataList[mupif.Function]"
+        ){
+            if(!("ValueType" in md)){
+                elem_error.innerHTML += '<div class="p4">' + name + ' is missing key "ValueType".</div>';
+                retval = false;
+            }else if(!valueTypes.includes(md["ValueType"])){
+                elem_error.innerHTML += '<div class="p4">"ValueType" of ' + name + ' must be chosen from [' + valueTypes.map(v => '"'+v+'"').join(', ') + '].</div>';
+                retval = false;
+            }
+        }
     }
-    if(enum_values.length > 0 && !enum_values.includes(md[key])){
-        elem_error.innerHTML += '<div class="p4">' + obj_name + ' item "' + key + '" must be chosen from [' + enum_values.map(v => '"'+v+'"').join(', ') + '].</div>';
-        return false;
-    }
-    return true;
+    return retval;
 }
 
 function checkMetadataSubItem(obj, keys, obj_name, check_nonempty=false, enum_values=[]){
@@ -107,7 +171,6 @@ function checkMetadataSubItem(obj, keys, obj_name, check_nonempty=false, enum_va
 }
 
 function checkMetadataFormat(md){
-    // temporary basic validation
     let base_keys = [
         'Name',
         'ID',
@@ -145,57 +208,13 @@ function checkMetadataFormat(md){
     const solver_keys = Object.keys(solver_meta);
     
     for(let i=0;i<md["Inputs"].length;i++){
-        if(!checkMetadataSubItem(md["Inputs"][i], ['Name', 'Type_ID', 'Type', 'Required', 'Set_at'], 'Inputs', true)){
+        if(!checkMetadataInputOrOutput(md["Inputs"][i], 'Input', i+1)){
             retval = false;
-        }else{
-            if(
-                md["Inputs"][i]["Type"] === "mupif.Property"
-                || md["Inputs"][i]["Type"] === "mupif.String"
-                || md["Inputs"][i]["Type"] === "mupif.TemporalProperty"
-                || md["Inputs"][i]["Type"] === "mupif.Field"
-                || md["Inputs"][i]["Type"] === "mupif.TemporalField"
-                || md["Inputs"][i]["Type"] === "mupif.Function"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Function]"
-            ){
-                if(!checkMetadataSubItem(md["Inputs"][i], ['ValueType'], 'Inputs', true)){
-                    retval = false;
-                }
-                if(!['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'].includes(md["Inputs"][i]["ValueType"])){
-                    retval = false;
-                }
-            }
         }
     }
     for(let i=0;i<md["Outputs"].length;i++){
-        if(!checkMetadataSubItem(md["Outputs"][i], ['Name', 'Type_ID', 'Type'], 'Outputs', true)){
+        if(!checkMetadataInputOrOutput(md["Outputs"][i], 'Output', i+1)){
             retval = false;
-        }else{
-            if(
-                md["Outputs"][i]["Type"] === "mupif.Property"
-                || md["Outputs"][i]["Type"] === "mupif.String"
-                || md["Outputs"][i]["Type"] === "mupif.TemporalProperty"
-                || md["Inputs"][i]["Type"] === "mupif.Field"
-                || md["Inputs"][i]["Type"] === "mupif.TemporalField"
-                || md["Inputs"][i]["Type"] === "mupif.Function"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Property]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.String]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalProperty]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Field]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.TemporalField]"
-                || md["Inputs"][i]["Type"] === "mupif.DataList[mupif.Function]"
-            ){
-                if(!checkMetadataSubItem(md["Outputs"][i], ['ValueType'], 'Outputs', true)){
-                    retval = false;
-                }
-                if(!['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'].includes(md["Outputs"][i]["ValueType"])){
-                    retval = false;
-                }
-            }
         }
     }
     if(!checkMetadataSubItem(md["Execution_settings"], ['Type', 'Class', 'Module', 'jobManName'], 'Execution_settings', true)){retval = false;}
