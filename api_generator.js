@@ -2,6 +2,38 @@ let elem_input = document.getElementById('data_input');
 let elem_output = document.getElementById('data_output');
 let elem_error = document.getElementById('elem_error');
 
+let elem_basic_editor = document.getElementById('basic_editor');
+let elem_interactive_editor = document.getElementById('interactive_editor');
+let elem_interactive_input_params = document.getElementById('interactive_input_params');
+
+let interactive_json_data = {};
+
+let interactive_inputs = [
+    {path: "Name", type: "text"},
+    {path: "ID",  type: "text"},
+    {path: "Execution_settings.Type",  type: "select", options: ["Local", "Distributed"]},
+    {path: "Execution_settings.jobManName", type: "text" },
+    {path: "Execution_settings.Class",  type: "text"},
+    {path: "Execution_settings.Module",  type: "text"},
+    {path: "Physics.Type",  type: "select", options: ["Electronic", "Atomistic", "Molecular", "Mesoscopic", "Continuum", "Other"]},
+    {path: "Physics.Entity",  type: "select", options: ["Atom", "Electron", "Grains", "Finite volume", "Other"]},
+    {path: "Solver.Required_expertise",  type: "select", options: ["None", "User", "Expert"]},
+    {path: "Solver.Accuracy",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
+    {path: "Solver.Sensitivity",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
+    {path: "Solver.Complexity",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
+    {path: "Solver.Robustness",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
+    {path: "Solver.Software",  type: "text"},
+    {path: "Solver.Language",  type: "text"},
+    {path: "Solver.License",  type: "text"},
+    {path: "Solver.Creator",  type: "text"},
+    {path: "Solver.Version_date",  type: "text"},
+    {path: "Solver.Documentation",  type: "text"},
+    {path: "Solver.Estim_time_step_s",  type: "text"},
+    {path: "Solver.Estim_comp_time_s",  type: "text"},
+    {path: "Solver.Estim_execution_cost_EUR",  type: "text"},
+    {path: "Solver.Estim_personnel_cost_EUR",  type: "text"},
+];
+
 function isValidJson(json) {
     try {
         JSON.parse(json);
@@ -14,6 +46,134 @@ function isValidJson(json) {
 function textAreaAdjust(element) {
     element.style.height = "1px";
     element.style.height = (25+element.scrollHeight)+"px";
+}
+
+function fixMissingMDItems(){
+    interactive_inputs.forEach(i => {
+        let keywords = i.path.split('.');
+        let k1 = null;
+        let k2 = null;
+        if(keywords.length > 0){k1 = keywords[0];}
+        if(keywords.length > 1){k2 = keywords[1];}
+        if(k2 !== null){
+            if(!(k1 in interactive_json_data)){
+                interactive_json_data[k1] = {};
+            }
+            if(!(k2 in interactive_json_data[k1])) {
+                interactive_json_data[k1][k2] = '';
+            }
+        }
+        else if(k1 !== null){
+            if(!(k1 in interactive_json_data)){
+                interactive_json_data[k1] = '';
+            }
+        }
+    })
+    if(!("Inputs" in interactive_json_data)){interactive_json_data["Inputs"] = [];}
+    if(!("Outputs" in interactive_json_data)){interactive_json_data["Outputs"] = [];}
+    saveInteractiveJsonData();
+}
+
+function setInteractiveEditorVisibility(val){
+    if(val){
+        loadInteractiveJsonData();
+        generateInteractiveInputs();
+        elem_basic_editor.style.display = 'none';
+        elem_interactive_editor.style.display = 'block';
+    }else{
+        elem_basic_editor.style.display = 'block';
+        elem_interactive_editor.style.display = 'none';
+        generateApiImplementation();
+    }
+}
+
+function getMDAttribute(path){
+    let data = interactive_json_data;
+    let keywords = path.split('.');
+    let k1 = null;
+    let k2 = null;
+    if(keywords.length > 0){k1 = keywords[0];}
+    if(keywords.length > 1){k2 = keywords[1];}
+    if(k2 !== null){
+        if(k1 in data){
+            if(k2 in data[k1]){
+                return data[k1][k2];
+            }
+        }
+    }
+    if(k1 !== null){
+        if(k1 in data){
+            return data[k1];
+        }
+    }
+    return '';
+}
+
+function setMDAttribute(path, value){
+    let keywords = path.split('.');
+    let k1 = null;
+    let k2 = null;
+    if(keywords.length > 0){k1 = keywords[0];}
+    if(keywords.length > 1){k2 = keywords[1];}
+    if(k2 !== null){
+        if(!(k1 in interactive_json_data)){
+            interactive_json_data[k1] = {};
+        }
+        interactive_json_data[k1][k2] = value;
+    }
+    else if(k1 !== null){
+        interactive_json_data[k1] = value;
+    }
+    saveInteractiveJsonData();
+}
+
+function generateInteractiveInputs(){
+    let last_section = null;
+    let res_html = '<div class="p2">Model info</div>';
+    interactive_inputs.forEach(i => {
+        let path_items = i.path.split('.');
+        let section = path_items[0];
+        if(path_items.length > 1) {
+            if (section !== last_section) {
+                last_section = section;
+                res_html += '<div class="p2">' + section + '</div>';
+            }
+        }
+        let attr_name = path_items[path_items.length-1];
+
+        res_html += '<div class="hbox">';
+        res_html += '   <div class="param_section_tab"></div>';
+        res_html += '   <div class="p3 param_name">'+attr_name+'</div>';
+        res_html += '   <div class="param_input vbox align_items_stretch">';
+        if(i.type === 'text') {
+            res_html += '   <input type="text" onkeyup="setMDAttribute(\'' + i.path + '\', this.value)" value="' + getMDAttribute(i.path) + '">';
+        }
+        if(i.type === 'select') {
+            let val = getMDAttribute(i.path);
+            res_html += '   <select onchange="setMDAttribute(\'' + i.path + '\', this.value)">';
+            res_html += '       <option value=""></option>';
+            i.options.forEach(o => {
+                res_html += '       <option value="'+o+'" '+(o === val ? 'selected' : '')+'>'+o+'</option>';
+            })
+            res_html += '   </select>';
+        }
+        res_html += '   </div>';
+        res_html += '</div>';
+    })
+    elem_interactive_input_params.innerHTML = res_html;
+}
+
+function loadInteractiveJsonData(){
+    if(isValidJson(elem_input.value)){
+        interactive_json_data = JSON.parse(elem_input.value);
+    }else{
+        interactive_json_data = {};
+    }
+    fixMissingMDItems();
+}
+
+function saveInteractiveJsonData(){
+    elem_input.value = JSON.stringify(interactive_json_data, null, 4);
 }
 
 function clearApiImplementation(){
