@@ -9,19 +9,19 @@ let elem_interactive_input_params = document.getElementById('interactive_input_p
 let interactive_json_data = {};
 
 let interactive_inputs = [
-    {path: "Name", type: "text"},
-    {path: "ID",  type: "text"},
-    {path: "Execution_settings.Type",  type: "select", options: ["Local", "Distributed"]},
-    {path: "Execution_settings.jobManName", type: "text" },
-    {path: "Execution_settings.Class",  type: "text"},
-    {path: "Execution_settings.Module",  type: "text"},
-    {path: "Physics.Type",  type: "select", options: ["Electronic", "Atomistic", "Molecular", "Mesoscopic", "Continuum", "Other"]},
-    {path: "Physics.Entity",  type: "select", options: ["Atom", "Electron", "Grains", "Finite volume", "Other"]},
-    {path: "Solver.Required_expertise",  type: "select", options: ["None", "User", "Expert"]},
-    {path: "Solver.Accuracy",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
-    {path: "Solver.Sensitivity",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
-    {path: "Solver.Complexity",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
-    {path: "Solver.Robustness",  type: "select", options: ["Low", "Medium", "High", "Unknown"]},
+    {path: "Name", type: "text", nonempty: true},
+    {path: "ID",  type: "text", nonempty: true},
+    {path: "Execution_settings.Type",  type: "select", options: ["Local", "Distributed"], nonempty: true},
+    {path: "Execution_settings.jobManName", type: "text", nonempty: true},
+    {path: "Execution_settings.Class",  type: "text", nonempty: true},
+    {path: "Execution_settings.Module",  type: "text", nonempty: true},
+    {path: "Physics.Type",  type: "select", options: ["Electronic", "Atomistic", "Molecular", "Mesoscopic", "Continuum", "Other"], nonempty: true},
+    {path: "Physics.Entity",  type: "select", options: ["Atom", "Electron", "Grains", "Finite volume", "Other"], nonempty: true},
+    {path: "Solver.Required_expertise",  type: "select", options: ["None", "User", "Expert"], nonempty: true},
+    {path: "Solver.Accuracy",  type: "select", options: ["Low", "Medium", "High", "Unknown"], nonempty: true},
+    {path: "Solver.Sensitivity",  type: "select", options: ["Low", "Medium", "High", "Unknown"], nonempty: true},
+    {path: "Solver.Complexity",  type: "select", options: ["Low", "Medium", "High", "Unknown"], nonempty: true},
+    {path: "Solver.Robustness",  type: "select", options: ["Low", "Medium", "High", "Unknown"], nonempty: true},
     {path: "Solver.Software",  type: "text"},
     {path: "Solver.Language",  type: "text"},
     {path: "Solver.License",  type: "text"},
@@ -74,10 +74,48 @@ function fixMissingMDItems(){
     saveInteractiveJsonData();
 }
 
+function highlightRequiredNonEmptyParams(){
+    interactive_inputs.forEach(i => {
+        if('nonempty' in i){
+            if(i['nonempty'] === true){
+                let elem_id = 'param_' + i.path;
+                let elem = document.getElementById(elem_id);
+                if(elem) {
+                    if (getMDAttribute(i.path) === '') {
+                        elem.style.border = '1px solid red';
+                    } else {
+                        elem.style.border = '1px solid black';
+                    }
+                }
+            }
+        }
+
+        let keywords = i.path.split('.');
+        let k1 = null;
+        let k2 = null;
+        if(keywords.length > 0){k1 = keywords[0];}
+        if(keywords.length > 1){k2 = keywords[1];}
+        if(k2 !== null){
+            if(!(k1 in interactive_json_data)){
+                interactive_json_data[k1] = {};
+            }
+            if(!(k2 in interactive_json_data[k1])) {
+                interactive_json_data[k1][k2] = '';
+            }
+        }
+        else if(k1 !== null){
+            if(!(k1 in interactive_json_data)){
+                interactive_json_data[k1] = '';
+            }
+        }
+    })
+}
+
 function setInteractiveEditorVisibility(val){
     if(val){
         loadInteractiveJsonData();
         generateInteractiveInputs();
+        highlightRequiredNonEmptyParams();
         elem_basic_editor.style.display = 'none';
         elem_interactive_editor.style.display = 'block';
     }else{
@@ -125,6 +163,7 @@ function setMDAttribute(path, value){
         interactive_json_data[k1] = value;
     }
     saveInteractiveJsonData();
+    highlightRequiredNonEmptyParams();
 }
 
 function generateInteractiveInputs(){
@@ -146,11 +185,11 @@ function generateInteractiveInputs(){
         res_html += '   <div class="p3 param_name">'+attr_name+'</div>';
         res_html += '   <div class="param_input vbox align_items_stretch">';
         if(i.type === 'text') {
-            res_html += '   <input type="text" onkeyup="setMDAttribute(\'' + i.path + '\', this.value)" value="' + getMDAttribute(i.path) + '">';
+            res_html += '   <input id="param_'+i.path+'" type="text" onkeyup="setMDAttribute(\'' + i.path + '\', this.value)" value="' + getMDAttribute(i.path) + '">';
         }
         if(i.type === 'select') {
             let val = getMDAttribute(i.path);
-            res_html += '   <select onchange="setMDAttribute(\'' + i.path + '\', this.value)">';
+            res_html += '   <select id="param_'+i.path+'" onchange="setMDAttribute(\'' + i.path + '\', this.value)">';
             res_html += '       <option value=""></option>';
             i.options.forEach(o => {
                 res_html += '       <option value="'+o+'" '+(o === val ? 'selected' : '')+'>'+o+'</option>';
