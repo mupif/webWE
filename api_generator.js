@@ -5,8 +5,33 @@ let elem_error = document.getElementById('elem_error');
 let elem_basic_editor = document.getElementById('basic_editor');
 let elem_interactive_editor = document.getElementById('interactive_editor');
 let elem_interactive_input_params = document.getElementById('interactive_input_params');
+let elem_interactive_inputs = document.getElementById('interactive_inputs');
+let elem_interactive_outputs = document.getElementById('interactive_outputs');
 
 let interactive_json_data = {};
+
+const setAtValues = ['initialization', 'timestep'];
+const valueTypes = ['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'];
+const dataTypes = [
+    'mupif.Property',
+    'mupif.TemporalProperty',
+    'mupif.Field',
+    'mupif.TemporalField',
+    'mupif.Function',
+    'mupif.HeavyStruct',
+    'mupif.PyroFile',
+    'mupif.String',
+    'mupif.GrainState',
+    'mupif.DataList[mupif.Property]',
+    'mupif.DataList[mupif.TemporalProperty]',
+    'mupif.DataList[mupif.Field]',
+    'mupif.DataList[mupif.TemporalField]',
+    'mupif.DataList[mupif.Function]',
+    'mupif.DataList[mupif.HeavyStruct]',
+    'mupif.DataList[mupif.PyroFile]',
+    'mupif.DataList[mupif.String]',
+    'mupif.DataList[mupif.GrainState]'
+];
 
 let interactive_inputs = [
     {path: "Name", type: "text", nonempty: true},
@@ -33,6 +58,22 @@ let interactive_inputs = [
     {path: "Solver.Estim_execution_cost_EUR",  type: "text"},
     {path: "Solver.Estim_personnel_cost_EUR",  type: "text"},
 ];
+
+let interactive_output_attributes = [
+    {key: "Name", name: "Name", type: "text", nonempty: true},
+    {key: "Type", name: "Type", type: "select", options: dataTypes, nonempty: true},
+    {key: "ValueType", name: "ValueType", type: "select", options: valueTypes, nonempty: true},
+    {key: "Type_ID", name: "DataID", type: "select", options: mupif_DataID, nonempty: true},
+    {key: "Units", name: "Units", type: "text"},
+    {key: "Obj_ID", name: "Obj_ID", type: "text"},
+];
+let interactive_input_attributes = structuredClone(interactive_output_attributes);
+interactive_input_attributes.push(
+    {key: "Required", name: "Required", type: "select", options: [true, false], nonempty: true, bool: true},
+    {key: "Set_at", name: "Set_at", type: "select", options: setAtValues, nonempty: true},
+);
+
+
 
 function isValidJson(json) {
     try {
@@ -84,7 +125,7 @@ function highlightRequiredNonEmptyParams(){
                     if (getMDAttribute(i.path) === '') {
                         elem.style.border = '1px solid red';
                     } else {
-                        elem.style.border = '1px solid black';
+                        elem.style.border = '1px solid gray';
                     }
                 }
             }
@@ -166,6 +207,16 @@ function setMDAttribute(path, value){
     highlightRequiredNonEmptyParams();
 }
 
+function setMDIOAttribute(io, idx, key, value){
+    let setval = value;
+    if(key === 'Required'){
+        setval = value === 'true' || value === true;
+    }
+    interactive_json_data[io][idx][key] = setval;
+    saveInteractiveJsonData();
+    highlightRequiredNonEmptyParams();
+}
+
 function generateInteractiveInputs(){
     let last_section = null;
     let res_html = '<div class="p2">Model info</div>';
@@ -180,7 +231,7 @@ function generateInteractiveInputs(){
         }
         let attr_name = path_items[path_items.length-1];
 
-        res_html += '<div class="hbox">';
+        res_html += '<div class="hbox align_items_center">';
         res_html += '   <div class="param_section_tab"></div>';
         res_html += '   <div class="p3 param_name">'+attr_name+'</div>';
         res_html += '   <div class="param_input vbox align_items_stretch">';
@@ -200,6 +251,132 @@ function generateInteractiveInputs(){
         res_html += '</div>';
     })
     elem_interactive_input_params.innerHTML = res_html;
+
+
+    let inp_or_out = 'Inputs';
+    res_html = '<div class="p2">Model Inputs</div>';
+    let inp_length = interactive_json_data['Inputs'].length;
+    for (let ioidx = 0; ioidx < inp_length; ioidx++) {
+        let io = interactive_json_data['Inputs'][ioidx];
+        res_html += '<div class="io_box vbox gap4">';
+        interactive_input_attributes.forEach(ioa => {
+            res_html += '   <div class="hbox io_line gap4 align_items_center">';
+            res_html += '       <div class="p4 io_name">'+ioa.name+'</div>';
+            res_html += '       <div class="io_value vbox">';
+            if(ioa.type === 'text') {
+                res_html += '           <input type="text" value="' + io[ioa.key] + '" onkeyup="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+            } else {
+                let val = io[ioa.key];
+                res_html += '   <select id="inp_'+ioidx+'_param_'+ioa.key+'" onchange="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+                res_html += '       <option value=""></option>';
+                ioa.options.forEach(o => {
+                    let oval = o;
+                    if(ioa.key === 'Type_ID'){oval = 'mupif.DataID.'+o}
+                    res_html += '       <option value="'+oval+'" '+(oval === val ? 'selected' : '')+'>'+o+'</option>';
+                })
+                res_html += '   </select>';
+            }
+            res_html += '       </div>';
+            res_html += '   </div>';
+        })
+
+        res_html += '   <div class="hbox io_line gap4 align_items_center">';
+        res_html += '       <div class="p4 io_name"></div>';
+        res_html += '       <div class="io_value vbox align_items_flex_end"><button onclick="deleteInput('+ioidx+')">Delete</button></div>';
+        res_html += '   </div>';
+        res_html += '</div>';
+    }
+    res_html += '<div class="hbox"><div class="param_section_tab"></div><button onclick="addInput()">+</button></div>';
+    elem_interactive_inputs.innerHTML = res_html;
+
+    inp_or_out = 'Outputs';
+    res_html = '<div class="p2">Model Outputs</div>';
+    let out_length = interactive_json_data['Outputs'].length;
+    for (let ioidx = 0; ioidx < out_length; ioidx++) {
+        let io = interactive_json_data['Outputs'][ioidx];
+        res_html += '<div class="io_box vbox gap4">';
+        interactive_output_attributes.forEach(ioa => {
+            res_html += '   <div class="hbox io_line gap4 align_items_center">';
+            res_html += '       <div class="p4 io_name">'+ioa.name+'</div>';
+            res_html += '       <div class="io_value vbox">';
+            if(ioa.type === 'text') {
+                res_html += '           <input type="text" value="' + io[ioa.key] + '" onkeyup="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+            } else {
+                let val = io[ioa.key];
+                res_html += '   <select id="inp_'+ioidx+'_param_'+ioa.key+'" onchange="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+                res_html += '       <option value=""></option>';
+                ioa.options.forEach(o => {
+                    let oval = o;
+                    if(ioa.key === 'Type_ID'){oval = 'mupif.DataID.'+o}
+                    res_html += '       <option value="'+oval+'" '+(oval === val ? 'selected' : '')+'>'+o+'</option>';
+                })
+                res_html += '   </select>';
+            }
+            res_html += '       </div>';
+            res_html += '   </div>';
+        })
+
+        res_html += '   <div class="hbox io_line gap4 align_items_center">';
+        res_html += '       <div class="p4 io_name"></div>';
+        res_html += '       <div class="io_value vbox align_items_flex_end"><button onclick="deleteOutput('+ioidx+')">Delete</button></div>';
+        res_html += '   </div>';
+        res_html += '</div>';
+    }
+    res_html += '<div class="hbox"><div class="param_section_tab"></div><button onclick="addOutput()">+</button></div>';
+    elem_interactive_outputs.innerHTML = res_html;
+
+}
+
+function deleteInput(idx){
+    let io_data = interactive_json_data['Inputs'];
+    io_data.splice(idx, 1);
+    interactive_json_data['Inputs'] = io_data;
+    saveInteractiveJsonData();
+    generateInteractiveInputs();
+    highlightRequiredNonEmptyParams();
+}
+
+function deleteOutput(idx){
+    let io_data = interactive_json_data['Outputs'];
+    io_data.splice(idx, 1);
+    interactive_json_data['Outputs'] = io_data;
+    saveInteractiveJsonData();
+    generateInteractiveInputs();
+    highlightRequiredNonEmptyParams();
+}
+
+function addInput(){
+    let io_data = interactive_json_data['Inputs'];
+    io_data.push({
+        Name: "",
+        Type: "mupif.Property",
+        ValueType: "Scalar",
+        Required: true,
+        Type_ID: "",
+        Units: "",
+        Obj_ID: "",
+        Set_at: "timestep",
+    });
+    interactive_json_data['Inputs'] = io_data;
+    saveInteractiveJsonData();
+    generateInteractiveInputs();
+    highlightRequiredNonEmptyParams();
+}
+
+function addOutput(){
+    let io_data = interactive_json_data['Outputs'];
+    io_data.push({
+        Name: "",
+        Type: "mupif.Property",
+        ValueType: "Scalar",
+        Type_ID: "",
+        Units: "",
+        Obj_ID: "",
+    });
+    interactive_json_data['Outputs'] = io_data;
+    saveInteractiveJsonData();
+    generateInteractiveInputs();
+    highlightRequiredNonEmptyParams();
 }
 
 function loadInteractiveJsonData(){
@@ -264,29 +441,6 @@ function insertEmptyTemplateMetadata(){
     }
     client.send();
 }
-
-const setAtValues = ['initialization', 'timestep'];
-const valueTypes = ['Scalar', 'Vector', 'Tensor', 'ScalarArray', 'VectorArray', 'TensorArray'];
-const dataTypes = [
-    'mupif.Property',
-    'mupif.TemporalProperty',
-    'mupif.Field',
-    'mupif.TemporalField',
-    'mupif.Function',
-    'mupif.HeavyStruct',
-    'mupif.PyroFile',
-    'mupif.String',
-    'mupif.GrainState',
-    'mupif.DataList[mupif.Property]',
-    'mupif.DataList[mupif.TemporalProperty]',
-    'mupif.DataList[mupif.Field]',
-    'mupif.DataList[mupif.TemporalField]',
-    'mupif.DataList[mupif.Function]',
-    'mupif.DataList[mupif.HeavyStruct]',
-    'mupif.DataList[mupif.PyroFile]',
-    'mupif.DataList[mupif.String]',
-    'mupif.DataList[mupif.GrainState]'
-];
 
 function checkMetadataItem(md, key, obj_name, check_nonempty=false, enum_values=[]){
     if(!(key in md)){

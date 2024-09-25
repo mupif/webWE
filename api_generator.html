@@ -26,11 +26,8 @@
             <div id="basic_editor">
                 <div class="mainpage_content vbox align_items_stretch gap20">
                     <div class="hbox gap20">
-                        <div class="vbox align_items_center gap6" style="flex: 1 1 0;">
-                            <div class="hbox justify_content_flex_start" style="width: 100%;">
-                                <button onclick="setInteractiveEditorVisibility(true)">Open interactive editor</button>
-                            </div>
-                            <h3>Insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
+                        <div class="vbox align_items_flex_start gap6" style="flex: 1 1 0;">
+                            <h3><button onclick="setInteractiveEditorVisibility(true)">Open interactive editor</button> or insert model metadata or <button onclick="insertEmptyTemplateMetadata();">Fill empty template</button></h3>
                         </div>
                         <div class="vbox align_items_center" style="flex: 1 1 0;">
                             <div id="elem_error" class="vbox gap6" style="color:red;"></div>
@@ -55,10 +52,10 @@
                     <div class="hbox gap20">
                         <button onclick="setInteractiveEditorVisibility(false)"><- Back to model metadata and implementation</button>
                     </div>
-                    <div class="hbox gap6">
-                        <div class="vbox gap6" id="interactive_input_params">
-
-                        </div>
+                    <div class="hbox gap40">
+                        <div class="vbox gap6" id="interactive_input_params"></div>
+                        <div class="vbox gap6" id="interactive_inputs"></div>
+                        <div class="vbox gap6" id="interactive_outputs"></div>
                     </div>
                 </div>
             </div>
@@ -72,6 +69,7 @@
         
     </div>
 
+    <script type="text/javascript" src="src/mupifData.js"></script>
     <script type="text/javascript" src="api_generator.js"></script>
 </body>
 </html>
