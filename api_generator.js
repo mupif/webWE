@@ -150,6 +150,47 @@ function highlightRequiredNonEmptyParams(){
             }
         }
     })
+
+    let ioDirection = 'Inputs';
+    let io_length = interactive_json_data[ioDirection].length;
+    for (let ioidx = 0; ioidx < io_length; ioidx++) {
+        let io = interactive_json_data[ioDirection][ioidx];
+        interactive_input_attributes.forEach(ioa => {
+            if('nonempty' in ioa){
+                if(io[ioa.key] === ''){
+                    let elem_id = 'inp_'+ioidx+'_param_'+ioa.key;
+                    let elem = document.getElementById(elem_id);
+                    if(elem) {
+                        if (getMDIOAttribute(ioDirection, ioidx, ioa.key) === '') {
+                            elem.style.border = '1px solid red';
+                        } else {
+                            elem.style.border = '1px solid gray';
+                        }
+                    }
+                }
+            }
+        })
+    }
+    ioDirection = 'Outputs';
+    io_length = interactive_json_data[ioDirection].length;
+    for (let ioidx = 0; ioidx < io_length; ioidx++) {
+        let io = interactive_json_data[ioDirection][ioidx];
+        interactive_input_attributes.forEach(ioa => {
+            if('nonempty' in ioa){
+                if(io[ioa.key] === ''){
+                    let elem_id = 'out_'+ioidx+'_param_'+ioa.key;
+                    let elem = document.getElementById(elem_id);
+                    if(elem) {
+                        if (getMDIOAttribute(ioDirection, ioidx, ioa.key) === '') {
+                            elem.style.border = '1px solid red';
+                        } else {
+                            elem.style.border = '1px solid gray';
+                        }
+                    }
+                }
+            }
+        })
+    }
 }
 
 function setInteractiveEditorVisibility(val){
@@ -205,6 +246,18 @@ function setMDAttribute(path, value){
     }
     saveInteractiveJsonData();
     highlightRequiredNonEmptyParams();
+}
+
+function getMDIOAttribute(io, idx, key){
+    let data = interactive_json_data;
+    if(io in data){
+        if(data[io].length >= idx+1){
+            if(key in data[io][idx]){
+                return data[io][idx][key];
+            }
+        }
+    }
+    return '';
 }
 
 function setMDIOAttribute(io, idx, key, value){
@@ -264,7 +317,7 @@ function generateInteractiveInputs(){
             res_html += '       <div class="p4 io_name">'+ioa.name+'</div>';
             res_html += '       <div class="io_value vbox">';
             if(ioa.type === 'text') {
-                res_html += '           <input type="text" value="' + io[ioa.key] + '" onkeyup="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+                res_html += '           <input id="inp_'+ioidx+'_param_'+ioa.key+'" type="text" value="' + io[ioa.key] + '" onkeyup="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
             } else {
                 let val = io[ioa.key];
                 res_html += '   <select id="inp_'+ioidx+'_param_'+ioa.key+'" onchange="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
@@ -300,10 +353,10 @@ function generateInteractiveInputs(){
             res_html += '       <div class="p4 io_name">'+ioa.name+'</div>';
             res_html += '       <div class="io_value vbox">';
             if(ioa.type === 'text') {
-                res_html += '           <input type="text" value="' + io[ioa.key] + '" onkeyup="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+                res_html += '           <input id="out_'+ioidx+'_param_'+ioa.key+'" type="text" value="' + io[ioa.key] + '" onkeyup="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
             } else {
                 let val = io[ioa.key];
-                res_html += '   <select id="inp_'+ioidx+'_param_'+ioa.key+'" onchange="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
+                res_html += '   <select id="out_'+ioidx+'_param_'+ioa.key+'" onchange="setMDIOAttribute(\''+inp_or_out+'\', '+ioidx+', \'' + ioa.key + '\', this.value)">';
                 res_html += '       <option value=""></option>';
                 ioa.options.forEach(o => {
                     let oval = o;
@@ -391,7 +444,7 @@ function loadInteractiveJsonData(){
 function saveInteractiveJsonData(){
     elem_input.value = JSON.stringify(interactive_json_data, null, 4);
 }
-
+false
 function clearApiImplementation(){
     elem_output.value = '';
     setOutputElemVisibility(false);
