@@ -648,6 +648,12 @@ function checkMetadataFormat(md){
 // ====================================================================================================
 
 function generateCodeFromMetadata(md){
+    function fixTypeForCode(val){
+        let parts = val.split('[');
+        if(parts.length > 1){return parts[0];}
+        return val;
+    }
+
     let md_str = "MD = " + JSON.stringify(md, null, 4);
     md_str = md_str.replaceAll('false', 'False');
     md_str = md_str.replaceAll('true', 'True');
@@ -780,14 +786,14 @@ function generateCodeFromMetadata(md){
                 obj_id = item['Obj_ID'];
             }
             if (obj_id === null) {
-                code.push("\t\tif obj.isInstance(" + item['Type'] + ") and obj.getDataID() == " + item['Type_ID'] + ":");
+                code.push("\t\tif obj.isInstance(" + fixTypeForCode(item['Type']) + ") and obj.getDataID() == " + item['Type_ID'] + ":");
                 code.push("\t\t\t" + item['code_name'] + " = obj");
             } else if (typeof obj_id == 'string') {
-                code.push("\t\tif obj.isInstance(" + item['Type'] + ") and obj.getDataID() == " + item['Type_ID'] + " and objectID == \"" + obj_id + "\":");
+                code.push("\t\tif obj.isInstance(" + fixTypeForCode(item['Type']) + ") and obj.getDataID() == " + item['Type_ID'] + " and objectID == \"" + obj_id + "\":");
                 code.push("\t\t\t" + item['code_name'] + " = obj");
             } else if (obj_id.constructor.name === "Array") {
                 for (let ii = 0; ii < obj_id.length; ii++) {
-                    code.push("\t\tif obj.isInstance(" + item['Type'] + ") and obj.getDataID() == " + item['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
+                    code.push("\t\tif obj.isInstance(" + fixTypeForCode(item['Type']) + ") and obj.getDataID() == " + item['Type_ID'] + " and objectID == \"" + obj_id[ii] + "\":");
                     code.push("\t\t\t" + item['code_name'] + " = obj");
                 }
             }
