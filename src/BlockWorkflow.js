@@ -172,7 +172,7 @@ class BlockWorkflow extends Block{
                         "\"Type_ID\": \"" + s.getLinkedDataSlot().getDataID() + "\", " +
                         "\"Obj_ID\": \"" + s.getName() + "\", " +
                         "\"Units\": \"" + s.getLinkedDataSlot().getUnits() + "\"";
-                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property' || s.getLinkedDataSlot().getDataType() === 'mupif.Function')
+                    if(s.getLinkedDataSlot().getDataType() === 'mupif.Property' || s.getLinkedDataSlot().getDataType() === 'mupif.Function' || s.getLinkedDataSlot().getDataType() === 'mupif.String')
                         params += ', "ValueType": "' + s.getLinkedDataSlot().getValueType() + '"';
                     code.push("\t\t\t\t{" + params + "}");
                     n_slots_printed += 1;
