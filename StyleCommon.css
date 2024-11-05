@@ -24,6 +24,16 @@ body {
     width: 100%;
 }
 
+.header_fixed{
+    background-color: #ececec;
+    height: 90px;
+    position: fixed;
+}
+
+.header_height_filler{
+    margin-top: 90px;
+}
+
 .mainpage_all {
     width: 100%;
 }

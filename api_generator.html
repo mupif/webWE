@@ -2,7 +2,7 @@
 <head>
     <title>Model API generator</title>
     <link rel="stylesheet" href="./StyleBase.css">
-    <link rel="stylesheet" href="./StyleCommon.css">
+    <link rel="stylesheet" href="./StyleCommon.css?v=0">
     <link rel="stylesheet" href="./StyleMAG.css">
     <script type="text/javascript" src="src/helpers.js"></script>
 </head>
@@ -11,10 +11,12 @@
 
         <div class="vbox">
 
-            <div class="hbox gap20 justify_content_flex_start align_items_flex_start header">
+            <div class="hbox gap20 justify_content_flex_start align_items_flex_start header header_fixed">
                 <a href="../" class="cursor_pointer"><div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="mupif_logo"></div></a>
                 <h1>Model API generator</h1>
             </div>
+
+            <div class="header_height_filler"></div>
             
             <div class="hbox header p2" style="padding: 16px;">
                 This tool generates Model API implementation for given Model metadata.
