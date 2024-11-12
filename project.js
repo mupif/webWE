@@ -2012,6 +2012,20 @@ class BlockWorkflow extends Block{
                 code.push("\tw.solve()");
                 code.push("");
 
+                let out_number = 0;
+                this.getAllExternalDataSlots("in").forEach(s => {
+                    if (s.connected()) {
+                        let linkedDS = s.getLinkedDataSlot();
+
+                        let io_objectId = s.getName();
+                        let io_dataId = linkedDS.getDataID();
+                        let io_type = linkedDS.getDataType();
+
+                        out_number++;
+                        let output_name = `output_${out_number}`;
+                        code.push(`\t${output_name} = w.get(${io_dataId}, objectID='${io_objectId}')`);
+                    }
+                })
                 // output = w.get(mupif.DataID.PID_Mass_density)
 
                 code.push("");
