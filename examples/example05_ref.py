@@ -131,7 +131,9 @@ if __name__ == '__main__':  # for development and testing
     w.solve()
 
     output_1 = w.get(mupif.DataID.FID_Temperature, objectID='temperature')
+    print(output_1)
     output_2 = w.get(mupif.DataID.FID_Displacement, objectID='displacement')
+    print(output_2)
 
     w.terminate()
 

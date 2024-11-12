@@ -477,6 +477,7 @@ class BlockWorkflow extends Block{
                         out_number++;
                         let output_name = `output_${out_number}`;
                         code.push(`\t${output_name} = w.get(${io_dataId}, objectID='${io_objectId}')`);
+                        code.push(`\tprint(${output_name})`);
                     }
                 })
                 // output = w.get(mupif.DataID.PID_Mass_density)
