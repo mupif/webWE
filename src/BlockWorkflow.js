@@ -328,24 +328,24 @@ class BlockWorkflow extends Block{
 
                 let anyOfThisValueType;
                 let linked_model;
-                let value_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field", "mupif.HeavyStruct", "mupif.String", "mupif.Function"];
-                for(let vi=0;vi<value_types.length;vi++){
+                let data_types = ["mupif.PyroFile", "mupif.Property", "mupif.Field", "mupif.HeavyStruct", "mupif.String", "mupif.Function"];
+                for(let vi=0;vi<data_types.length;vi++){
                     anyOfThisValueType = false;
                     this.getAllExternalDataSlots("out").forEach(s => {
                         if (s.connected()) {
-                            if (s.getLinkedDataSlot().getDataType() === value_types[vi]) {
+                            if (s.getLinkedDataSlot().getDataType() === data_types[vi]) {
                                 anyOfThisValueType = true;
                             }
                         }
                     })
                     if(anyOfThisValueType) {
                         code.push("");
-                        code.push("\t\t# in case of " + value_types[vi]);
-                        code.push("\t\tif obj.isInstance(" + value_types[vi] + "):");
+                        code.push("\t\t# in case of " + data_types[vi]);
+                        code.push("\t\tif obj.isInstance(" + data_types[vi] + "):");
                         code.push("\t\t\tpass");
                         this.getAllExternalDataSlots("out").forEach(s => {
                             if (s.connected()) {
-                                if (s.getLinkedDataSlot().getDataType() === value_types[vi]) {
+                                if (s.getLinkedDataSlot().getDataType() === data_types[vi]) {
                                     code.push("\t\t\tif objectID == '" + s.getName() + "':");
                                     code.push("\t\t\t\t" + s.getCodeRepresentation() + " = obj");
 
@@ -407,7 +407,71 @@ class BlockWorkflow extends Block{
             // execution part
             // --------------------------------------------------
 
-            if (!class_code) {
+            if (class_code) {
+                code.push("if __name__ == '__main__':  # for development and testing");
+                code.push("\tmd = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A'}}");
+                code.push("\tns = mupif.pyroutil.connectNameserver()");
+                code.push("\tdaemon = mupif.pyroutil.getDaemon(ns)");
+                code.push("");
+                code.push("\tw = " + this.project_classname + "()");
+                code.push("\tw.initialize(metadata=md)");
+                code.push("");
+
+                let num_inp_hs = 0;
+                let num_inp_file = 0;
+                this.getAllExternalDataSlots("out").forEach(s => {
+                    if (s.connected()) {
+                        let linkedDS = s.getLinkedDataSlot();
+
+                        let io_objectId = s.getName();
+                        let io_units = linkedDS.getUnits();
+                        let io_dataId = linkedDS.getDataID();
+                        let io_type = linkedDS.getDataType();
+                        let io_valueType = '';
+                        if (io_type === 'mupif.Property' || io_type === 'mupif.Function') {
+                            io_valueType = linkedDS.getValueType();
+                        }
+
+                        if (io_type === 'mupif.Property') {
+                            let io_value = '0.';
+                            if (io_valueType === 'mupif.ValueType.Scalar') { io_value = '0.'; }
+                            if (io_valueType === 'mupif.ValueType.Vector') { io_value = '[0.]'; }
+                            if (io_valueType === 'mupif.ValueType.Tensor') { io_value = '[[0.]]'; }
+                            code.push(`\tw.set(mupif.ConstantProperty(value=${io_value}, propID=${io_dataId}, valueType=${io_valueType}, unit='${io_units}'), objectID='${io_objectId}')`);
+                        }
+                        else if (io_type === 'mupif.String') {
+                            code.push(`\tw.set(mupif.String(value=${io_value}, dataID=${io_dataId}, valueType=${io_valueType}), objectID='${io_objectId}')`);
+                        }
+                        else if (io_type === 'mupif.PyroFile') {
+                            num_inp_file++;
+                            let file_name = `input_file_${num_inp_file}`;
+                            code.push(`\t${file_name} = mp.PyroFile(filename='./${file_name}.txt', mode="rb", dataID=${io_dataId})`);
+                            code.push(`\tmodel.set(${file_name}, objectID='${io_objectId}')`);
+                        }
+                        else if (io_type === 'mupif.HeavyStruct') {
+                            num_inp_hs++;
+                            let hs_name = `input_hs_${num_inp_hs}`;
+                            code.push(`\t${hs_name} = mupif.HeavyStruct(h5path='./${hs_name}.h5', mode='copy-readwrite', id=${io_dataId})`);
+                            code.push(`\tdaemon.register(${hs_name})`);
+                            code.push(`\t${hs_name}.exposeData()`);
+                            code.push(`\tw.set(${hs_name}, objectID='${io_objectId}')`);
+                        }
+                        else {
+                            code.push(`\t# Setting of input type ${io_type} is not implemented in workflow generator.`);
+                        }
+                    }
+                })
+
+                code.push("");
+                code.push("\tw.solve()");
+                code.push("");
+
+                // output = w.get(mupif.DataID.PID_Mass_density)
+
+                code.push("");
+                code.push("\tw.terminate()");
+                code.push("");
+            } else {
                 code.push("if __name__ == '__main__':");
                 code.push("\tproblem = " + this.project_classname + "()");
                 code.push("");

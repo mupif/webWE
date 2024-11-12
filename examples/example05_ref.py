@@ -114,3 +114,22 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
         self.getModel('model_2').solveStep(tstep=tstep, runInBackground=False)
 
 
+if __name__ == '__main__':  # for development and testing
+    md = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A'}}
+    ns = mupif.pyroutil.connectNameserver()
+    daemon = mupif.pyroutil.getDaemon(ns)
+
+    w = ThermoMechanicalClassWorkflow_02()
+    w.initialize(metadata=md)
+
+    w.set(mupif.ConstantProperty(value=0., propID=mupif.DataID.PID_Temperature, valueType=Scalar, unit='degC'), objectID='top_temperature')
+    input_file_1 = mp.PyroFile(filename='./input_file_1.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
+    model.set(input_file_1, objectID='input_file_thermal')
+    input_file_2 = mp.PyroFile(filename='./input_file_2.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
+    model.set(input_file_2, objectID='input_file_mechanical')
+
+    w.solve()
+
+
+    w.terminate()
+
