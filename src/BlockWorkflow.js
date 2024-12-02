@@ -428,18 +428,22 @@ class BlockWorkflow extends Block{
                         let io_dataId = linkedDS.getDataID();
                         let io_type = linkedDS.getDataType();
                         let io_valueType = '';
-                        if (io_type === 'mupif.Property' || io_type === 'mupif.Function') {
+                        if (io_type === 'mupif.Property' || io_type === 'mupif.Function' || io_type === 'mupif.String') {
                             io_valueType = linkedDS.getValueType();
                         }
 
                         if (io_type === 'mupif.Property') {
                             let io_value = '0.';
-                            if (io_valueType === 'mupif.ValueType.Scalar') { io_value = '0.'; }
-                            if (io_valueType === 'mupif.ValueType.Vector') { io_value = '[0.]'; }
-                            if (io_valueType === 'mupif.ValueType.Tensor') { io_value = '[[0.]]'; }
+                            if (io_valueType === 'Scalar') { io_value = '0.'; }
+                            if (io_valueType === 'Vector') { io_value = '[0.]'; }
+                            if (io_valueType === 'Tensor') { io_value = '[[0.]]'; }
                             code.push(`\tw.set(mupif.ConstantProperty(value=${io_value}, propID=${io_dataId}, valueType=${io_valueType}, unit='${io_units}'), objectID='${io_objectId}')`);
                         }
                         else if (io_type === 'mupif.String') {
+                            let io_value = '""';
+                            if (io_valueType === 'Scalar') { io_value = '""'; }
+                            if (io_valueType === 'Vector') { io_value = '[""]'; }
+                            if (io_valueType === 'Tensor') { io_value = '[[""]]'; }
                             code.push(`\tw.set(mupif.String(value=${io_value}, dataID=${io_dataId}, valueType=${io_valueType}), objectID='${io_objectId}')`);
                         }
                         else if (io_type === 'mupif.PyroFile') {
