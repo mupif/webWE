@@ -121,7 +121,7 @@ if __name__ == '__main__':  # for development and testing
     w = ThermoMechanicalClassWorkflow_01()
     w.initialize(metadata=md)
 
-    w.set(mupif.ConstantProperty(value=0., propID=mupif.DataID.PID_Temperature, valueType=Scalar, unit='degC'), objectID='top_temperature')
+    w.set(mupif.ConstantProperty(value=0., propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit='degC'), objectID='top_temperature')
     input_file_1 = mp.PyroFile(filename='./input_file_1.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
     model.set(input_file_1, objectID='input_file_thermal')
     input_file_2 = mp.PyroFile(filename='./input_file_2.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)

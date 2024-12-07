@@ -437,14 +437,14 @@ class BlockWorkflow extends Block{
                             if (io_valueType === 'Scalar') { io_value = '0.'; }
                             if (io_valueType === 'Vector') { io_value = '[0.]'; }
                             if (io_valueType === 'Tensor') { io_value = '[[0.]]'; }
-                            code.push(`\tw.set(mupif.ConstantProperty(value=${io_value}, propID=${io_dataId}, valueType=${io_valueType}, unit='${io_units}'), objectID='${io_objectId}')`);
+                            code.push(`\tw.set(mupif.ConstantProperty(value=${io_value}, propID=${io_dataId}, valueType=mupif.ValueType.${io_valueType}, unit='${io_units}'), objectID='${io_objectId}')`);
                         }
                         else if (io_type === 'mupif.String') {
                             let io_value = '""';
                             if (io_valueType === 'Scalar') { io_value = '""'; }
                             if (io_valueType === 'Vector') { io_value = '[""]'; }
                             if (io_valueType === 'Tensor') { io_value = '[[""]]'; }
-                            code.push(`\tw.set(mupif.String(value=${io_value}, dataID=${io_dataId}, valueType=${io_valueType}), objectID='${io_objectId}')`);
+                            code.push(`\tw.set(mupif.String(value=${io_value}, dataID=${io_dataId}, valueType=mupif.ValueType.${io_valueType}), objectID='${io_objectId}')`);
                         }
                         else if (io_type === 'mupif.PyroFile') {
                             num_inp_file++;
@@ -484,7 +484,6 @@ class BlockWorkflow extends Block{
                         code.push(`\tprint(${output_name})`);
                     }
                 })
-                // output = w.get(mupif.DataID.PID_Mass_density)
 
                 code.push("");
                 code.push("\tw.terminate()");
