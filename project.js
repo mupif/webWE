@@ -1766,7 +1766,8 @@ class BlockWorkflow extends Block{
             code.push("import Pyro5");
             code.push("import threading");
             code.push("import time");
-            
+            code.push("import os");
+
             let model_blocks = this.getBlocksRecursive(BlockModel);
             let imported_modules = [];
             for (let i = 0; i < model_blocks.length; i++) {
@@ -1955,7 +1956,17 @@ class BlockWorkflow extends Block{
 
             if (class_code) {
                 code.push("if __name__ == '__main__':  # for development and testing");
-                code.push("\tmd = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A'}}");
+                code.push("");
+                code.push("\tlog = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])");
+                code.push("\tlog.setLevel(logging.DEBUG)");
+                code.push("\ttailHandler = mupif.pyrolog.TailLogHandler(capacity=10000)");
+                code.push("\tlog.addHandler(tailHandler)");
+                code.push("\tns = mupif.pyroutil.connectNameserver()");
+                code.push("\tdaemon = mupif.pyroutil.getDaemon(proxy=ns)");
+                code.push("\tlogUri = str(daemon.register(mupif.pyrolog.PyroLogReceiver(tailHandler=tailHandler)))");
+
+                code.push("");
+                code.push("\tmd = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A', 'Log_URI': logUri}}");
                 code.push("\tns = mupif.pyroutil.connectNameserver()");
                 code.push("\tdaemon = mupif.pyroutil.getDaemon(ns)");
                 code.push("");
@@ -1995,8 +2006,8 @@ class BlockWorkflow extends Block{
                         else if (io_type === 'mupif.PyroFile') {
                             num_inp_file++;
                             let file_name = `input_file_${num_inp_file}`;
-                            code.push(`\t${file_name} = mp.PyroFile(filename='./${file_name}.txt', mode="rb", dataID=${io_dataId})`);
-                            code.push(`\tmodel.set(${file_name}, objectID='${io_objectId}')`);
+                            code.push(`\t${file_name} = mupif.PyroFile(filename='./${file_name}.txt', mode="rb", dataID=${io_dataId})`);
+                            code.push(`\tw.set(${file_name}, objectID='${io_objectId}')`);
                         }
                         else if (io_type === 'mupif.HeavyStruct') {
                             num_inp_hs++;

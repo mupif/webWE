@@ -3,6 +3,7 @@ import copy
 import Pyro5
 import threading
 import time
+import os
 import mupif_examples_models
 import logging
 log = logging.getLogger()
@@ -115,7 +116,16 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
 
 
 if __name__ == '__main__':  # for development and testing
-    md = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A'}}
+
+    log = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])
+    log.setLevel(logging.DEBUG)
+    tailHandler = mupif.pyrolog.TailLogHandler(capacity=10000)
+    log.addHandler(tailHandler)
+    ns = mupif.pyroutil.connectNameserver()
+    daemon = mupif.pyroutil.getDaemon(proxy=ns)
+    logUri = str(daemon.register(mupif.pyrolog.PyroLogReceiver(tailHandler=tailHandler)))
+
+    md = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A', 'Log_URI': logUri}}
     ns = mupif.pyroutil.connectNameserver()
     daemon = mupif.pyroutil.getDaemon(ns)
 
@@ -123,10 +133,10 @@ if __name__ == '__main__':  # for development and testing
     w.initialize(metadata=md)
 
     w.set(mupif.ConstantProperty(value=0., propID=mupif.DataID.PID_Temperature, valueType=mupif.ValueType.Scalar, unit='degC'), objectID='top_temperature')
-    input_file_1 = mp.PyroFile(filename='./input_file_1.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
-    model.set(input_file_1, objectID='input_file_thermal')
-    input_file_2 = mp.PyroFile(filename='./input_file_2.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
-    model.set(input_file_2, objectID='input_file_mechanical')
+    input_file_1 = mupif.PyroFile(filename='./input_file_1.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
+    w.set(input_file_1, objectID='input_file_thermal')
+    input_file_2 = mupif.PyroFile(filename='./input_file_2.txt', mode="rb", dataID=mupif.DataID.ID_InputFile)
+    w.set(input_file_2, objectID='input_file_mechanical')
 
     w.solve()
 

@@ -3,6 +3,7 @@ import copy
 import Pyro5
 import threading
 import time
+import os
 import example02
 import field_export
 import logging

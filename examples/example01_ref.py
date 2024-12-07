@@ -3,6 +3,7 @@ import copy
 import Pyro5
 import threading
 import time
+import os
 import mupif_examples_models
 import field_export
 import logging
