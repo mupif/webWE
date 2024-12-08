@@ -117,7 +117,7 @@ class ThermoMechanicalClassWorkflow_02(mupif.Workflow):
 
 if __name__ == '__main__':  # for development and testing
 
-    log = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])
+    # log = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])
     log.setLevel(logging.DEBUG)
     tailHandler = mupif.pyrolog.TailLogHandler(capacity=10000)
     log.addHandler(tailHandler)

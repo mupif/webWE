@@ -1957,7 +1957,7 @@ class BlockWorkflow extends Block{
             if (class_code) {
                 code.push("if __name__ == '__main__':  # for development and testing");
                 code.push("");
-                code.push("\tlog = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])");
+                code.push("\t# log = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])");
                 code.push("\tlog.setLevel(logging.DEBUG)");
                 code.push("\ttailHandler = mupif.pyrolog.TailLogHandler(capacity=10000)");
                 code.push("\tlog.addHandler(tailHandler)");
