@@ -1956,17 +1956,7 @@ class BlockWorkflow extends Block{
 
             if (class_code) {
                 code.push("if __name__ == '__main__':  # for development and testing");
-                code.push("");
-                code.push("\t# log = logging.getLogger(__file__.split(os.path.sep)[-1].split('.')[0])");
-                code.push("\tlog.setLevel(logging.DEBUG)");
-                code.push("\ttailHandler = mupif.pyrolog.TailLogHandler(capacity=10000)");
-                code.push("\tlog.addHandler(tailHandler)");
-                code.push("\tns = mupif.pyroutil.connectNameserver()");
-                code.push("\tdaemon = mupif.pyroutil.getDaemon(proxy=ns)");
-                code.push("\tlogUri = str(daemon.register(mupif.pyrolog.PyroLogReceiver(tailHandler=tailHandler)))");
-
-                code.push("");
-                code.push("\tmd = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A', 'Log_URI': logUri}}");
+                code.push("\tmd = {'Execution': {'ID': 'N/A', 'Use_case_ID': 'N/A', 'Task_ID': 'N/A'}}");
                 code.push("\tns = mupif.pyroutil.connectNameserver()");
                 code.push("\tdaemon = mupif.pyroutil.getDaemon(ns)");
                 code.push("");
