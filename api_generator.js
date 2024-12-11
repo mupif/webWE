@@ -667,7 +667,12 @@ function generateCodeFromMetadata(md){
     let code = [];
     code.push("import mupif");
     code.push("import Pyro5");
+    code.push("import logging");
+    code.push("import argparse");
+    code.push("import os");
     code.push("");
+    code.push("log = logging.getLogger()");
+    code.push("# os.environ['MUPIF_NS'] = '172.0.0.1:10000'");
     code.push("");
 
     code.push("@Pyro5.api.expose");
@@ -822,114 +827,136 @@ function generateCodeFromMetadata(md){
     code.push("\t\t");
     code.push("\t\traise NotImplementedError(\"Not implemented\")");
     code.push("");
-    
-    if(md['Execution_settings']['Type'] === 'Distributed') {
-        code.push("");
-        code.push("if __name__ == '__main__':");
 
-        code.push("\tif True:");
-        code.push("\t\timport " + md['Execution_settings']['Module']);
-        code.push("\t\tmupif.SimpleJobManager(");
-        code.push("\t\t\tns=mupif.pyroutil.connectNameserver(),");
-        code.push("\t\t\tappClass=" + md['Execution_settings']['Module'] + "." + md['Execution_settings']['Class'] + ",");
-        code.push("\t\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
-        code.push("\t\t\tmaxJobs=10");
-        code.push("\t\t).runServer()");
-        code.push("\t\t");
+    code.push("");
+    code.push("if __name__ == '__main__':");
 
-        code.push("\telse:");
-        code.push("\t\tmodel = " + md['Execution_settings']['Class'] + "()");
-        code.push("\t\tmodel.initialize(metadata={'Execution': {'ID': '', 'Use_case_ID': '', 'Task_ID': ''}})");
-        code.push("\t\t");
+    code.push("\tparser = argparse.ArgumentParser()");
+    code.push("\tparser.add_argument('-run_type', '--run_type', required=False, dest=\"run_type\", default=\"modelserver\")");
+    code.push("\targs = parser.parse_args()");
+    code.push("\trun_type = args.run_type");
+    code.push("\tif run_type != \"test_local\" and run_type != \"test_remote\":");
+    code.push("\t\trun_type = \"modelserver\"");
+    code.push("\t");
 
-        let varNumber = 0;
-        function getSetFunctionCode(codel_lines, type, dataId, objId, valueType){
-            if (type === "mupif.Property") {
-                let val = "0.";
-                if(valueType === 'Scalar'){val = "0."}
-                if(valueType === 'Vector'){val = "[0.]"}
-                if(valueType === 'Tensor'){val = "[[0.]]"}
-                codel_lines.push("\t\tmodel.set(mupif.ConstantProperty(value=" + val + ", propID=" + dataId + ", valueType=mupif.ValueType." + valueType + ", unit='', time=None), '" + objId + "')");
-            } else if (type === "mupif.String") {
-                let val = "''";
-                if(valueType === 'Scalar'){val = "''"}
-                if(valueType === 'Vector'){val = "['']"}
-                if(valueType === 'Tensor'){val = "[['']]"}
-                codel_lines.push("\t\tmodel.set(mupif.String(value=" + val + ", dataID=" + dataId + ", valueType=mupif.ValueType." + valueType + ", time=None), '" + objId + "')");
-            } else if (type === "mupif.PyroFile") {
-                varNumber++;
-                let varName = `pf${varNumber}`;
-                code.push(`\t\t${varName} = mupif.PyroFile(filename='input.txt', mode='rb', dataID=${dataId})`);
-                code.push(`\t\tdaemon.register(${varName})`);
-                codel_lines.push(`\t\tmodel.set(${varName}, '${objId}')`);
-            } else if (type === "mupif.HeavyStruct") {
-                varNumber++;
-                let varName = `hs${varNumber}`;
-                code.push(`\t\t${varName} = mupif.HeavyStruct(h5path='input.h5', mode='readwrite', id=${dataId})`);
-                code.push(`\t\tdaemon.register(${varName})`);
-                code.push(`\t\t${varName}.exposeData()`);
-                codel_lines.push(`\t\tmodel.set(mupif.String(${varName}, '${objId}')`);
-            } else {
-                codel_lines.push("\t\t# setting input of type " + type + " not implemented");
-            }
+    code.push("\tif run_type == \"modelserver\":");
+    code.push("\t\timport " + md['Execution_settings']['Module']);
+    code.push("\t\tmupif.SimpleJobManager(");
+    code.push("\t\t\tns=mupif.pyroutil.connectNameserver(),");
+    code.push("\t\t\tappClass=" + md['Execution_settings']['Module'] + "." + md['Execution_settings']['Class'] + ",");
+    code.push("\t\t\tappName='" + md['Execution_settings']['jobManName'] + "',");
+    code.push("\t\t\tmaxJobs=10,");
+    code.push("\t\t\tincludeFiles=[]");
+    code.push("\t\t).runServer()");
+
+    code.push("\t");
+
+    code.push("\telif run_type == \"test_local\" or run_type == \"test_remote\":");
+    code.push("\t\tlog.setLevel(logging.DEBUG)");
+    code.push("\t\tif run_type == \"test_local\":");
+    code.push("\t\t\tmodel = " + md['Execution_settings']['Class'] + "()");
+    code.push("\t\telse:");
+    code.push("\t\t\tns = mupif.pyroutil.connectNameserver()");
+    code.push("\t\t\tdaemon = mupif.pyroutil.getDaemon(proxy=ns)");
+    code.push("\t\t\tlogUri = str(daemon.register(mupif.pyrolog.PyroLogReceiver()))");
+    code.push("\t\t\tmodelserver = mupif.pyroutil.connectModelServer(ns, '" + md['Execution_settings']['jobManName'] + "')");
+    code.push("\t\t\tmodel = mupif.pyroutil.allocateApplicationWithJobManager(");
+    code.push("\t\t\t\tns=ns,");
+    code.push("\t\t\t\tjobMan=modelserver,");
+    code.push("\t\t\t\tremoteLogUri=logUri");
+    code.push("\t\t\t)");
+
+    code.push("\t\t");
+    code.push("\t\tmodel.initialize(metadata={'Execution': {'ID': '', 'Use_case_ID': '', 'Task_ID': ''}})");
+    code.push("\t\t");
+
+    let varNumber = 0;
+    function getSetFunctionCode(codel_lines, type, dataId, objId, valueType){
+        if (type === "mupif.Property") {
+            let val = "0.";
+            if(valueType === 'Scalar'){val = "0."}
+            if(valueType === 'Vector'){val = "[0.]"}
+            if(valueType === 'Tensor'){val = "[[0.]]"}
+            codel_lines.push("\t\tmodel.set(mupif.ConstantProperty(value=" + val + ", propID=" + dataId + ", valueType=mupif.ValueType." + valueType + ", unit='', time=None), '" + objId + "')");
+        } else if (type === "mupif.String") {
+            let val = "''";
+            if(valueType === 'Scalar'){val = "''"}
+            if(valueType === 'Vector'){val = "['']"}
+            if(valueType === 'Tensor'){val = "[['']]"}
+            codel_lines.push("\t\tmodel.set(mupif.String(value=" + val + ", dataID=" + dataId + ", valueType=mupif.ValueType." + valueType + ", time=None), '" + objId + "')");
+        } else if (type === "mupif.PyroFile") {
+            varNumber++;
+            let varName = `pf${varNumber}`;
+            code.push(`\t\t${varName} = mupif.PyroFile(filename='input.txt', mode='rb', dataID=${dataId})`);
+            code.push(`\t\tdaemon.register(${varName})`);
+            codel_lines.push(`\t\tmodel.set(${varName}, '${objId}')`);
+        } else if (type === "mupif.HeavyStruct") {
+            varNumber++;
+            let varName = `hs${varNumber}`;
+            code.push(`\t\t${varName} = mupif.HeavyStruct(h5path='input.h5', mode='readwrite', id=${dataId})`);
+            code.push(`\t\tdaemon.register(${varName})`);
+            code.push(`\t\t${varName}.exposeData()`);
+            codel_lines.push(`\t\tmodel.set(mupif.String(${varName}, '${objId}')`);
+        } else {
+            codel_lines.push("\t\t# setting input of type " + type + " not implemented");
         }
-
-        let daemonNeeded = false;
-        Inputs.forEach(item => {
-            if(item['Type'] === 'mupif.HeavyStruct' || item['Type'] === 'mupif.PyroFile'){
-                daemonNeeded = true;
-            }
-        })
-        if(daemonNeeded){
-            code.push("\t\tns = mupif.pyroutil.connectNameServer()");
-            code.push("\t\tdaemon = mupif.pyroutil.getDaemon(ns)");
-        }
-        Inputs.forEach(item => {
-            obj_id = null;
-            if ('Obj_ID' in item) {
-                obj_id = item['Obj_ID'];
-            }
-            if (obj_id === null) {
-                getSetFunctionCode(code, item['Type'], item['Type_ID'], '', item['ValueType']);
-            } else if (typeof obj_id == 'string') {
-                getSetFunctionCode(code, item['Type'], item['Type_ID'], obj_id, item['ValueType']);
-            } else if (obj_id.constructor.name === "Array") {
-                for (let ii = 0; ii < obj_id.length; ii++) {
-                    getSetFunctionCode(code, item['Type'], item['Type_ID'], obj_id[ii], item['ValueType']);
-                }
-            }
-        })
-
-        code.push("\t\t");
-
-        code.push("\t\tts = mupif.TimeStep(time=0., dt=1., targetTime=1., unit=mupif.U.s, number=1)");
-        code.push("\t\tmodel.solveStep(ts)");
-
-        code.push("\t\t");
-
-        Outputs.forEach(item => {
-            obj_id = null;
-            if ('Obj_ID' in item) {
-                obj_id = item['Obj_ID'];
-            }
-            if (obj_id === null) {
-                code.push("\t\toutput = model.get(objectTypeID=" + item['Type_ID'] + ")");//, objectID=''
-                code.push("\t\tprint(output)");
-            } else if (typeof obj_id == 'string') {
-                code.push("\t\toutput = model.get(objectTypeID=" + item['Type_ID'] + ", objectID='" + obj_id + "')");
-                code.push("\t\tprint(output)");
-            } else if (obj_id.constructor.name === "Array") {
-                for (let ii = 0; ii < obj_id.length; ii++) {
-                    code.push("\t\toutput = model.get(objectTypeID=" + item['Type_ID'] + ", objectID='" + obj_id[ii] + "')");
-                    code.push("\t\tprint(output)");
-                }
-            }
-        })
-
-        code.push("\t\t");
-
-        code.push("\t\tmodel.terminate()");
     }
+
+    let daemonNeeded = false;
+    Inputs.forEach(item => {
+        if(item['Type'] === 'mupif.HeavyStruct' || item['Type'] === 'mupif.PyroFile'){
+            daemonNeeded = true;
+        }
+    })
+    if(daemonNeeded){
+        code.push("\t\tns = mupif.pyroutil.connectNameServer()");
+        code.push("\t\tdaemon = mupif.pyroutil.getDaemon(ns)");
+    }
+    Inputs.forEach(item => {
+        obj_id = null;
+        if ('Obj_ID' in item) {
+            obj_id = item['Obj_ID'];
+        }
+        if (obj_id === null) {
+            getSetFunctionCode(code, item['Type'], item['Type_ID'], '', item['ValueType']);
+        } else if (typeof obj_id == 'string') {
+            getSetFunctionCode(code, item['Type'], item['Type_ID'], obj_id, item['ValueType']);
+        } else if (obj_id.constructor.name === "Array") {
+            for (let ii = 0; ii < obj_id.length; ii++) {
+                getSetFunctionCode(code, item['Type'], item['Type_ID'], obj_id[ii], item['ValueType']);
+            }
+        }
+    })
+
+    code.push("\t\t");
+
+    code.push("\t\tts = mupif.TimeStep(time=0., dt=1., targetTime=1., unit=mupif.U.s, number=1)");
+    code.push("\t\tmodel.solveStep(ts)");
+
+    code.push("\t\t");
+
+    Outputs.forEach(item => {
+        obj_id = null;
+        if ('Obj_ID' in item) {
+            obj_id = item['Obj_ID'];
+        }
+        if (obj_id === null) {
+            code.push("\t\toutput = model.get(objectTypeID=" + item['Type_ID'] + ")");//, objectID=''
+            code.push("\t\tprint(output)");
+        } else if (typeof obj_id == 'string') {
+            code.push("\t\toutput = model.get(objectTypeID=" + item['Type_ID'] + ", objectID='" + obj_id + "')");
+            code.push("\t\tprint(output)");
+        } else if (obj_id.constructor.name === "Array") {
+            for (let ii = 0; ii < obj_id.length; ii++) {
+                code.push("\t\toutput = model.get(objectTypeID=" + item['Type_ID'] + ", objectID='" + obj_id[ii] + "')");
+                code.push("\t\tprint(output)");
+            }
+        }
+    })
+
+    code.push("\t\t");
+
+    code.push("\t\tmodel.terminate()");
 
     return formatCodeToText(replace_tabs_with_spaces_for_each_line(code));
 }
