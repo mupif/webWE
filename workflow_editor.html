@@ -50,6 +50,7 @@
     <script type="text/javascript" src="lib/joint/joint.min.js"></script>
     <script type="text/javascript" src="src/view/AutoLayout.js"></script>
     <script type="text/javascript" src="src/view/Shapes.js"></script>
+    <script type="text/javascript" src="src/view/ZoomPan.js"></script>
     <script type="text/javascript" src="src/view/CanvasView.js"></script>
     <script type="text/javascript" src="src/WorkflowEditor.js"></script>
     <script type="text/javascript" src="src/Main.js"></script>
@@ -135,10 +136,8 @@
     function reRender(){
         if(!editor)
             return;// the observer fires before main() created the editor
-        // the canvas only needs to adapt the drawing area; the legacy renderer depends on the container size
-        if(editor.canvas)
-            editor.canvas.fitPaper();
-        else
+        // the canvas fills the container by itself; the legacy renderer depends on the container size
+        if(!editor.canvas)
             editor.generateWorkflowHtml();
     }
     new ResizeObserver(reRender).observe(document.getElementById('workflowContainer'));

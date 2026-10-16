@@ -18,14 +18,61 @@ div#contentView{
     min-width: 0;
 }
 
-/* in canvas mode the container fills the content view and scrolls the (larger) paper */
+/* in canvas mode the container fills the content view; the paper fills the container (zoom and pan instead
+   of scrolling, see src/view/ZoomPan.js) */
 div#workflowContainer.canvas_mode{
     flex: 1 1 0;
     min-height: 0;
+    overflow: hidden;
 }
 
 div#workflowCanvas{
     position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+div#workflowCanvas.panning{
+    cursor: grabbing;
+}
+
+/* toolbar in the top-left corner of the editor area */
+div.canvas_toolbar{
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #c9ced6;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+}
+
+div.canvas_toolbar span.canvas_project{
+    font-weight: bold;
+    cursor: pointer;
+}
+
+div.canvas_toolbar span.canvas_toolbar_group{
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+div.canvas_toolbar span.canvas_zoom{
+    min-width: 44px;
+    text-align: center;
+}
+
+div.canvas_toolbar button{
+    min-width: 26px;
+    padding: 2px 6px;
+    cursor: pointer;
 }
 
 /* texts of blocks are not selectable, so that dragging does not select them */

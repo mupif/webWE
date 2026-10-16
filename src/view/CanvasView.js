@@ -30,6 +30,10 @@
  * are the existing ``VisualMenu`` definitions of the blocks, so all actions still go through
  * ``Block.modificationQuery``. A block added from the menu is placed where the menu was opened.
  *
+ * The paper fills the editor area; zooming and panning are provided by ``CanvasZoomPan`` (ZoomPan.js) and a
+ * toolbar above the canvas (zoom buttons, fit to content, project name opening the project settings). A newly
+ * shown or loaded project is fitted to the editor area.
+ *
  * Data links are created by dragging from a slot port to another one. While dragging, the ports accepting the
  * link are highlighted (``validateConnection`` asks ``WorkflowEditor.canLinkSlots``); on connection the data
  * link is added to the model (``onLinkConnect``). Hovering a link shows a remove button.
@@ -37,14 +41,14 @@
  * JointJS features used
  * ---------------------
  * ``dia.Graph`` / ``dia.Paper`` (embedding of child elements via the ``parent``/``embeds`` attributes and the
- * paper's ``embeddingMode`` with ``validateEmbedding``, ``fitToContent`` for the scrollable drawing area),
+ * paper's ``embeddingMode`` with ``validateEmbedding``),
  * paper pointer events, link creation from magnets (``defaultLink``, ``validateConnection``, ``markAvailable``,
  * ``snapLinks``), link tools (``linkTools.Remove``) and the ``stroke`` highlighter (selection outline).
  */
 class CanvasView{
     /**
      * @param {WorkflowEditor} editor - the edited project
-     * @param {HTMLElement} el - element hosting the paper (inside the scrollable #workflowContainer)
+     * @param {HTMLElement} el - element hosting the paper (it fills #workflowContainer)
      */
     constructor(editor, el){
         this.editor = editor;
@@ -79,8 +83,8 @@ class CanvasView{
             el: el,
             model: this.graph,
             cellViewNamespace: joint.shapes,
-            width: 800,
-            height: 600,
+            width: '100%',
+            height: '100%',
             gridSize: SHAPE_GEOMETRY.GRID,
             drawGrid: {name: 'dot', args: {color: '#c9ced6'}},
             background: {color: '#f7f8fa'},
@@ -103,6 +107,14 @@ class CanvasView{
             validateEmbedding: (child_view, parent_view) => this.canEmbed(child_view.model, parent_view.model)
         });
 
+        /**
+         * Workflow block shown at the last render; a different one means a newly loaded project, which is fitted
+         * to the editor area. @type {BlockWorkflow|null}
+         */
+        this.shown_workflow = null;
+        this.zoom = new CanvasZoomPan(this.paper, scale => this.updateToolbar());
+        this.createToolbar();
+
         this.paper.on('element:pointerdown', (view, evt, x, y) => this.onPointerDown(view));
         this.paper.on('element:pointerup', (view, evt, x, y) => this.onPointerUp(view));
         this.paper.on('link:pointerclick', (link_view) => this.select(this.getModelOfCell(link_view.model)));
@@ -113,6 +125,42 @@ class CanvasView{
         this.paper.on('link:connect', (link_view) => this.onLinkConnect(link_view.model));
         this.paper.on('link:mouseenter', (link_view) => this.showLinkTools(link_view));
         this.paper.on('link:mouseleave', (link_view) => link_view.removeTools());
+    }
+
+    /**
+     * Create the toolbar shown above the canvas (in the top-left corner of the editor area).
+     */
+    createToolbar(){
+        this.toolbar_el = document.createElement('div');
+        this.toolbar_el.className = 'canvas_toolbar';
+        this.toolbar_el.innerHTML =
+            '<span class="canvas_project" title="Project settings"></span>' +
+            '<span class="canvas_toolbar_group">' +
+            '<button data-cmd="zoom-out" title="Zoom out (mouse wheel)">&minus;</button>' +
+            '<span class="canvas_zoom"></span>' +
+            '<button data-cmd="zoom-in" title="Zoom in (mouse wheel)">+</button>' +
+            '<button data-cmd="fit" title="Show the whole workflow">Fit</button>' +
+            '<button data-cmd="reset" title="Actual size">1:1</button>' +
+            '</span>';
+        let commands = {
+            'zoom-out': () => this.zoom.zoomBy(1 / ZOOM_STEP),
+            'zoom-in': () => this.zoom.zoomBy(ZOOM_STEP),
+            'fit': () => this.zoom.fit(),
+            'reset': () => this.zoom.zoomTo(1)
+        };
+        this.toolbar_el.querySelectorAll('button[data-cmd]').forEach(button => {
+            button.addEventListener('click', () => commands[button.dataset.cmd]());
+        });
+        this.toolbar_el.querySelector('.canvas_project').addEventListener('click', () => this.editor.selectSettingsAndUpdate());
+        this.el.parentElement.insertBefore(this.toolbar_el, this.el);
+    }
+
+    /**
+     * Show the current project name and zoom factor in the toolbar.
+     */
+    updateToolbar(){
+        this.toolbar_el.querySelector('.canvas_project').textContent = this.editor.workflowblock.project_name;
+        this.toolbar_el.querySelector('.canvas_zoom').textContent = Math.round(this.zoom.getScale() * 100) + ' %';
     }
 
     /**
@@ -414,8 +462,12 @@ class CanvasView{
         });
 
         this.graph.resetCells(cells);
-        this.fitPaper();
         this.showSelection();
+        if(this.shown_workflow !== workflow){
+            this.shown_workflow = workflow;
+            this.zoom.fit();
+        }
+        this.updateToolbar();
     }
 
     /**
@@ -441,16 +493,4 @@ class CanvasView{
         block.setLayout({x: point.x - origin.x, y: point.y - origin.y});
     }
 
-    /**
-     * Resize the paper to its content (with a margin), but at least to the visible area of the container.
-     */
-    fitPaper(){
-        let host = this.el.parentElement;
-        this.paper.fitToContent({
-            padding: 60,
-            allowNewOrigin: 'any',
-            minWidth: host ? host.clientWidth : 0,
-            minHeight: host ? host.clientHeight : 0
-        });
-    }
 }
