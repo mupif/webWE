@@ -18,6 +18,41 @@ or using pip:
 
 `pip install git+https://github.com/mupif/mupif.git`
 
+## Using the editor
+
+Open `workflow_editor.html` in a browser (served by any web server, e.g., `python3 -m http.server` in the
+repository root); `workflow_editor.html?example_id=1` opens an example. The workflow is drawn on an SVG canvas
+(based on the vendored [JointJS](https://www.jointjs.com/) library in `lib/joint/`):
+
+- **Blocks** can be placed anywhere by dragging their header. Dropping a block onto a container (Time Loop,
+  Do While, Run in background, Allocate model at runtime) nests it there, dropping it on the blank canvas makes
+  it a top-level block. Containers grow with their content; *Arrange child blocks* in the context menu (or the
+  `O` key) re-arranges the children by data flow, vertically or horizontally.
+- **Data links** are drawn by dragging from a slot (port) to another one; compatible slots are highlighted while
+  dragging. Hovering a link shows a remove button. Hovering a port shows the slot details.
+- **Right click** opens the context menu of a block, a link, an external slot or of the canvas (adding blocks
+  places them at the clicked point). A selected object can be deleted with `Delete`; `↑`/`↓` change the
+  execution order of the selected block.
+- **Mouse wheel** zooms, dragging the blank canvas pans; the toolbar offers *Fit* and *1:1*.
+
+**Execution order.** The generated code executes the blocks of every container in their *execution order*,
+which is independent of the position of the blocks on the canvas. Executable blocks (models, variables, loops
+and other containers) carry a label with their hierarchical order (`1`, `2`, `2.1`, ...) and are connected by
+semi-transparent *flow arrows* (loops also by a dashed loop-back arrow); the arrows can be switched off in the
+toolbar. Data and helper blocks (constants, input files, conversions, comparisons) are not numbered, as their
+values are evaluated where they are read.
+When a block reads data computed by a block executed later, the data link and the label of the reading block
+are marked red (orange inside a loop, where the value of the previous iteration is read) and the toolbar shows
+the number of problems. *Order by dependencies* reorders the blocks so that every block is executed after the
+blocks it reads from.
+
+### Project file
+
+Projects are saved as JSON (*Project > Save to JSON*). Since the canvas editor, blocks and external slots may
+contain an optional `layout` record with their position (`x`, `y`, relative to the containing block) and, for
+containers, their size (`w`, `h`). The layout does not influence the generated code. Projects without layout
+(e.g., created by older versions) are arranged automatically when opened.
+
 ## Examples
 
 This project provides three examples of simulation workflows, which work with 2D thermal and mechanical model.
@@ -76,6 +111,21 @@ It means that both these scripts produce equal simulation of the thermo-mechanic
 
 The execution workflows can be executed with commands `python example01.py` or `python example03.py`, respectively.
 
+
+## Development and tests
+
+The editor consists of plain JavaScript files without a build step:
+
+- `src/*.js` – the project model and the code generator; they are concatenated into `project.js` by
+  `examples/unify.py`, which is used headless by the Node.js scripts in `examples/`;
+- `src/view/*.js` – the SVG canvas (browser only).
+
+The tests need Node.js and the Node package `jsonschema` (`npm install` in the repository root):
+
+`cd examples && python3 runtests.py`
+
+They regenerate the code of the examples and compare it with the reference files, check the JSON round-trip and
+run the unit tests `examples/test_*.js`.
 
 ## License
 The Workflow Editor and Code Generator has been developed at Czech Technical University by Stanislav Šulc and is available under GNU Library or Lesser General Public License version 3.0 (LGPLv3).
