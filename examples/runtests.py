@@ -1,27 +1,35 @@
+"""
+Regression tests of the workflow editor code generator.
+
+For every example ``exampleNN.json`` the script
+
+1. rebuilds ``project.js`` from ``src/*.js`` (see ``unify.py``),
+2. runs ``node app_test.js NN <mode>`` which loads the JSON, regenerates the
+   JSON (``exampleNN_copy.json``) and the Python code (``exampleNN.py``),
+3. compares the regenerated JSON with the original one (round-trip test) and
+   the generated code with the reference ``exampleNN_ref.py``,
+4. runs the additional Node unit tests listed in ``UNIT_TESTS``.
+
+The script can be started from any directory. It exits with a non-zero status
+when any test fails, so it can be used in CI.
+
+Requirements: ``node`` on ``PATH`` and the Node package ``jsonschema``
+(``npm install`` in the repository root). ``termcolor`` is optional.
+"""
 import os
+import sys
 import filecmp
-from termcolor import colored
+import subprocess
 
-rp = os.path.realpath(__file__)
-dirname = "%s%s" % (os.path.dirname(rp), os.path.sep)
+try:
+    from termcolor import colored
+except ImportError:  # termcolor is a cosmetic dependency only
+    def colored(text, color):
+        return text
 
-os.system("rm -f ./example01.py")
-os.system("rm -f ./example02.py")
-os.system("rm -f ./example03.py")
-os.system("rm -f ./example04.py")
-os.system("rm -f ./example05.py")
-os.system("rm -f ./example05_server.py")
-os.system("rm -f ./example06.py")
+dirname = os.path.dirname(os.path.realpath(__file__))
 
-os.system("rm -f ./example01_copy.json")
-os.system("rm -f ./example02_copy.json")
-os.system("rm -f ./example03_copy.json")
-os.system("rm -f ./example04_copy.json")
-os.system("rm -f ./example05_copy.json")
-os.system("rm -f ./example06_copy.json")
-
-os.system("python unify.py")
-
+#: (example number, code generation mode) pairs; mode is one of exec|class|server
 tests = [
     [1, "exec"],
     [2, "class"],
@@ -32,44 +40,84 @@ tests = [
     [6, "exec"],
 ]
 
-all_tests_ok = True
-failed_tests = []
+#: standalone Node unit test scripts (paths relative to this directory);
+#: each script must exit with a non-zero status on failure
+UNIT_TESTS = []
 
-for test_number in range(0, len(tests)):
-    print("Running example number %d\n----------" % tests[test_number][0])
-    os.system("node %sapp_test.js %d %s" % (dirname, tests[test_number][0], tests[test_number][1]))
 
-    if tests[test_number][1] != "server":
-        f1 = "%sexample%02d.json" % (dirname, tests[test_number][0])
-        f2 = "%sexample%02d_copy.json" % (dirname, tests[test_number][0])
-    
-        result = filecmp.cmp(f1, f2, shallow=False)
-        if result:
-            print(colored("Files %s and %s are identical." % (f1, f2), "green"))
-        else:
-            print(colored("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2), "red"))
-            all_tests_ok = False
-            failed_tests.append(tests[test_number][0])
-    
-    server_add = ""
-    if tests[test_number][1] == "server":
-        server_add = "_server"
+def path(name):
+    """
+    :param str name: file name relative to the examples directory
+    :return: absolute path of the file
+    :rtype: str
+    """
+    return os.path.join(dirname, name)
 
-    f1 = "%sexample%02d%s.py" % (dirname, tests[test_number][0], server_add)
-    f2 = "%sexample%02d%s_ref.py" % (dirname, tests[test_number][0], server_add)
 
-    result = filecmp.cmp(f1, f2, shallow=False)
-    if result:
+def remove_generated_files():
+    """Remove outputs of previous runs so that stale files cannot pass a comparison."""
+    for number, mode in tests:
+        suffix = "_server" if mode == "server" else ""
+        for name in ("example%02d%s.py" % (number, suffix), "example%02d_copy.json" % number):
+            if os.path.exists(path(name)):
+                os.remove(path(name))
+
+
+def compare(f1, f2):
+    """
+    Compare two files byte by byte and print the result.
+
+    :param str f1: first file
+    :param str f2: second file
+    :return: True when the files are identical
+    :rtype: bool
+    """
+    if os.path.exists(f2) and filecmp.cmp(f1, f2, shallow=False):
         print(colored("Files %s and %s are identical." % (f1, f2), "green"))
-    else:
-        print(colored("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2), "red"))
-        all_tests_ok = False
-        failed_tests.append(tests[test_number][0])
+        return True
+    print(colored("!    ERROR: Files %s and %s are NOT identical!" % (f1, f2), "red"))
+    return False
 
-    print("----------\n")
-    
-if all_tests_ok:
-    print(colored("ALL TESTS PASSED :)", "green"))
-else:
+
+def main():
+    """
+    Run all tests.
+
+    :return: process exit status (0 when all tests passed)
+    :rtype: int
+    """
+    remove_generated_files()
+    subprocess.run([sys.executable, "unify.py"], cwd=dirname, check=True)
+
+    failed_tests = []
+
+    for number, mode in tests:
+        print("Running example number %d\n----------" % number)
+        subprocess.run(["node", path("app_test.js"), str(number), mode], cwd=dirname)
+
+        if mode != "server":
+            if not compare(path("example%02d.json" % number), path("example%02d_copy.json" % number)):
+                failed_tests.append(number)
+
+        suffix = "_server" if mode == "server" else ""
+        if not compare(path("example%02d%s.py" % (number, suffix)), path("example%02d%s_ref.py" % (number, suffix))):
+            failed_tests.append(number)
+        print("----------\n")
+
+    for script in UNIT_TESTS:
+        print("Running unit tests %s\n----------" % script)
+        if subprocess.run(["node", path(script)], cwd=dirname).returncode != 0:
+            print(colored("!    ERROR: unit tests %s failed" % script, "red"))
+            failed_tests.append(script)
+        print("----------\n")
+
+    if not failed_tests:
+        print(colored("ALL TESTS PASSED :)", "green"))
+        return 0
     print(colored("SOME TESTS FAILED :(", "red"))
     print(colored(failed_tests, "red"))
+    return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

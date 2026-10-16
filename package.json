@@ -1,0 +1,13 @@
+{
+  "name": "mupif-webwe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MuPIF web workflow editor and code generator (static web app). This manifest only declares the Node tooling used by the test suite in examples/.",
+  "license": "LGPL-3.0",
+  "scripts": {
+    "test": "cd examples && python3 runtests.py"
+  },
+  "devDependencies": {
+    "jsonschema": "^1.4.1"
+  }
+}
