@@ -1,0 +1,39 @@
+/*
+ * Styles of the SVG workflow canvas (src/view/CanvasView.js).
+ *
+ * #workflowContainer hosts both renderers: the legacy HTML renderer (#workflowSubContainer) and the canvas
+ * (#workflowCanvas). The class canvas_mode, set in main() when the canvas is used, selects which one is shown.
+ */
+
+div#workflowContainer.canvas_mode div#workflowSubContainer{
+    display: none;
+}
+
+div#workflowContainer:not(.canvas_mode) div#workflowCanvas{
+    display: none;
+}
+
+/* the content view must not grow with the paper (flex items do by default), so that the paper scrolls */
+div#contentView{
+    min-width: 0;
+}
+
+/* in canvas mode the container fills the content view and scrolls the (larger) paper */
+div#workflowContainer.canvas_mode{
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+div#workflowCanvas{
+    position: relative;
+}
+
+/* texts of blocks are not selectable, so that dragging does not select them */
+div#workflowCanvas text{
+    user-select: none;
+}
+
+/* the page sets letter-spacing on :root (StyleBase.css); texts on the canvas are measured without it */
+div#workflowCanvas svg{
+    letter-spacing: normal;
+}

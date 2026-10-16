@@ -31,6 +31,17 @@ function loadProject(){
 }
 
 /**
+ * Evaluate an additional browser script (e.g., a headless module of ``src/view/``, which is not part of
+ * ``project.js``) in the global scope, after ``project.js``.
+ *
+ * @param {string} relative_path - path relative to the repository root, e.g., 'src/view/AutoLayout.js'
+ */
+function loadScript(relative_path){
+    loadProject();
+    vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', relative_path), 'utf8'), {filename: relative_path});
+}
+
+/**
  * Create a fresh headless editor (``visual=false``), optionally loaded from an example project.
  *
  * @param {number|null} example_number - number NN of ``exampleNN.json`` to load, or null for an empty project
@@ -101,4 +112,4 @@ function finish(){
     process.exitCode = failures.length ? 1 : 0;
 }
 
-module.exports = {loadProject, createEditor, loadExampleJson, test, assert, assertEqual, finish};
+module.exports = {loadProject, loadScript, createEditor, loadExampleJson, test, assert, assertEqual, finish};

@@ -4,6 +4,13 @@ let editor;// The Workflow Editor instance
 let example_id = 0;// Global defining optional example
 
 /**
+ * When true, the workflow is rendered by the former HTML/flexbox renderer instead of the SVG canvas
+ * (CanvasView). It is set by the URL parameter ``view=legacy`` (see workflow_editor.html).
+ * @type {boolean}
+ */
+let legacy_view = false;
+
+/**
  * Counter used to assign {@link Block#view_id} values. It is only incremented, so view ids are unique
  * within one editor session (they are never persisted).
  * @type {number}
@@ -3821,6 +3828,12 @@ function main(visual=false)
     editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
+    // the SVG canvas is used unless the legacy renderer is requested (or the view scripts are not loaded)
+    if(visual && !legacy_view && typeof CanvasView !== 'undefined') {
+        editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
+        document.getElementById('workflowContainer').classList.add('canvas_mode');
+    }
+
     if(visual) {
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');
         loadMetaDataFromJSONOnServer('examples/metadata/md02.json');
@@ -4714,6 +4727,13 @@ class WorkflowEditor{
         this.selected_slot_ext = null;
 
         this.visual = true;
+
+        /**
+         * SVG canvas showing the workflow (see src/view/CanvasView.js), or null when the legacy HTML renderer
+         * is used or the editor runs headless (visual = false).
+         * @type {CanvasView|null}
+         */
+        this.canvas = null;
     }
 
     /**
@@ -5280,7 +5300,15 @@ class WorkflowEditor{
         this.download("md.json", JSON.stringify(editor.list_of_model_metadata[md_id]));
     }
 
+    /**
+     * Redraw the workflow after a change of the model: by the SVG canvas when available, otherwise by the
+     * legacy HTML renderer.
+     */
     generateWorkflowHtml(){
+        if(this.canvas !== null){
+            this.canvas.render();
+            return;
+        }
         // workflow content
         this.workflowblock.generateAllElementCodeNames();
         // this.generateAllDatalinksCodeNames();

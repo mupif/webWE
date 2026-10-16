@@ -13,6 +13,13 @@ class WorkflowEditor{
         this.selected_slot_ext = null;
 
         this.visual = true;
+
+        /**
+         * SVG canvas showing the workflow (see src/view/CanvasView.js), or null when the legacy HTML renderer
+         * is used or the editor runs headless (visual = false).
+         * @type {CanvasView|null}
+         */
+        this.canvas = null;
     }
 
     /**
@@ -579,7 +586,15 @@ class WorkflowEditor{
         this.download("md.json", JSON.stringify(editor.list_of_model_metadata[md_id]));
     }
 
+    /**
+     * Redraw the workflow after a change of the model: by the SVG canvas when available, otherwise by the
+     * legacy HTML renderer.
+     */
     generateWorkflowHtml(){
+        if(this.canvas !== null){
+            this.canvas.render();
+            return;
+        }
         // workflow content
         this.workflowblock.generateAllElementCodeNames();
         // this.generateAllDatalinksCodeNames();

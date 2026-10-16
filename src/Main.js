@@ -298,6 +298,12 @@ function main(visual=false)
     editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
+    // the SVG canvas is used unless the legacy renderer is requested (or the view scripts are not loaded)
+    if(visual && !legacy_view && typeof CanvasView !== 'undefined') {
+        editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
+        document.getElementById('workflowContainer').classList.add('canvas_mode');
+    }
+
     if(visual) {
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');
         loadMetaDataFromJSONOnServer('examples/metadata/md02.json');
