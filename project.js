@@ -3341,12 +3341,97 @@ function findOrderViolations(editor){
 }
 
 /**
+ * Data dependencies between the children of a container.
+ *
+ * All data links between blocks of the container's subtree are lifted to the children of the container
+ * (see ``liftToCommonContainer``); links from/to external slots and links between a block and its own
+ * ancestor are ignored.
+ *
+ * @param {Block} container
+ * @param {WorkflowEditor} editor - editor holding the data links
+ * @returns {Set<number>[]} for every child (by its index in ``container.blocks``) the indices of the children
+ *          consuming its data
+ */
+function childDependencies(container, editor){
+    let children = container.blocks;
+    let successors = children.map(() => new Set());
+    for(let i = 0; i < editor.datalinks.length; i++){
+        let dir = getDatalinkDirection(editor.datalinks[i]);
+        if(dir === null || dir.producer.external || dir.consumer.external)
+            continue;
+        let lifted = liftToCommonContainer(dir.producer.getParentBlock(), dir.consumer.getParentBlock());
+        if(lifted === null || lifted.container !== container)
+            continue;
+        successors[children.indexOf(lifted.a)].add(children.indexOf(lifted.b));
+    }
+    return successors;
+}
+
+/**
+ * Stable topological order of a dependency graph (Kahn's algorithm): among the nodes whose predecessors have
+ * all been ordered, the one with the lowest index is taken next, so an already valid order is kept.
+ *
+ * @param {Set<number>[]} successors - successors of every node (see ``childDependencies``)
+ * @returns {{order: number[], unordered: number[]}} ``order`` contains the sortable nodes; ``unordered`` the
+ *          nodes which are members of a cycle or depend on one (in increasing index order)
+ */
+function stableTopologicalOrder(successors){
+    let n = successors.length;
+    let n_predecessors = new Array(n).fill(0);
+    successors.forEach(succ => succ.forEach(c => n_predecessors[c]++));
+
+    let order = [];
+    let done = new Array(n).fill(false);
+    for(let step = 0; step < n; step++){
+        let next = -1;
+        for(let i = 0; i < n && next < 0; i++)
+            if(!done[i] && n_predecessors[i] === 0)
+                next = i;
+        if(next < 0)
+            break;
+        done[next] = true;
+        order.push(next);
+        successors[next].forEach(c => n_predecessors[c]--);
+    }
+    let unordered = [];
+    for(let i = 0; i < n; i++)
+        if(!done[i])
+            unordered.push(i);
+    return {order: order, unordered: unordered};
+}
+
+/**
+ * Data flow rank of the children of a container: 0 for children consuming no data of their siblings, otherwise
+ * one more than the highest rank of the siblings they consume data from (longest path layering). Children
+ * which cannot be ordered because of a dependency cycle are ranked after their already ranked producers,
+ * ignoring the links that close the cycle.
+ *
+ * The ranks are used to arrange blocks in columns following the data flow (see AutoLayout.js).
+ *
+ * @param {Block} container
+ * @param {WorkflowEditor} editor - editor holding the data links
+ * @returns {number[]} rank of every child (by its index in ``container.blocks``)
+ */
+function dataflowRanks(container, editor){
+    let successors = childDependencies(container, editor);
+    let topo = stableTopologicalOrder(successors);
+    let ranks = new Array(successors.length).fill(0);
+    let processed = new Array(successors.length).fill(false);
+    topo.order.concat(topo.unordered).forEach(i => {
+        processed[i] = true;
+        successors[i].forEach(c => {
+            if(!processed[c])
+                ranks[c] = Math.max(ranks[c], ranks[i] + 1);
+        });
+    });
+    return ranks;
+}
+
+/**
  * Reorder the children of a container so that every producer is executed before its consumers.
  *
- * The data dependencies between the children are derived from all data links between blocks of the
- * container's subtree (lifted to the children, see ``liftToCommonContainer``). The children are then sorted
- * topologically (Kahn's algorithm). The sort is stable: among the blocks ready for execution, the one that
- * comes first in the current order is taken, so an already valid order is not changed. Blocks which cannot be
+ * The children are sorted topologically according to their data dependencies (``childDependencies``). The sort
+ * is stable (``stableTopologicalOrder``), so an already valid order is not changed. Blocks which cannot be
  * ordered, i.e., members of a dependency cycle and blocks depending on them, keep their relative order and are
  * appended after the sorted blocks.
  *
@@ -3358,46 +3443,9 @@ function findOrderViolations(editor){
  */
 function orderChildrenByDependencies(container, editor, recursive=false){
     let children = container.blocks.slice();
-    let n = children.length;
-    let successors = children.map(() => new Set());
-    let n_predecessors = new Array(n).fill(0);
-
-    for(let i = 0; i < editor.datalinks.length; i++){
-        let dir = getDatalinkDirection(editor.datalinks[i]);
-        if(dir === null || dir.producer.external || dir.consumer.external)
-            continue;
-        let lifted = liftToCommonContainer(dir.producer.getParentBlock(), dir.consumer.getParentBlock());
-        if(lifted === null || lifted.container !== container)
-            continue;
-        let p = children.indexOf(lifted.a);
-        let c = children.indexOf(lifted.b);
-        if(!successors[p].has(c)){
-            successors[p].add(c);
-            n_predecessors[c]++;
-        }
-    }
-
-    let order = [];
-    let done = new Array(n).fill(false);
-    for(let step = 0; step < n; step++){
-        // the first ready block in the current order keeps the sort stable
-        let next = -1;
-        for(let i = 0; i < n && next < 0; i++)
-            if(!done[i] && n_predecessors[i] === 0)
-                next = i;
-        if(next < 0)
-            break;
-        done[next] = true;
-        order.push(next);
-        successors[next].forEach(c => n_predecessors[c]--);
-    }
-
-    let unordered = [];
-    for(let i = 0; i < n; i++)
-        if(!done[i]){
-            unordered.push(children[i]);
-            order.push(i);
-        }
+    let topo = stableTopologicalOrder(childDependencies(container, editor));
+    let order = topo.order.concat(topo.unordered);
+    let unordered = topo.unordered.map(i => children[i]);
 
     let changed = order.some((idx, pos) => idx !== pos);
     container.blocks = order.map(idx => children[idx]);

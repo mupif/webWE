@@ -159,6 +159,25 @@ t.test('blocks in or behind a dependency cycle keep their relative order', () =>
     t.assert(tl.getBlocks().every((b, i) => b === [m3, m4, m2, m1][i]), 'unordered blocks keep their order');
 });
 
+t.test('data flow ranks follow the longest dependency path', () => {
+    let ed = t.createEditor(1);
+    let tl = ed.workflowblock.getBlocks(BlockTimeloop)[0];
+    t.assertEqual(dataflowRanks(ed.workflowblock, ed), [0, 0, 0, 0, 0, 0, 0, 1], 'constants feed the Timeloop');
+    t.assertEqual(dataflowRanks(tl, ed), [0, 1, 1, 2], 'model_1 -> model_2, model_3; model_2 -> model_4');
+    tl.blocks = tl.blocks.slice().reverse();
+    t.assertEqual(dataflowRanks(tl, ed), [2, 1, 1, 0], 'ranks do not depend on the execution order');
+});
+
+t.test('data flow ranks of a cycle', () => {
+    let ed = t.createEditor(1);
+    let tl = ed.workflowblock.getBlocks(BlockTimeloop)[0];
+    let [m1, m2] = tl.getBlocks();
+    ed.addDatalink(m2.getSlots('out')[0], m1.getSlots('in').find(s => !s.connected()));
+    let ranks = dataflowRanks(tl, ed);
+    t.assertEqual(ranks.length, 4);
+    t.assert(ranks[0] < ranks[1] && ranks[1] < ranks[3], 'cycle broken in execution order: ' + ranks);
+});
+
 t.test('reordering does not change generated code of a valid workflow', () => {
     let ed = t.createEditor(1);
     let code = ed.getExecutionCode();
