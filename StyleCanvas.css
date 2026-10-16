@@ -53,3 +53,10 @@ div#workflowCanvas .available-magnet{
 div#workflowCanvas .joint-link:hover [joint-selector="line"]{
     stroke-width: 3.5;
 }
+
+/* context menu of the canvas; it reuses the styles of the block menus (StyleWE_blocks.css) */
+div.canvas_context_menu{
+    position: fixed;
+    z-index: 400;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.35);
+}

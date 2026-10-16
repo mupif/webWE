@@ -226,9 +226,30 @@ class Block{
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('add_external_slot', 'out', 'External&nbsp;Output'), 'Add&nbsp;External&nbsp;Dataslot');
     }
 
+    /**
+     * Menu items arranging the child blocks on the canvas (keyword 'set_order', see {@link Block#arrangeChildren}).
+     * The arrangement does not change the execution order.
+     */
     addOrderingMenuItems(){
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_order', 'horizontal', 'Horizontally'), 'Order&nbsp;child&nbsp;blocks');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_order', 'vertical', 'Vertically'), 'Order&nbsp;child&nbsp;blocks');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_order', 'dataflow', 'By&nbsp;data&nbsp;flow'), 'Arrange&nbsp;child&nbsp;blocks');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_order', 'horizontal', 'Horizontally'), 'Arrange&nbsp;child&nbsp;blocks');
+        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_order', 'vertical', 'Vertically'), 'Arrange&nbsp;child&nbsp;blocks');
+    }
+
+    /**
+     * Set the arrangement of the child blocks and discard their canvas positions, so that the automatic layout
+     * places them again (see src/view/AutoLayout.js). The stored size of this block is discarded as well, so that
+     * it shrinks to its new content. The execution order is not changed.
+     *
+     * @param {string} sort - 'dataflow' (columns following the data flow), 'vertical' or 'horizontal'
+     */
+    arrangeChildren(sort){
+        if(sort !== 'dataflow' && sort !== 'vertical' && sort !== 'horizontal')
+            return;
+        this.child_block_sort = sort;
+        this.blocks.forEach(b => { b.layout = null; });
+        if(this.layout !== null)
+            this.layout = {x: this.layout.x, y: this.layout.y};
     }
 
     defineMenu(){
@@ -317,10 +338,7 @@ class Block{
             this.addExternalDataSlot(value, new_name);
         }
         if(keyword === 'set_order'){
-            if(value === 'horizontal')
-                this.child_block_sort = value;
-            if(value === 'vertical')
-                this.child_block_sort = value;
+            this.arrangeChildren(value);
         }
         this.editor.generateWorkflowHtml();
     }

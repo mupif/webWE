@@ -140,6 +140,32 @@ t.test('children above or left of the content area are shifted into it', () => {
     t.assertEqual(m2.layout, {x: m2_before.x + LAYOUT_PADDING, y: m2_before.y + 40 + LAYOUT_PADDING - 10});
 });
 
+t.test('arranging children re-places them and discards the container size', () => {
+    let ed = t.createEditor(1);
+    let wf = ed.workflowblock;
+    computeCanvasLayout(wf, measure, measureExt);
+    let tl = wf.getBlocks()[7];
+    tl.getBlocks()[3].setLayout({x: 2000, y: 20});
+    computeCanvasLayout(wf, measure, measureExt);
+    t.assert(tl.layout.w > 2000, 'container grew');
+
+    tl.arrangeChildren('vertical');
+    t.assert(tl.getBlocks().every(b => b.layout === null), 'children are unplaced');
+    t.assertEqual(Object.keys(tl.layout), ['x', 'y'], 'stored size discarded');
+    computeCanvasLayout(wf, measure, measureExt);
+    t.assertEqual(tl.getBlocks().map(b => b.layout.x), [20, 20, 20, 20], 'stacked vertically');
+    t.assertEqual(tl.layout.w, 100 + 2 * LAYOUT_PADDING, 'container shrank to its content');
+
+    tl.arrangeChildren('dataflow');
+    computeCanvasLayout(wf, measure, measureExt);
+    let col = 100 + LAYOUT_COLUMN_GAP;
+    t.assertEqual(tl.getBlocks().map(b => b.layout.x), [20, 20 + col, 20 + col, 20 + 2 * col], 'data flow columns');
+
+    tl.arrangeChildren('diagonal');
+    t.assertEqual(tl.child_block_sort, 'dataflow', 'invalid arrangement is ignored');
+    t.assertEqual(tl.getBlocks()[0].layout.x, 20, 'positions are kept');
+});
+
 t.test('top-level blocks are never shifted', () => {
     let ed = t.createEditor(1);
     let wf = ed.workflowblock;

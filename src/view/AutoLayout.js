@@ -132,7 +132,9 @@ function placeChildrenByDataflow(container, origin, sizes){
  */
 function placeChildren(container, origin, sizes, normalize=true, initial=false){
     let children = container.blocks;
-    if(initial && children.length > 0 && children.every(c => c.layout === null))
+    // all children unplaced: the whole content is arranged, by the data flow on the first layout of a project
+    // or when requested by the container's arrangement (see Block.arrangeChildren)
+    if((initial || container.child_block_sort === 'dataflow') && children.length > 0 && children.every(c => c.layout === null))
         placeChildrenByDataflow(container, origin, sizes);
     let placed = children.filter(c => c.layout !== null);
 

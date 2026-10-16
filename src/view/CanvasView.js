@@ -25,6 +25,11 @@
  * one, the block is moved to it in the model as well (appended as its last child, i.e., executed last).
  * The canvas is then rebuilt from the model, which also grows containers around their (new) children.
  *
+ * Clicking selects a block, a data link or an external slot terminal (stored in ``editor.selected_*``, which the
+ * keyboard commands in Main.js use); right-clicking opens the context menu of the clicked object. The block menus
+ * are the existing ``VisualMenu`` definitions of the blocks, so all actions still go through
+ * ``Block.modificationQuery``. A block added from the menu is placed where the menu was opened.
+ *
  * Data links are created by dragging from a slot port to another one. While dragging, the ports accepting the
  * link are highlighted (``validateConnection`` asks ``WorkflowEditor.canLinkSlots``); on connection the data
  * link is added to the model (``onLinkConnect``). Hovering a link shows a remove button.
@@ -34,7 +39,7 @@
  * ``dia.Graph`` / ``dia.Paper`` (embedding of child elements via the ``parent``/``embeds`` attributes and the
  * paper's ``embeddingMode`` with ``validateEmbedding``, ``fitToContent`` for the scrollable drawing area),
  * paper pointer events, link creation from magnets (``defaultLink``, ``validateConnection``, ``markAvailable``,
- * ``snapLinks``) and link tools (``linkTools.Remove``).
+ * ``snapLinks``), link tools (``linkTools.Remove``) and the ``stroke`` highlighter (selection outline).
  */
 class CanvasView{
     /**
@@ -49,6 +54,25 @@ class CanvasView{
 
         /** State of the element being dragged (see ``onPointerDown``), or null. @type {Object|null} */
         this.drag = null;
+
+        /**
+         * Where the context menu was opened: the container block (or the workflow), the point in canvas
+         * coordinates and the number of its children at that time. A block added by the menu to that container is
+         * placed at the point (see ``placeBlockAddedByMenu``).
+         * @type {{container: Block, x: number, y: number, n_children: number}|null}
+         */
+        this.menu_point = null;
+
+        /** Floating element hosting the context menus. @type {HTMLElement} */
+        this.menu_el = document.createElement('div');
+        this.menu_el.className = 'block_menu_base canvas_context_menu';
+        document.body.appendChild(this.menu_el);
+        // a click outside of the menu and of the paper closes the menu; presses on the paper are handled by the
+        // paper events (JointJS opens context menus already on the right-button mousedown, which then bubbles here)
+        document.addEventListener('mousedown', evt => {
+            if(!this.menu_el.contains(evt.target) && !this.el.contains(evt.target))
+                this.hideMenu();
+        });
 
         this.graph = new joint.dia.Graph({}, {cellNamespace: joint.shapes});
         this.paper = new joint.dia.Paper({
@@ -81,6 +105,11 @@ class CanvasView{
 
         this.paper.on('element:pointerdown', (view, evt, x, y) => this.onPointerDown(view));
         this.paper.on('element:pointerup', (view, evt, x, y) => this.onPointerUp(view));
+        this.paper.on('link:pointerclick', (link_view) => this.select(this.getModelOfCell(link_view.model)));
+        this.paper.on('blank:pointerdown', () => this.select(null));
+        this.paper.on('element:contextmenu', (view, evt, x, y) => this.onContextMenu(this.getModelOfCell(view.model), evt, x, y));
+        this.paper.on('link:contextmenu', (view, evt, x, y) => this.onContextMenu(this.getModelOfCell(view.model), evt, x, y));
+        this.paper.on('blank:contextmenu', (evt, x, y) => this.onContextMenu(this.editor.workflowblock, evt, x, y));
         this.paper.on('link:connect', (link_view) => this.onLinkConnect(link_view.model));
         this.paper.on('link:mouseenter', (link_view) => this.showLinkTools(link_view));
         this.paper.on('link:mouseleave', (link_view) => link_view.removeTools());
@@ -173,7 +202,99 @@ class CanvasView{
      */
     onPointerDown(view){
         let cell = view.model;
+        this.select(this.getModelOfCell(cell));
         this.drag = {id: cell.id, position: cell.position(), parent: cell.get('parent') || null};
+    }
+
+    /**
+     * Select a model object (or clear the selection) and outline it on the canvas. The selection is stored in
+     * the editor (``selected_block``, ``selected_datalink``, ``selected_slot_ext``), where the keyboard commands
+     * (Delete, arrow keys, see Main.js) find it. Any open context menu is closed.
+     *
+     * @param {Block|Datalink|SlotExt|null} model
+     */
+    select(model){
+        this.hideMenu();
+        this.editor.selected_block = model instanceof Block ? model : null;
+        this.editor.selected_datalink = model instanceof Datalink ? model : null;
+        this.editor.selected_slot_ext = model instanceof SlotExt ? model : null;
+        this.showSelection();
+    }
+
+    /**
+     * Outline the selected object (after a selection change or a re-render). A selection whose object no longer
+     * exists (e.g., a deleted block) is cleared.
+     */
+    showSelection(){
+        joint.highlighters.stroke.removeAll(this.paper, 'selection');
+        let selected = this.editor.selected_block || this.editor.selected_datalink || this.editor.selected_slot_ext;
+        if(!selected || selected === this.editor.workflowblock)
+            return;
+        let id = selected instanceof Block ? this.blockCellId(selected) :
+            selected instanceof Datalink ? this.datalinkCellId(selected) : this.slotCellId(selected);
+        let view = this.graph.getCell(id) ? this.paper.findViewByModel(id) : null;
+        if(!view){
+            this.editor.selected_block = this.editor.selected_datalink = this.editor.selected_slot_ext = null;
+            return;
+        }
+        let is_link = selected instanceof Datalink;
+        let highlighter = joint.highlighters.stroke.add(view, is_link ? 'line' : 'body', 'selection', {
+            padding: is_link ? 0 : 4,
+            rx: 10,
+            ry: 10,
+            attrs: {'stroke': '#ff3b30', 'stroke-width': is_link ? 5 : 3, 'stroke-opacity': is_link ? 0.6 : 1}
+        });
+        // the outline is appended to the cell; keep the execution label badge in front of it
+        let badge = is_link ? null : view.findNode('badgeBody');
+        if(badge && highlighter.el)
+            badge.parentNode.insertBefore(highlighter.el, badge);
+    }
+
+    /**
+     * Open the context menu of a block, data link or external slot at the mouse position.
+     *
+     * @param {Block|Datalink|SlotExt|null} model - the clicked object (the workflow for the blank canvas)
+     * @param {Event} evt
+     * @param {number} x - mouse position in canvas coordinates
+     * @param {number} y
+     */
+    onContextMenu(model, evt, x, y){
+        evt.preventDefault();
+        if(model === null)
+            return;
+        this.select(model === this.editor.workflowblock ? null : model);
+        let html = '';
+        if(model instanceof Block){
+            html = model.getMenuHtml();
+            // the containing block for blocks added through the menu; they are placed at the clicked point
+            this.menu_point = model.isContainer() ? {container: model, x: x, y: y, n_children: model.blocks.length} : null;
+        }else if(model instanceof Datalink){
+            html = this.menuItemHtml('editor.removeDatalink(editor.selected_datalink);editor.generateWorkflowHtml();', 'Delete&nbsp;data&nbsp;link');
+        }else if(model instanceof SlotExt){
+            html = this.menuItemHtml('editor.deleteExtSlot(editor.selected_slot_ext);editor.generateWorkflowHtml();', 'Delete&nbsp;external&nbsp;slot');
+        }
+        if(html === '')
+            return;
+        this.menu_el.innerHTML = '<div class="block_menu block_menu_0" style="display:block;">' + html + '</div>';
+        this.menu_el.style.left = evt.clientX + 'px';
+        this.menu_el.style.top = evt.clientY + 'px';
+        this.menu_el.style.display = 'block';
+    }
+
+    /**
+     * @param {string} onclick - JavaScript code executed by the item
+     * @param {string} text - item text (HTML)
+     * @returns {string} HTML of a context menu item styled as the block menu items
+     */
+    menuItemHtml(onclick, text){
+        return '<div class="block_menu_item" onclick="' + onclick + '">' + text + '</div>';
+    }
+
+    /**
+     * Close the context menu.
+     */
+    hideMenu(){
+        this.menu_el.style.display = 'none';
     }
 
     /**
@@ -258,6 +379,8 @@ class CanvasView{
     render(){
         let workflow = this.editor.workflowblock;
         workflow.generateAllElementCodeNames();
+        this.hideMenu();
+        this.placeBlockAddedByMenu();
         let layout = computeCanvasLayout(workflow, measureBlock, measureExtSlot);
 
         let cells = [];
@@ -292,6 +415,30 @@ class CanvasView{
 
         this.graph.resetCells(cells);
         this.fitPaper();
+        this.showSelection();
+    }
+
+    /**
+     * Place a block added through the context menu at the point where the menu was opened. Added blocks are
+     * appended to the container, so the block is recognized as a new, unplaced last child (other menu actions,
+     * e.g., arranging the children, do not add a child). The point is used only once.
+     */
+    placeBlockAddedByMenu(){
+        let point = this.menu_point;
+        this.menu_point = null;
+        if(point === null || point.container.blocks.length !== point.n_children + 1)
+            return;
+        let block = point.container.blocks[point.n_children];
+        if(block.layout !== null)
+            return;
+        let origin = {x: 0, y: 0};
+        if(point.container !== this.editor.workflowblock){
+            let cell = this.graph.getCell(this.blockCellId(point.container));
+            if(!cell)
+                return;
+            origin = cell.position();
+        }
+        block.setLayout({x: point.x - origin.x, y: point.y - origin.y});
     }
 
     /**

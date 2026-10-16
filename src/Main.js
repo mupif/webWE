@@ -43,15 +43,17 @@ function keyPress(e){
             editor.generateWorkflowHtml();
         }
     }
-    // changing the sorting
+    // changing the arrangement of child blocks (vertical -> horizontal -> data flow -> vertical)
     if(e.which === 79){
-        if(editor.selected_block){
-            if(editor.selected_block.child_block_sort === 'vertical')
-                editor.selected_block.child_block_sort = 'horizontal';
-            else if(editor.selected_block.child_block_sort === 'horizontal')
-                editor.selected_block.child_block_sort = 'vertical';
+        if(editor.selected_block && editor.selected_block.isContainer()){
+            let next = {'vertical': 'horizontal', 'horizontal': 'dataflow', 'dataflow': 'vertical'};
+            editor.selected_block.arrangeChildren(next[editor.selected_block.child_block_sort] || 'vertical');
             editor.generateWorkflowHtml();
         }
+    }
+    // Escape closes the context menu of the canvas and clears the selection
+    if(e.which === 27 && editor.canvas){
+        editor.canvas.select(null);
     }
 }
 
