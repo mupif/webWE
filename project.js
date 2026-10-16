@@ -4669,58 +4669,64 @@ class WorkflowEditor{
     }
 
     /**
+     * Check whether two data slots can be connected by a new data link.
+     *
+     * The rules are: the slots must exist and differ, one must be an input and the other an output, both
+     * must have spare connection capacity (an input accepts a single link), they must belong to different
+     * blocks and at most one of them may be an external workflow slot. The function has no side effects,
+     * so the graphical view can call it to validate a connection while the user is dragging it.
+     *
+     * @param {Slot|null} s1
+     * @param {Slot|null} s2
+     * @returns {{ok: boolean, message: string}} ``ok`` is true when the link can be created; otherwise
+     *          ``message`` describes the reason (it is empty when there is nothing worth reporting, e.g.,
+     *          when a slot is connected to itself)
+     */
+    canLinkSlots(s1, s2){
+        if(!s1 || !s2 || s1 === s2)
+            return {ok: false, message: ''};
+        if(s1.inout === s2.inout)
+            return {ok: false, message: 'Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)'};
+        if(s1.getNumConnections() >= s1.max_connections || s2.getNumConnections() >= s2.max_connections){
+            let slot_naming = '';
+            if (s1.getNumConnections() === s1.max_connections)
+                slot_naming += '<br>(' + s1.name + ')';
+            if (s2.getNumConnections() === s2.max_connections)
+                slot_naming += '<br>(' + s2.name + ')';
+            return {ok: false, message: 'One of the slots can not accept more connections.' + slot_naming};
+        }
+        if(s1.parent_block === s2.parent_block)
+            return {ok: false, message: 'Slots within one block can not be connected.'};
+        if(s1.external === true && s2.external === true)
+            return {ok: false, message: 'Two external slots can not be connected.'};
+        // // none of the slots is external
+        // if(s1.obj_type !== s2.obj_type){
+        //     myQuery_show_error('The slots must have identical ValueType to be connected.<br>('+s1.obj_type+' X '+s2.obj_type+')');
+        //     return null;
+        // }
+        return {ok: true, message: ''};
+    }
+
+    /**
+     * Create a data link between two slots when allowed by {@link WorkflowEditor#canLinkSlots}. When the
+     * link cannot be created, the reason is logged and, in the visual mode, shown to the user.
+     *
      * @param {Slot} s1
      * @param {Slot} s2
-     * @returns {Datalink} */
+     * @returns {Datalink|null} the new data link or null */
     addDatalink(s1, s2){
-        if(s1 && s2) {
-            if (s1 !== s2) {
-                if (s1.inout !== s2.inout) {
-                    if (s1.getNumConnections() < s1.max_connections && s2.getNumConnections() < s2.max_connections) {
-                        if (s1.parent_block !== s2.parent_block) {
-                            if (s1.external === true || s2.external === true) {
-                                if (s1.external === true && s2.external === true) {
-                                    console.log('Two external slots can not be connected.');
-                                    if(this.visual)
-                                        myQuery_show_error('Two external slots can not be connected.');
-                                    return null;
-                                }
-
-                            } else {
-                                // // none of the slots is external
-                                // if(s1.obj_type !== s2.obj_type){
-                                //     myQuery_show_error('The slots must have identical ValueType to be connected.<br>('+s1.obj_type+' X '+s2.obj_type+')');
-                                //     return null;
-                                // }
-                            }
-
-
-                            let dl = new Datalink(s1, s2);
-                            this.datalinks.push(dl);
-                            return dl;
-                        } else {
-                            console.log('Slots within one block can not be connected.');
-                            if(this.visual)
-                                myQuery_show_error('Slots within one block can not be connected.');
-                        }
-                    } else {
-                        let slot_naming = '';
-                        if (s1.getNumConnections() === s1.max_connections)
-                            slot_naming += '<br>(' + s1.name + ')';
-                        if (s2.getNumConnections() === s2.max_connections)
-                            slot_naming += '<br>(' + s2.name + ')';
-                        console.log('One of the slots can not accept more connections.' + slot_naming);
-                        if(this.visual)
-                            myQuery_show_error('One of the slots can not accept more connections.' + slot_naming);
-                    }
-                } else {
-                    console.log('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
-                    if(this.visual)
-                        myQuery_show_error('Only input and output dataslot can be connected.<br>(Or input and external input or output and external output)');
-                }
+        let check = this.canLinkSlots(s1, s2);
+        if(!check.ok){
+            if(check.message !== ''){
+                console.log(check.message);
+                if(this.visual)
+                    myQuery_show_error(check.message);
             }
+            return null;
         }
-        return null;
+        let dl = new Datalink(s1, s2);
+        this.datalinks.push(dl);
+        return dl;
     }
 
     removeDatalink(dl) {
