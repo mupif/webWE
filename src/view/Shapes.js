@@ -214,7 +214,8 @@ function slotPortGroup(side){
     let g = SHAPE_GEOMETRY;
     return {
         position: {name: 'absolute'},
-        markup: [{tagName: 'circle', selector: 'portBody'}],
+        // the <title> child shows the slot details as a tooltip
+        markup: [{tagName: 'circle', selector: 'portBody', children: [{tagName: 'title', selector: 'portTitle'}]}],
         attrs: {
             portBody: {r: g.PORT_R, magnet: true, stroke: '#222', strokeWidth: 1.5, fill: '#ffffff', cursor: 'crosshair'}
         },
@@ -273,11 +274,33 @@ if(typeof joint !== 'undefined'){
 
     joint.shapes.standard.Link.define('mupif.DataLink', {
         attrs: {
-            line: {strokeWidth: 2, targetMarker: {type: 'path', d: 'M 8 -4 0 0 8 4 z'}},
-            wrapper: {strokeWidth: 12}
+            line: {strokeWidth: 2, strokeLinecap: 'butt', targetMarker: {type: 'path', d: 'M 8 -4 0 0 8 4 z'}},
+            // wide transparent hit area; butt caps do not reach over the ports at the link ends
+            wrapper: {strokeWidth: 10, strokeLinecap: 'butt'}
         },
         connector: {name: 'curve', args: {sourceDirection: 'right', targetDirection: 'left'}}
     });
+}
+
+/**
+ * Tooltip text of a slot port.
+ *
+ * @param {Slot} slot
+ * @returns {string} name, data type, DataID, units and the time of setting of the slot (when defined)
+ */
+function slotTooltip(slot){
+    let lines = [slot.name + (slot.external ? ' (external ' + (slot.inout === 'out' ? 'input' : 'output') + ')' : '')];
+    let add = (label, value) => {
+        if(value !== null && value !== undefined && value !== '' && value !== 'None')
+            lines.push(label + ': ' + value);
+    };
+    add('Type', slot.getDataType());
+    add('DataID', slot.getDataID());
+    add('Units', slot.getUnits());
+    add('Set at', slot.getSetAt());
+    if(slot.inout === 'in' && !slot.external)
+        lines.push(slot.connected() ? 'connected' : (slot.required ? 'required, not connected' : 'optional'));
+    return lines.join('\n');
 }
 
 /**
@@ -297,6 +320,7 @@ function slotPortItems(slots, group, x, top){
         args: {x: x, y: top + i * g.PORT_ROW_H + g.PORT_ROW_H / 2},
         attrs: {
             portBody: {fill: dataTypeColor(s.getDataType())},
+            portTitle: {text: slotTooltip(s)},
             label: {text: s.name, fontSize: 10, fontFamily: CANVAS_FONT_FAMILY, fill: '#111'}
         }
     }));
@@ -350,7 +374,7 @@ function createExtSlotCell(slot, box, id){
         id: slot.getUID(),
         group: provides ? 'out' : 'in',
         args: {x: provides ? box.w : 0, y: box.h / 2},
-        attrs: {portBody: {fill: dataTypeColor(slot.getDataType())}}
+        attrs: {portBody: {fill: dataTypeColor(slot.getDataType())}, portTitle: {text: slotTooltip(slot)}}
     };
     return new joint.shapes.mupif.ExtSlot({
         id: id,

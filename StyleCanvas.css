@@ -42,3 +42,14 @@ div#workflowCanvas svg{
 div#workflowCanvas .joint-element{
     cursor: move;
 }
+
+/* ports accepting the link being drawn (JointJS markAvailable) */
+div#workflowCanvas .available-magnet{
+    stroke: #1e66f5;
+    stroke-width: 3;
+}
+
+/* the hovered data link is emphasized */
+div#workflowCanvas .joint-link:hover [joint-selector="line"]{
+    stroke-width: 3.5;
+}

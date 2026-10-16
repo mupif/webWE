@@ -25,11 +25,16 @@
  * one, the block is moved to it in the model as well (appended as its last child, i.e., executed last).
  * The canvas is then rebuilt from the model, which also grows containers around their (new) children.
  *
+ * Data links are created by dragging from a slot port to another one. While dragging, the ports accepting the
+ * link are highlighted (``validateConnection`` asks ``WorkflowEditor.canLinkSlots``); on connection the data
+ * link is added to the model (``onLinkConnect``). Hovering a link shows a remove button.
+ *
  * JointJS features used
  * ---------------------
  * ``dia.Graph`` / ``dia.Paper`` (embedding of child elements via the ``parent``/``embeds`` attributes and the
  * paper's ``embeddingMode`` with ``validateEmbedding``, ``fitToContent`` for the scrollable drawing area),
- * paper pointer events.
+ * paper pointer events, link creation from magnets (``defaultLink``, ``validateConnection``, ``markAvailable``,
+ * ``snapLinks``) and link tools (``linkTools.Remove``).
  */
 class CanvasView{
     /**
@@ -57,8 +62,16 @@ class CanvasView{
             background: {color: '#f7f8fa'},
             async: false,
             sorting: joint.dia.Paper.sorting.APPROX,
-            interactive: {elementMove: true, linkMove: false, labelMove: false, addLinkFromMagnet: false},
-            defaultConnectionPoint: {name: 'anchor'},
+            interactive: {elementMove: true, linkMove: false, labelMove: false, addLinkFromMagnet: true},
+            // links end at the edge of the port circle, so that the port itself stays clickable for new links
+            defaultConnectionPoint: {name: 'boundary', args: {offset: 1}},
+            // data links: dragged from a slot port, dropped on a compatible one
+            defaultLink: () => new joint.shapes.mupif.DataLink({attrs: {line: {stroke: DATA_TYPE_DEFAULT_COLOR}}}),
+            validateConnection: (view_s, magnet_s, view_t, magnet_t) =>
+                this.canConnect(view_s, magnet_s, view_t, magnet_t),
+            linkPinning: false,
+            markAvailable: true,
+            snapLinks: {radius: 20},
             // nesting by drag and drop: a dropped block is embedded in the container under the pointer
             embeddingMode: true,
             frontParentOnly: false,
@@ -68,6 +81,76 @@ class CanvasView{
 
         this.paper.on('element:pointerdown', (view, evt, x, y) => this.onPointerDown(view));
         this.paper.on('element:pointerup', (view, evt, x, y) => this.onPointerUp(view));
+        this.paper.on('link:connect', (link_view) => this.onLinkConnect(link_view.model));
+        this.paper.on('link:mouseenter', (link_view) => this.showLinkTools(link_view));
+        this.paper.on('link:mouseleave', (link_view) => link_view.removeTools());
+    }
+
+    /**
+     * @param {joint.dia.CellView} view - view of a block or of an external slot terminal
+     * @param {SVGElement} magnet - port element
+     * @returns {Slot|null} the data slot represented by the port
+     */
+    slotOfMagnet(view, magnet){
+        if(!view || !magnet)
+            return null;
+        let port_id = view.findAttribute('port', magnet);
+        return port_id ? this.editor.getSlotByUID(port_id) : null;
+    }
+
+    /**
+     * Connection rule used while a link is dragged: the link may end at a port when the editor allows linking
+     * the two slots (see WorkflowEditor.canLinkSlots).
+     *
+     * @returns {boolean}
+     */
+    canConnect(view_s, magnet_s, view_t, magnet_t){
+        let s = this.slotOfMagnet(view_s, magnet_s);
+        let t = this.slotOfMagnet(view_t, magnet_t);
+        return s !== null && t !== null && this.editor.canLinkSlots(s, t).ok;
+    }
+
+    /**
+     * Add the data link drawn by the user to the model and rebuild the canvas. The data link is oriented from
+     * the output to the input slot, regardless of the direction in which it was drawn.
+     *
+     * @param {joint.dia.Link} link - the link connected by the user
+     */
+    onLinkConnect(link){
+        let slot_of_end = end => {
+            let cell = end.id ? this.graph.getCell(end.id) : null;
+            let model = cell ? this.getModelOfCell(cell) : null;
+            return model && end.port ? this.editor.getSlotByUID(end.port) : null;
+        };
+        let a = slot_of_end(link.source());
+        let b = slot_of_end(link.target());
+        link.remove();
+        if(a !== null && b !== null){
+            if(a.inout === 'in')
+                [a, b] = [b, a];
+            this.editor.addDatalink(a, b);
+        }
+        this.editor.generateWorkflowHtml();
+    }
+
+    /**
+     * Show the remove button on a hovered data link.
+     *
+     * @param {joint.dia.LinkView} link_view
+     */
+    showLinkTools(link_view){
+        let datalink = this.getModelOfCell(link_view.model);
+        if(!(datalink instanceof Datalink))
+            return;
+        link_view.addTools(new joint.dia.ToolsView({
+            tools: [new joint.linkTools.Remove({
+                distance: '50%',
+                action: () => {
+                    this.editor.removeDatalink(datalink);
+                    this.editor.generateWorkflowHtml();
+                }
+            })]
+        }));
     }
 
     /**
