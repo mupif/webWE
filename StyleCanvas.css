@@ -107,3 +107,29 @@ div.canvas_context_menu{
     z-index: 400;
     box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.35);
 }
+
+/* flow arrows of the hovered block (see src/view/FlowOverlay.js) */
+div#workflowCanvas .flow_highlight [joint-selector="line"]{
+    stroke-opacity: 0.55;
+}
+
+/* execution order status in the toolbar */
+div.canvas_toolbar span.canvas_order_status{
+    padding: 1px 6px;
+    border-radius: 4px;
+    cursor: help;
+}
+
+div.canvas_toolbar span.order_ok{
+    color: #2b8a3e;
+}
+
+div.canvas_toolbar span.order_warning{
+    color: #ffffff;
+    background: #f08c00;
+}
+
+div.canvas_toolbar span.order_error{
+    color: #ffffff;
+    background: #e03131;
+}

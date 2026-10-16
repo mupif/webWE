@@ -34,6 +34,11 @@
  * toolbar above the canvas (zoom buttons, fit to content, project name opening the project settings). A newly
  * shown or loaded project is fitted to the editor area.
  *
+ * The execution order is shown by the badges of the blocks and by flow arrows (FlowOverlay.js), which can be
+ * switched off in the toolbar (the choice is remembered by the browser). Execution order problems are marked on
+ * the canvas and counted in the toolbar, where "Order by dependencies" reorders the blocks of all containers so
+ * that producers are executed before their consumers (``orderChildrenByDependencies``).
+ *
  * Data links are created by dragging from a slot port to another one. While dragging, the ports accepting the
  * link are highlighted (``validateConnection`` asks ``WorkflowEditor.canLinkSlots``); on connection the data
  * link is added to the model (``onLinkConnect``). Hovering a link shows a remove button.
@@ -112,6 +117,14 @@ class CanvasView{
          * to the editor area. @type {BlockWorkflow|null}
          */
         this.shown_workflow = null;
+
+        /** Whether the flow arrows are shown (remembered in the browser's local storage). @type {boolean} */
+        this.show_flow = true;
+        try{
+            this.show_flow = window.localStorage.getItem('mupif_we_show_flow') !== 'false';
+        }catch(e){
+            // storage not available (e.g., disabled); the default is used
+        }
         this.zoom = new CanvasZoomPan(this.paper, scale => this.updateToolbar());
         this.createToolbar();
 
@@ -123,6 +136,9 @@ class CanvasView{
         this.paper.on('link:contextmenu', (view, evt, x, y) => this.onContextMenu(this.getModelOfCell(view.model), evt, x, y));
         this.paper.on('blank:contextmenu', (evt, x, y) => this.onContextMenu(this.editor.workflowblock, evt, x, y));
         this.paper.on('link:connect', (link_view) => this.onLinkConnect(link_view.model));
+        // hovering a block emphasizes its incoming and outgoing flow arrows
+        this.paper.on('element:mouseenter', view => this.highlightFlow(view.model, true));
+        this.paper.on('element:mouseleave', view => this.highlightFlow(view.model, false));
         this.paper.on('link:mouseenter', (link_view) => this.showLinkTools(link_view));
         this.paper.on('link:mouseleave', (link_view) => link_view.removeTools());
     }
@@ -141,18 +157,95 @@ class CanvasView{
             '<button data-cmd="zoom-in" title="Zoom in (mouse wheel)">+</button>' +
             '<button data-cmd="fit" title="Show the whole workflow">Fit</button>' +
             '<button data-cmd="reset" title="Actual size">1:1</button>' +
+            '</span>' +
+            '<span class="canvas_toolbar_group">' +
+            '<label title="Show arrows following the execution order"><input type="checkbox" class="canvas_show_flow"> Execution flow</label>' +
+            '<span class="canvas_order_status"></span>' +
+            '<button data-cmd="order" title="Reorder the blocks so that every block is executed after the blocks it reads data from">' +
+            'Order by dependencies</button>' +
             '</span>';
         let commands = {
             'zoom-out': () => this.zoom.zoomBy(1 / ZOOM_STEP),
             'zoom-in': () => this.zoom.zoomBy(ZOOM_STEP),
             'fit': () => this.zoom.fit(),
-            'reset': () => this.zoom.zoomTo(1)
+            'reset': () => this.zoom.zoomTo(1),
+            'order': () => this.orderByDependencies()
         };
+        let checkbox = this.toolbar_el.querySelector('.canvas_show_flow');
+        checkbox.checked = this.show_flow;
+        checkbox.addEventListener('change', () => this.setShowFlow(checkbox.checked));
         this.toolbar_el.querySelectorAll('button[data-cmd]').forEach(button => {
             button.addEventListener('click', () => commands[button.dataset.cmd]());
         });
         this.toolbar_el.querySelector('.canvas_project').addEventListener('click', () => this.editor.selectSettingsAndUpdate());
         this.el.parentElement.insertBefore(this.toolbar_el, this.el);
+    }
+
+    /**
+     * Show or hide the flow arrows.
+     *
+     * @param {boolean} show
+     */
+    setShowFlow(show){
+        this.show_flow = show;
+        try{
+            window.localStorage.setItem('mupif_we_show_flow', show ? 'true' : 'false');
+        }catch(e){
+            // storage not available; the choice holds for this session only
+        }
+        this.render();
+    }
+
+    /**
+     * Reorder the children of all containers by their data dependencies (see orderChildrenByDependencies) and
+     * redraw. Blocks which cannot be ordered because of a dependency cycle are reported.
+     */
+    orderByDependencies(){
+        let result = orderChildrenByDependencies(this.editor.workflowblock, this.editor, true);
+        this.editor.generateWorkflowHtml();
+        if(result.unordered.length)
+            myQuery_show_error('The following blocks depend on each other in a cycle (or on such blocks) and keep ' +
+                'their order:<br>' + result.unordered.map(b => b.getCodeName()).join(', '));
+    }
+
+    /**
+     * Emphasize (or restore) the flow arrows entering and leaving an element.
+     *
+     * @param {joint.dia.Element} cell
+     * @param {boolean} on
+     */
+    highlightFlow(cell, on){
+        this.graph.getConnectedLinks(cell).forEach(link => {
+            if(link.get('type') !== 'mupif.FlowArrow')
+                return;
+            let view = this.paper.findViewByModel(link);
+            if(view)
+                view.el.classList.toggle('flow_highlight', on);
+        });
+    }
+
+    /**
+     * Show the number of execution order problems in the toolbar.
+     *
+     * @param {OrderViolation[]} violations
+     */
+    updateOrderStatus(violations){
+        let el = this.toolbar_el.querySelector('.canvas_order_status');
+        let errors = violations.filter(v => v.severity === 'error').length;
+        let warnings = violations.length - errors;
+        el.className = 'canvas_order_status' + (errors ? ' order_error' : warnings ? ' order_warning' : ' order_ok');
+        if(violations.length === 0){
+            el.textContent = '\u2713 order OK';
+            el.title = 'Every block is executed after the blocks it reads data from.';
+        }else{
+            let parts = [];
+            if(errors)
+                parts.push(errors + (errors > 1 ? ' errors' : ' error'));
+            if(warnings)
+                parts.push(warnings + (warnings > 1 ? ' warnings' : ' warning'));
+            el.textContent = '\u26a0 ' + parts.join(', ');
+            el.title = violations.map(v => v.message).join('\n');
+        }
     }
 
     /**
@@ -433,8 +526,10 @@ class CanvasView{
 
         let cells = [];
         this.cell_models = new Map();
+        let block_cells = new Map();
 
-        // blocks; nested blocks are embedded in their container and stacked above it
+        // blocks; nested blocks are embedded in their container and stacked above it (z: 10 per nesting level,
+        // the flow arrows of a container lie in between, see FlowOverlay.js)
         let add_block = (block, parent_cell, depth) => {
             let cell = createBlockCell(block, layout.blocks.get(block), this.blockCellId(block), 10 * (depth + 1));
             if(parent_cell !== null){
@@ -442,10 +537,14 @@ class CanvasView{
                 parent_cell.set('embeds', (parent_cell.get('embeds') || []).concat([cell.id]));
             }
             cells.push(cell);
+            block_cells.set(cell.id, cell);
             this.cell_models.set(cell.id, block);
             block.blocks.forEach(child => add_block(child, cell, depth + 1));
         };
         workflow.blocks.forEach(block => add_block(block, null, 0));
+
+        if(this.show_flow)
+            cells = cells.concat(createFlowCells(this, layout, block_cells));
 
         layout.extSlots.forEach((box, slot) => {
             let cell = createExtSlotCell(slot, box, this.slotCellId(slot));
@@ -462,6 +561,9 @@ class CanvasView{
         });
 
         this.graph.resetCells(cells);
+        let violations = findOrderViolations(this.editor);
+        markOrderViolations(this, violations);
+        this.updateOrderStatus(violations);
         this.showSelection();
         if(this.shown_workflow !== workflow){
             this.shown_workflow = workflow;

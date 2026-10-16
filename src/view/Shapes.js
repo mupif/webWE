@@ -253,7 +253,7 @@ if(typeof joint !== 'undefined'){
             badgeBody: {x: -8, y: -SHAPE_GEOMETRY.BADGE_H / 2 - 2, height: SHAPE_GEOMETRY.BADGE_H, rx: SHAPE_GEOMETRY.BADGE_H / 2,
                 ry: SHAPE_GEOMETRY.BADGE_H / 2, fill: EXECUTION_FLOW_COLOR, stroke: '#ffffff', strokeWidth: 1.5},
             badgeLabel: {y: -2, textAnchor: 'middle', textVerticalAnchor: 'middle', fontSize: 11, fontWeight: 'bold',
-                fontFamily: CANVAS_FONT_FAMILY, fill: '#ffffff'}
+                fontFamily: CANVAS_FONT_FAMILY, fill: '#ffffff', pointerEvents: 'none'}
         },
         ports: {groups: {in: slotPortGroup('left'), out: slotPortGroup('right')}}
     }, {
@@ -264,7 +264,8 @@ if(typeof joint !== 'undefined'){
             {tagName: 'text', selector: 'title'},
             {tagName: 'text', selector: 'codeName'},
             {tagName: 'text', selector: 'params'},
-            {tagName: 'rect', selector: 'badgeBody'},
+            // the <title> of the badge explains the execution label (or order problems, see FlowOverlay.js)
+            {tagName: 'rect', selector: 'badgeBody', children: [{tagName: 'title', selector: 'badgeTitle'}]},
             {tagName: 'text', selector: 'badgeLabel'}
         ]
     });
@@ -364,6 +365,7 @@ function createBlockCell(block, box, id, z){
             params: {text: d.params.join('\n')},
             // only executed blocks have an execution label
             badgeBody: {width: badge_w, display: label === '' ? 'none' : null},
+            badgeTitle: {text: 'Execution order: ' + label},
             badgeLabel: {x: badge_w / 2 - 8, text: label, display: label === '' ? 'none' : null}
         },
         ports: {items: slotPortItems(d.inputs, 'in', 0, top).concat(slotPortItems(d.outputs, 'out', box.w, top))}
