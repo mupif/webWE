@@ -61,6 +61,16 @@ t.test('external slot layout survives a JSON round-trip', () => {
     t.assertEqual(first['blocks'][0]['ext_slots'][0]['layout'], {x: 1, y: 2}, 'size of ext slot is not stored');
 });
 
+t.test('loading a project replaces the data links of the previous one', () => {
+    let ed = t.createEditor(1);
+    let n = ed.datalinks.length;
+    ed.loadFromJsonData(t.loadExampleJson(1));
+    t.assertEqual(ed.datalinks.length, n, 'links are not accumulated');
+    ed.loadFromJsonData(t.loadExampleJson(2));
+    t.assertEqual(ed.datalinks.length, t.loadExampleJson(2)['datalinks'].length);
+    t.assert(ed.datalinks.every(dl => ed.getSlotByUID(dl.slot1.getUID()) === dl.slot1), 'links refer to the loaded project');
+});
+
 t.test('invalid layouts are rejected', () => {
     let ed = t.createEditor(1);
     let b = ed.workflowblock.getBlocksRecursive()[0];

@@ -5195,8 +5195,18 @@ class WorkflowEditor{
             this.addDatalink(s1, s2);
     }
 
+    /**
+     * Replace the edited project by the project described by a JSON record (see BlockWorkflow.getDictForJSON).
+     *
+     * @param {Object} json_data - project record with the keys 'blocks', 'datalinks' and 'settings'
+     */
     loadFromJsonData(json_data){
         this.workflowblock = new BlockWorkflow(this, null);
+        // data links and the selection belong to the replaced project
+        this.datalinks = [];
+        this.selected_block = null;
+        this.selected_datalink = null;
+        this.selected_slot_ext = null;
         console.log('Constructing project from JSON.');
         if(json_data.constructor === {}.constructor) {
             if('blocks' in json_data && 'datalinks' in json_data && 'settings' in json_data) {
