@@ -521,6 +521,11 @@ class BlockWorkflow extends Block{
         this.addOrderingMenuItems();
     }
 
+    /** @returns {boolean} true; the block contains child blocks */
+    isContainer() {
+        return true;
+    }
+
     getClassName() {
         return 'BlockWorkflow';
     }

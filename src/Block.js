@@ -94,6 +94,48 @@ class Block{
     }
 
     /**
+     * @returns {boolean} true when the block can contain child blocks (workflow, loops, ...);
+     *                    container blocks override this method
+     */
+    isContainer(){
+        return false;
+    }
+
+    /**
+     * @returns {boolean} true when the block executes its children repeatedly (Timeloop, DoWhile).
+     *                    Inside a loop, reading a value produced later in the loop body is a legitimate
+     *                    read of the previous iteration's value.
+     */
+    isLoop(){
+        return false;
+    }
+
+    /**
+     * @returns {number} zero-based position of the block among the children of its parent, i.e., its
+     *                   execution order within the parent; -1 for the workflow (root) block
+     */
+    getExecutionIndex(){
+        if(this.parent_block === null)
+            return -1;
+        return this.parent_block.blocks.indexOf(this);
+    }
+
+    /**
+     * Hierarchical execution label of the block, e.g., '2' for the second top-level block and '2.1' for the
+     * first block nested in it. The label reflects the order in which the generated code executes the
+     * blocks; the workflow (root) block has an empty label.
+     *
+     * @returns {string} execution label
+     */
+    getExecutionLabel(){
+        if(this.parent_block === null)
+            return '';
+        let parent_label = this.parent_block.getExecutionLabel();
+        let own = String(this.getExecutionIndex() + 1);
+        return parent_label === '' ? own : parent_label + '.' + own;
+    }
+
+    /**
      * @returns {BlockLayout|null} position and size of the block on the canvas (see {@link BlockLayout})
      */
     getLayout(){

@@ -73,6 +73,16 @@ class BlockDoWhile extends Block{
         this.addOrderingMenuItems();
     }
 
+    /** @returns {boolean} true; the block contains child blocks */
+    isContainer() {
+        return true;
+    }
+
+    /** @returns {boolean} true; the child blocks are executed repeatedly */
+    isLoop() {
+        return true;
+    }
+
     getClassName() {
         return 'BlockDoWhile';
     }
