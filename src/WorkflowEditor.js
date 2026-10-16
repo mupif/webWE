@@ -150,7 +150,10 @@ class WorkflowEditor{
                         inout = 'out';
                     if(slot['inout']==='out')
                         inout = 'in';
-                    this.workflowblock.addExternalDataSlot(inout, slot['name'], slot['type'], slot['obj_type'], slot['uid']);
+                    let new_slot = this.workflowblock.addExternalDataSlot(inout, slot['name'], slot['type'], slot['obj_type'], slot['uid']);
+                    // optional canvas position of the external slot terminal
+                    if('layout' in slot)
+                        new_slot.setLayout(slot['layout']);
                 }
             }
         }
@@ -266,6 +269,10 @@ class WorkflowEditor{
         }
 
         if(new_block != null){
+            // optional canvas layout (missing in projects created by older versions of the editor)
+            if('layout' in json_data)
+                new_block.setLayout(json_data['layout']);
+
             slots = new_block.getSlots('in');
             for(let i=0;i<slots.length && i<json_data['slot_in_uids'].length;i++)
                 slots[i].id = json_data['slot_in_uids'][i];

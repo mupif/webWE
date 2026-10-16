@@ -22,7 +22,8 @@ module.exports = {
                                     "obj_type": {"type": "string"},
                                     "obj_id": {"type": "string"},
                                     "inout": {"type": "string"},
-                                    "uid": {"type": "string"}
+                                    "uid": {"type": "string"},
+                                    "layout": {"type": "object", "properties": {"x": {"type": "number"}, "y": {"type": "number"}, "w": {"type": "number"}, "h": {"type": "number"}}, "required": ["x", "y"]}
                                 },
                                 "required": ["name", "type", "obj_type", "obj_id", "inout", "uid"]
                             }
@@ -117,6 +118,7 @@ module.exports = {
                             "required": ["Name", "ID", "Inputs", "Outputs", "Execution_settings"]
                         },
                         "model_working_directory": {"type": "string"},
+                        "layout": {"type": "object", "properties": {"x": {"type": "number"}, "y": {"type": "number"}, "w": {"type": "number"}, "h": {"type": "number"}}, "required": ["x", "y"]}
                     },
                     "required": ["classname", "uid", "parent_uid"],
                     "allOf": [

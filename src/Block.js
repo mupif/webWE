@@ -1,20 +1,112 @@
+/**
+ * Counter used to assign {@link Block#view_id} values. It is only incremented, so view ids are unique
+ * within one editor session (they are never persisted).
+ * @type {number}
+ */
+let block_view_id_counter = 0;
+
+/**
+ * Geometry of a block on the editor canvas.
+ *
+ * Coordinates are expressed in canvas units and are **relative to the top-left corner of the parent
+ * container block** (for top-level blocks the parent is the workflow, i.e. the canvas origin). Storing
+ * relative coordinates keeps the layout of a container's content intact when the container is moved.
+ *
+ * The layout is purely presentational: it is saved to and loaded from the project JSON, but it never
+ * influences the generated code. Execution order is defined by the order of {@link Block#blocks}.
+ *
+ * @typedef {Object} BlockLayout
+ * @property {number} x - left edge relative to the parent container
+ * @property {number} y - top edge relative to the parent container
+ * @property {number} [w] - width (optional; when missing the view computes it from the content)
+ * @property {number} [h] - height (optional; when missing the view computes it from the content)
+ */
+
+/**
+ * Validate and normalize a layout record (e.g., read from a JSON file).
+ *
+ * @param {*} data - candidate layout object
+ * @param {boolean} [with_size=true] - when false, the size fields ``w`` and ``h`` are dropped
+ * @returns {BlockLayout|null} normalized copy, or null when ``data`` does not contain numeric ``x`` and ``y``
+ */
+function normalizeLayout(data, with_size=true){
+    if(data === null || typeof data !== 'object')
+        return null;
+    if(!Number.isFinite(data['x']) || !Number.isFinite(data['y']))
+        return null;
+    let layout = {'x': data['x'], 'y': data['y']};
+    if(with_size){
+        if(Number.isFinite(data['w']) && data['w'] > 0)
+            layout['w'] = data['w'];
+        if(Number.isFinite(data['h']) && data['h'] > 0)
+            layout['h'] = data['h'];
+    }
+    return layout;
+}
+
 class Block{
+    /**
+     * @param {WorkflowEditor} editor - the editor owning the block
+     * @param {Block|null} parent_block - container block in which this block is nested (null for the workflow)
+     */
     constructor(editor, parent_block){
         this.editor = editor;
         this.parent_block = parent_block;
+        /** Child blocks; **their order defines the execution order** within this block. @type {Block[]} */
         this.blocks = [];
         this.input_slots = [];
         this.output_slots = [];
         this.name = 'Block';
 
+        /**
+         * Name of the block in the generated code. It also serves as the persistent block UID
+         * (see {@link Block#getUID}) and it is regenerated whenever the block tree changes
+         * (see BlockWorkflow.generateAllElementCodeNames), e.g., when blocks are reordered.
+         * @type {string}
+         */
         this.code_name = "";
+
+        /**
+         * Session-unique, immutable identifier of the block used by the graphical view (e.g., as the id
+         * of the corresponding canvas element). Unlike {@link Block#code_name} it does not change when
+         * blocks are reordered or renamed. It is not persisted.
+         * @type {number}
+         */
+        this.view_id = ++block_view_id_counter;
+
+        /**
+         * Position (and optionally size) of the block on the canvas, or null when the block has not been
+         * placed yet (the view then computes an automatic layout).
+         * @type {BlockLayout|null}
+         */
+        this.layout = null;
 
         this.menu_items = [];
         this.menu_record = new VisualMenu();
 
+        /**
+         * Direction ('vertical' or 'horizontal') in which child blocks are arranged by the automatic layout.
+         * @type {string}
+         */
         this.child_block_sort = 'vertical';
 
         this.defines_timestep = false;
+    }
+
+    /**
+     * @returns {BlockLayout|null} position and size of the block on the canvas (see {@link BlockLayout})
+     */
+    getLayout(){
+        return this.layout;
+    }
+
+    /**
+     * Set the canvas layout of the block.
+     *
+     * @param {BlockLayout|null} layout - new layout; invalid values are treated as null (= not placed)
+     */
+    setLayout(layout){
+        this.layout = normalizeLayout(layout);
     }
 
     getDefinesTimestep(){
@@ -120,18 +212,33 @@ class Block{
         }
     }
 
+    /**
+     * Add an external data slot (workflow input or output). Note the inverted direction: an external
+     * *input* of the workflow is stored as an *output* slot of the workflow block (it provides data to the
+     * blocks inside) and vice versa.
+     *
+     * @param {string} inout - 'in' for an external input, 'out' for an external output
+     * @param {string|null} name - slot name (a default is used when null)
+     * @param {string} type - data type
+     * @param {string} obj_type - DataID
+     * @param {string} uid - slot UID ('' to generate a new one)
+     * @returns {SlotExt|null} the created slot, or null for an invalid ``inout``
+     */
     addExternalDataSlot(inout, name=null, type='None', obj_type='None', uid=''){
+        let slot = null;
         if(inout === 'out') {
             if(name === null)
                 name = 'external_output';
-            this.addInputSlot(new SlotExt(this, 'in', name, name, type, true, obj_type, uid));
+            slot = new SlotExt(this, 'in', name, name, type, true, obj_type, uid);
+            this.addInputSlot(slot);
         }
         if(inout === 'in') {
             if(name === null)
                 name = 'external_input';
-            this.addOutputSlot(new SlotExt(this, 'out', name, name, type, true, obj_type, uid));
+            slot = new SlotExt(this, 'out', name, name, type, true, obj_type, uid);
+            this.addOutputSlot(slot);
         }
-
+        return slot;
     }
 
     myquery_proceed(action, p1=null, p2=null){
@@ -435,6 +542,14 @@ class Block{
         return 'Block';
     }
 
+    /**
+     * Serialize the block (without its children) into a JSON-compatible record.
+     *
+     * The optional ``layout`` entry (see {@link BlockLayout}) is written only when the block has been placed
+     * on the canvas, so that projects created without the graphical editor keep their original form.
+     *
+     * @returns {Object} JSON record of the block
+     */
     getDictForJSON(){
         let slots;
         let slot_in_array = [];
@@ -448,7 +563,7 @@ class Block{
         for (let i = 0; i < slots.length; i++)
             slot_out_array.push(slots[i].getUID());
 
-        return {
+        let dict = {
             'classname': this.getClassName(),
             'uid': this.getUID(),
             'parent_uid': this.parent_block.getUID(),
@@ -456,6 +571,9 @@ class Block{
             'slot_out_uids': slot_out_array
 
         };
+        if(this.layout !== null)
+            dict['layout'] = Object.assign({}, this.layout);
+        return dict;
     }
 
     // #########################

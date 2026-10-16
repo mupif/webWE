@@ -77,6 +77,16 @@ class BlockDoWhile extends Block{
         return 'BlockDoWhile';
     }
 
+    /**
+     * @returns {Object} JSON record of the block including the arrangement of its child blocks
+     *                   (read back by WorkflowEditor.addBlockByJsonRecord)
+     */
+    getDictForJSON() {
+        let dict = super.getDictForJSON();
+        dict['child_block_sort'] = this.child_block_sort;
+        return dict;
+    }
+
     // #########################
     // ########## NEW ##########
     // #########################

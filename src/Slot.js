@@ -220,9 +220,31 @@ class SlotExt extends Slot{
     constructor(parent_block, inout, name, text, type, required=true, obj_type='None', uid=''){
         super(parent_block, inout, name, text, type, required, obj_type, name, uid);
         this.external = true;
+        /**
+         * Position of the external slot terminal on the canvas (relative to the canvas origin), or null when
+         * not placed yet. Only ``x`` and ``y`` are used (see {@link BlockLayout}).
+         * @type {BlockLayout|null}
+         */
+        this.layout = null;
     }
 
     getClassName(){return 'SlotExt';}
+
+    /** @returns {BlockLayout|null} position of the slot terminal on the canvas */
+    getLayout(){return this.layout;}
+
+    /** @param {BlockLayout|null} layout - new position; invalid values are treated as null (= not placed) */
+    setLayout(layout){this.layout = normalizeLayout(layout, false);}
+
+    /**
+     * @returns {Object} JSON record of the slot; ``layout`` is included only when the slot has been placed
+     */
+    getDictForJSON(){
+        let dict = super.getDictForJSON();
+        if(this.layout !== null)
+            dict['layout'] = Object.assign({}, this.layout);
+        return dict;
+    }
 }
 
 function inout_invertor(val, invert){
