@@ -15,10 +15,6 @@
         if('example_id' in params){
             example_id = parseInt(params['example_id']);
         }
-        // ?view=legacy selects the former HTML renderer instead of the SVG canvas
-        if(params['view'] === 'legacy'){
-            legacy_view = true;
-        }
     </script>
     <script type="text/javascript" src="src/myQuery.js"></script>
     <script type="text/javascript" src="src/mupifData.js"></script>
@@ -46,7 +42,7 @@
     <script type="text/javascript" src="src/BlockGetItemFromDataList.js"></script>
     <script type="text/javascript" src="src/Datalink.js"></script>
     <script type="text/javascript" src="src/ExecutionOrder.js"></script>
-    <!-- SVG canvas (browser only; not part of the headless bundle project.js) -->
+    <!-- SVG canvas (browser only; not part of the headless bundle project.js used by the Node code generator) -->
     <script type="text/javascript" src="lib/joint/joint.min.js"></script>
     <script type="text/javascript" src="src/view/AutoLayout.js"></script>
     <script type="text/javascript" src="src/view/Shapes.js"></script>
@@ -109,10 +105,7 @@
                 </div>
                 
                 <div class="vbox contentView" id="contentView">
-                    <div id="workflowContainer" onmousedown="anyClick(event, '');" onmouseup="editor.one_elem_check_disabling_propagation=false;">
-                        <div id="workflowSubContainer">
-
-                        </div>
+                    <div id="workflowContainer">
                         <div id="workflowCanvas"></div>
                     </div>
 
@@ -134,15 +127,6 @@
 </div>
 
 <script type="text/javascript">
-    function reRender(){
-        if(!editor)
-            return;// the observer fires before main() created the editor
-        // the canvas fills the container by itself; the legacy renderer depends on the container size
-        if(!editor.canvas)
-            editor.generateWorkflowHtml();
-    }
-    new ResizeObserver(reRender).observe(document.getElementById('workflowContainer'));
-
     function windowResize(){
         document.getElementById('contentView').style.height = (window.innerHeight-100).toString() + 'px';
     }

@@ -4,8 +4,8 @@
  * Responsibility
  * --------------
  * ``CanvasView`` owns the JointJS graph and paper showing the edited workflow: blocks (nested containers
- * become nested elements), external slot terminals and data links. It replaces the former HTML/flexbox
- * rendering (``Block.getBlockHtml``), which remains available with the ``?view=legacy`` URL parameter.
+ * become nested elements), external slot terminals and data links. It replaced the former HTML/flexbox
+ * rendering of blocks and the div-segment data links.
  *
  * Model -> view sync
  * ------------------
@@ -552,9 +552,11 @@ class CanvasView{
             this.cell_models.set(cell.id, slot);
         });
 
+        // a data link is drawn only when both of its slots are shown (it cannot refer to a missing cell)
+        let shown = new Set(cells.map(c => c.id));
         this.editor.datalinks.forEach(dl => {
             let cell = createDataLinkCell(dl, this.datalinkCellId(dl), slot => this.slotCellId(slot));
-            if(cell !== null){
+            if(cell !== null && shown.has(cell.source().id) && shown.has(cell.target().id)){
                 cells.push(cell);
                 this.cell_models.set(cell.id, dl);
             }

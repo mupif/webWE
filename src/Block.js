@@ -666,94 +666,32 @@ class Block{
         return dict;
     }
 
-    // #########################
-    // ########## NEW ##########
-    // #########################
+    // ##############################################################
+    // Presentation, used by the canvas view (src/view/Shapes.js and
+    // src/view/CanvasView.js); subclasses override the first three.
+    // ##############################################################
 
+    /**
+     * @returns {string} CSS class(es) of the block kind; the canvas derives the fill color from it
+     *                   (BLOCK_COLORS in src/view/Shapes.js)
+     */
     getBlockHtmlClass(){
         return 'we_block';
     }
 
+    /** @returns {string} human readable name of the block kind, shown in the block header */
     getBlockHtmlName(){
         return 'Block';
     }
 
-    getBlockHtmlContent(){
-        let html = '';
-        html += this.getBlockHtml_header();
-        html += this.getBlockHtml_params();
-        html += '<div class="block_over_content">';
-        html += '<div>';
-        html += this.getBlockHtml_slots_input();
-        html += '</div><div>';
-        html += this.getBlockHtml_slots_output();
-        html += '</div>';
-        html += '</div>';
-        html += this.getBlockHtml_content();
-        html += this.getBlockHtml_footer();
-        html += this.getBlockHtml_menu();
-        return html;
-    }
-
-    getBlockHtml(){
-        let html = '';
-        html += '<div id="blockdiv_'+this.getUID()+'" class="'+this.getBlockHtmlClass()+'" onmousedown="anyClick(event, \''+this.getUID()+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;" oncontextmenu="return false;">';
-
-        html += this.getBlockHtmlContent();
-
-        html += '</div>';
-        return html;
-    }
-
-    getBlockHtml_header(){
-        return '<div class="bl_header">'+this.getBlockHtmlName()+'</div>';
-    }
-
+    /**
+     * @returns {string} parameters of the block as HTML (lines separated by ``<br>``), shown below the header
+     */
     getBlockHtml_params(){
         return '';
     }
 
-    getBlockHtml_slots_input(){
-        let html = '<div class="bl_slots_inputs">';
-        let slots = this.getSlots('in');
-        let n_slots = slots.length;
-        for(let i=0;i<n_slots;i++)
-            html += slots[i].getSlotHtml();
-        html += '</div>';
-        return html;
-    }
-
-    getBlockHtml_slots_output(){
-        let html = '<div class="bl_slots_inputs">';
-        let slots = this.getSlots('out');
-        let n_slots = slots.length;
-        for(let i=0;i<n_slots;i++)
-            html += slots[i].getSlotHtml();
-        html += '</div>';
-        return html;
-    }
-
-    getBlockHtml_content(){
-        let n_blocks = this.blocks.length;
-        let html = '';
-        if(n_blocks > 0) {
-            if (this.child_block_sort === 'vertical')
-                html += '<div class="bl_content bl_content_vertical">';
-            else
-                html += '<div class="bl_content bl_content_horizontal">';
-
-            for (let i = 0; i < n_blocks; i++) {
-                html += this.blocks[i].getBlockHtml();
-            }
-            html += '</div>';
-        }
-        return html;
-    }
-
-    getBlockHtml_footer(){
-        return '';
-    }
-
+    /** @returns {string} HTML of the items of the block's context menu (see {@link Block#defineMenu}) */
     getMenuHtml(){
         this.defineMenu();
         return this.generateMenuHtml(this.menu_record, 1);
@@ -775,33 +713,10 @@ class Block{
 
         let items = menu_record.getItems();
         for(let i=0;i<items.length;i++) {
-            html += '<div class="block_menu_item" onclick="editor.getBlockByUID(\''+this.getUID()+'\').modificationQuery(\''+items[i].getKeyword()+'\', \''+items[i].getValue()+'\');" onmousedown="editor.one_elem_check_disabling_propagation=true;" onmouseup="editor.one_elem_check_disabling_propagation=false;">'+items[i].getText()+'</div>';
+            html += '<div class="block_menu_item" onclick="editor.getBlockByUID(\''+this.getUID()+'\').modificationQuery(\''+items[i].getKeyword()+'\', \''+items[i].getValue()+'\');">'+items[i].getText()+'</div>';
         }
 
         return html;
-    }
-
-    getBlockHtml_menu(){
-        let html = '<div class="block_menu_base" id="block_menu_base_'+this.getUID()+'">';
-        html += '<div class="block_menu block_menu_0" style="display:block;">';
-        html += this.getMenuHtml();
-        html += '</div>';
-        html += '</div>';
-        return html;
-    }
-
-    getBlockDiv(){
-        return document.getElementById('blockdiv_'+this.getUID());
-    }
-
-    getBlockHeaderDiv(){
-        let divs = document.getElementById('blockdiv_'+this.getUID()).getElementsByClassName('bl_header');
-        if(divs.length)
-            return divs[0];
-    }
-
-    getBlockMenuDiv(){
-        return document.getElementById('block_menu_base_'+this.getUID());
     }
 
 }

@@ -57,92 +57,6 @@ function keyPress(e){
     }
 }
 
-function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=null){
-    // selection on the SVG canvas is handled by CanvasView; this handler serves the legacy HTML renderer
-    if(editor.canvas)
-        return;
-    if(editor.one_elem_check_disabling_propagation === false) {
-        editor.one_elem_check_disabling_propagation = true;
-
-        let block_instance = editor.getBlockByUID(block_uid);
-        let datalink_instance = editor.getDatalinkByUID(datalink_uid);
-        let ext_dataslot_instance = editor.getSlotByUID(ext_dataslot_uid);
-        if(ext_dataslot_instance)
-            if(ext_dataslot_instance.external === false)
-                ext_dataslot_instance = null;
-
-        // 0 = left
-        // 1 = middle
-        // 2 = right
-
-        if (event.button === 0 || event.button === 2) {
-            // block
-            editor.selected_block = block_instance;
-            let blocks = editor.getAllBlocks();
-            for (let i = 0; i < blocks.length; i++) {
-                blocks[i].getBlockDiv().classList.remove('we_block_selected');
-                blocks[i].getBlockMenuDiv().style.display = 'none';
-            }
-            if (editor.selected_block) {
-                editor.selected_block.getBlockDiv().classList.add('we_block_selected');
-            }
-
-            if (event.button === 2 && editor.selected_block) {
-                let block_menu = editor.selected_block.getBlockMenuDiv();
-                block_menu.style.display = 'block';
-            }
-
-            // datalink
-            editor.selected_datalink = null;
-            for (let i = 0; i < editor.datalinks.length; i++)
-                editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_selected');
-            if (datalink_instance) {
-                editor.selected_datalink = datalink_instance;
-                datalink_instance.getDatalinkDiv().classList.add('we_datalink_selected');
-            }
-
-            // external dataslot
-            editor.selected_slot_ext = null;
-            let slots = editor.workflowblock.getAllExternalDataSlots();
-            for (let i = 0; i < slots.length; i++)
-                slots[i].getDataslotDiv().classList.remove('slot_selected');
-            if (ext_dataslot_instance) {
-                editor.selected_slot_ext = ext_dataslot_instance;
-                ext_dataslot_instance.getDataslotDiv().classList.add('slot_selected');
-            }
-        }
-    }
-}
-
-function datalinkHoverOut(){
-    for (let i = 0; i < editor.datalinks.length; i++)
-        editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_hover');
-}
-
-function datalinkHoverIn(datalink_uid){
-    let datalink_instance = editor.getDatalinkByUID(datalink_uid);
-    for (let i = 0; i < editor.datalinks.length; i++)
-        editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_hover');
-    if (datalink_instance) {
-        datalink_instance.getDatalinkDiv().classList.add('we_datalink_hover');
-    }
-}
-
-function datalink_creation_begin(slot_uid){
-    editor.selected_slot_1 = editor.getSlotByUID(slot_uid);
-}
-
-function datalink_creation_finalize(slot_uid){
-    editor.selected_slot_2 = editor.getSlotByUID(slot_uid);
-
-    if(editor.selected_slot_1 && editor.selected_slot_2){
-        editor.addDatalink(editor.selected_slot_1, editor.selected_slot_2);
-        editor.selected_slot_1 = null;
-        editor.selected_slot_2 = null;
-    }
-    editor.generateWorkflowHtml();
-}
-
 function focusOnEditor(){
     document.getElementById('workflowContainer').style.display = 'block';
     document.getElementById('projectSettingsContainer').style.display = 'none';
@@ -303,11 +217,8 @@ function main(visual=false)
     editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
-    // the SVG canvas is used unless the legacy renderer is requested (or the view scripts are not loaded)
-    if(visual && !legacy_view && typeof CanvasView !== 'undefined') {
+    if(visual)
         editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
-        document.getElementById('workflowContainer').classList.add('canvas_mode');
-    }
 
     if(visual) {
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');

@@ -5,18 +5,15 @@ class WorkflowEditor{
 
         this.list_of_model_metadata = [];
 
-        this.one_elem_check_disabling_propagation = false;
         this.selected_block = null;
-        this.selected_slot_1 = null;
-        this.selected_slot_2 = null;
         this.selected_datalink = null;
         this.selected_slot_ext = null;
 
         this.visual = true;
 
         /**
-         * SVG canvas showing the workflow (see src/view/CanvasView.js), or null when the legacy HTML renderer
-         * is used or the editor runs headless (visual = false).
+         * SVG canvas showing the workflow (see src/view/CanvasView.js), or null when the editor runs headless
+         * (visual = false), e.g., in the Node code generator.
          * @type {CanvasView|null}
          */
         this.canvas = null;
@@ -597,27 +594,11 @@ class WorkflowEditor{
     }
 
     /**
-     * Redraw the workflow after a change of the model: by the SVG canvas when available, otherwise by the
-     * legacy HTML renderer.
+     * Redraw the workflow after a change of the model (no-op when the editor runs headless).
      */
     generateWorkflowHtml(){
-        if(this.canvas !== null){
+        if(this.canvas !== null)
             this.canvas.render();
-            return;
-        }
-        // workflow content
-        this.workflowblock.generateAllElementCodeNames();
-        // this.generateAllDatalinksCodeNames();
-
-        let code = '';
-        code += this.workflowblock.getBlockHtml();
-        let container = document.getElementById('workflowSubContainer');
-        code += '';
-        container.innerHTML = code;
-
-        // datalinks
-        for(let i=0;i<this.datalinks.length;i++)
-            container.innerHTML += this.datalinks[i].getDatalinkHtml();
     }
 
     getAllBlocks(){

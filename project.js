@@ -4,13 +4,6 @@ let editor;// The Workflow Editor instance
 let example_id = 0;// Global defining optional example
 
 /**
- * When true, the workflow is rendered by the former HTML/flexbox renderer instead of the SVG canvas
- * (CanvasView). It is set by the URL parameter ``view=legacy`` (see workflow_editor.html).
- * @type {boolean}
- */
-let legacy_view = false;
-
-/**
  * Counter used to assign {@link Block#view_id} values. It is only incremented, so view ids are unique
  * within one editor session (they are never persisted).
  * @type {number}
@@ -678,94 +671,32 @@ class Block{
         return dict;
     }
 
-    // #########################
-    // ########## NEW ##########
-    // #########################
+    // ##############################################################
+    // Presentation, used by the canvas view (src/view/Shapes.js and
+    // src/view/CanvasView.js); subclasses override the first three.
+    // ##############################################################
 
+    /**
+     * @returns {string} CSS class(es) of the block kind; the canvas derives the fill color from it
+     *                   (BLOCK_COLORS in src/view/Shapes.js)
+     */
     getBlockHtmlClass(){
         return 'we_block';
     }
 
+    /** @returns {string} human readable name of the block kind, shown in the block header */
     getBlockHtmlName(){
         return 'Block';
     }
 
-    getBlockHtmlContent(){
-        let html = '';
-        html += this.getBlockHtml_header();
-        html += this.getBlockHtml_params();
-        html += '<div class="block_over_content">';
-        html += '<div>';
-        html += this.getBlockHtml_slots_input();
-        html += '</div><div>';
-        html += this.getBlockHtml_slots_output();
-        html += '</div>';
-        html += '</div>';
-        html += this.getBlockHtml_content();
-        html += this.getBlockHtml_footer();
-        html += this.getBlockHtml_menu();
-        return html;
-    }
-
-    getBlockHtml(){
-        let html = '';
-        html += '<div id="blockdiv_'+this.getUID()+'" class="'+this.getBlockHtmlClass()+'" onmousedown="anyClick(event, \''+this.getUID()+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;" oncontextmenu="return false;">';
-
-        html += this.getBlockHtmlContent();
-
-        html += '</div>';
-        return html;
-    }
-
-    getBlockHtml_header(){
-        return '<div class="bl_header">'+this.getBlockHtmlName()+'</div>';
-    }
-
+    /**
+     * @returns {string} parameters of the block as HTML (lines separated by ``<br>``), shown below the header
+     */
     getBlockHtml_params(){
         return '';
     }
 
-    getBlockHtml_slots_input(){
-        let html = '<div class="bl_slots_inputs">';
-        let slots = this.getSlots('in');
-        let n_slots = slots.length;
-        for(let i=0;i<n_slots;i++)
-            html += slots[i].getSlotHtml();
-        html += '</div>';
-        return html;
-    }
-
-    getBlockHtml_slots_output(){
-        let html = '<div class="bl_slots_inputs">';
-        let slots = this.getSlots('out');
-        let n_slots = slots.length;
-        for(let i=0;i<n_slots;i++)
-            html += slots[i].getSlotHtml();
-        html += '</div>';
-        return html;
-    }
-
-    getBlockHtml_content(){
-        let n_blocks = this.blocks.length;
-        let html = '';
-        if(n_blocks > 0) {
-            if (this.child_block_sort === 'vertical')
-                html += '<div class="bl_content bl_content_vertical">';
-            else
-                html += '<div class="bl_content bl_content_horizontal">';
-
-            for (let i = 0; i < n_blocks; i++) {
-                html += this.blocks[i].getBlockHtml();
-            }
-            html += '</div>';
-        }
-        return html;
-    }
-
-    getBlockHtml_footer(){
-        return '';
-    }
-
+    /** @returns {string} HTML of the items of the block's context menu (see {@link Block#defineMenu}) */
     getMenuHtml(){
         this.defineMenu();
         return this.generateMenuHtml(this.menu_record, 1);
@@ -787,33 +718,10 @@ class Block{
 
         let items = menu_record.getItems();
         for(let i=0;i<items.length;i++) {
-            html += '<div class="block_menu_item" onclick="editor.getBlockByUID(\''+this.getUID()+'\').modificationQuery(\''+items[i].getKeyword()+'\', \''+items[i].getValue()+'\');" onmousedown="editor.one_elem_check_disabling_propagation=true;" onmouseup="editor.one_elem_check_disabling_propagation=false;">'+items[i].getText()+'</div>';
+            html += '<div class="block_menu_item" onclick="editor.getBlockByUID(\''+this.getUID()+'\').modificationQuery(\''+items[i].getKeyword()+'\', \''+items[i].getValue()+'\');">'+items[i].getText()+'</div>';
         }
 
         return html;
-    }
-
-    getBlockHtml_menu(){
-        let html = '<div class="block_menu_base" id="block_menu_base_'+this.getUID()+'">';
-        html += '<div class="block_menu block_menu_0" style="display:block;">';
-        html += this.getMenuHtml();
-        html += '</div>';
-        html += '</div>';
-        return html;
-    }
-
-    getBlockDiv(){
-        return document.getElementById('blockdiv_'+this.getUID());
-    }
-
-    getBlockHeaderDiv(){
-        let divs = document.getElementById('blockdiv_'+this.getUID()).getElementsByClassName('bl_header');
-        if(divs.length)
-            return divs[0];
-    }
-
-    getBlockMenuDiv(){
-        return document.getElementById('block_menu_base_'+this.getUID());
     }
 
 }
@@ -2425,24 +2333,6 @@ class BlockWorkflow extends Block{
         return html;
     }
 
-    getBlockHtmlContent(){
-        let html = '';
-        html += this.getBlockHtml_header();
-        html += this.getBlockHtml_params();
-        html += '<div class="block_over_content">';
-        html += '<div>';
-        html += this.getBlockHtml_slots_output();
-        html += '</div><div>';
-        html += this.getBlockHtml_content();
-        html += '</div><div>';
-        html += this.getBlockHtml_slots_input();
-        html += '</div>';
-        html += '</div>';
-        html += this.getBlockHtml_footer();
-        html += this.getBlockHtml_menu();
-        return html;
-    }
-
 }
 
 class BlockValueComparison extends Block{
@@ -3253,103 +3143,6 @@ class Datalink{
         };
     }
 
-    getDatalinkHtml(){
-        let div_a;
-        let div_b;
-        let br_a;
-        let br_b;
-        //
-        let div_workflow = document.getElementById('workflowSubContainer');
-        let br_workflow = div_workflow.getBoundingClientRect();
-        let s_x = br_workflow.x;
-        let s_y = br_workflow.y;
-        //
-        div_a = document.getElementById('point_'+this.slot1.getUID());
-        div_b = document.getElementById('point_'+this.slot2.getUID());
-        br_a = div_a.getBoundingClientRect();
-        br_b = div_b.getBoundingClientRect();
-        //
-        // return this.createDatalinkSimpleLine(br_a.x-s_x, br_a.y-s_y, br_b.x-s_x, br_b.y-s_y);
-        return this.createDatalingSpline(br_a.x-s_x, br_a.y-s_y, br_b.x-s_x, br_b.y-s_y);
-    }
-
-    getDatalinkDiv(){
-        return document.getElementById(this.id);
-    }
-
-    createDatalinkLineDiv(x, y, length, angle) {
-        let html = '';
-        html += '' +
-            '<div class="we_datalink_sub" style="' +
-            'width: ' + length + 'px;' +
-            'height: 0;' +
-            '-moz-transform: rotate(' + angle + 'rad);' +
-            '-webkit-transform: rotate(' + angle + 'rad);' +
-            '-o-transform: rotate(' + angle + 'rad);' +
-            '-ms-transform: rotate(' + angle + 'rad);' +
-            'top: ' + y + 'px;' +
-            'left: ' + x + 'px;' +
-            '" ' +
-            'onmousedown="anyClick(event, \'\', \''+this.id+'\');"' +
-            ' onmouseup="editor.one_elem_check_disabling_propagation=false;"' +
-            ' onmouseenter="datalinkHoverIn(\''+this.id+'\')"' +
-            ' onmouseleave="datalinkHoverOut()">' +
-            '</div>';
-        return html;
-    }
-
-    createDatalinkSubLine(x1, y1, x2, y2){
-        let a = x1 - x2,
-            b = y1 - y2,
-            c = Math.sqrt(a * a + b * b);
-        let sx = (x1 + x2) / 2,
-            sy = (y1 + y2) / 2;
-        let x = sx - c / 2,
-            y = sy;
-        let alpha = Math.PI - Math.atan2(-b, a);
-        return this.createDatalinkLineDiv(x, y, c, alpha);
-    }
-
-    createDatalingSpline(x1, y1, x2, y2){
-        let classname_add = '';
-        if(editor.selected_datalink === this)
-            classname_add = '_selected';
-
-        let html = '<div class="we_datalink'+classname_add+'" id="'+this.id+'">';
-
-
-        if(y1 === y2)
-            html += this.createDatalinkSubLine(x1, y1, x2, y2);
-        else{
-            let dx = x2-x1;
-            let dy = y2-y1;
-            let diag_len = Math.sqrt(dx*dx+dy*dy);
-            let div_elem_len = 5;
-
-            let x1_, x2_, y1_, y2_;
-            let division = Math.ceil(diag_len/div_elem_len);
-            let d_alpha = Math.PI/division;
-            let xc = 0.5*(x1+x2);
-            let yc = 0.5*(y1+y2);
-            let alpha=-Math.PI/2.;
-
-            for(let iloc = 0; iloc < division;iloc++) {
-                x1_ = x1+dx/division*iloc;
-                y1_ = yc+Math.sin(alpha)*0.5*dy;
-                x2_ = x1+dx/division*(iloc+1);
-                y2_ = yc+Math.sin(alpha+d_alpha)*0.5*dy;
-                html += this.createDatalinkSubLine(x1_, y1_, x2_, y2_);
-                alpha += d_alpha;
-            }
-
-        }
-
-
-
-        html += '<div>';
-        return html;
-    }
-
 
 
 }
@@ -3759,92 +3552,6 @@ function keyPress(e){
     }
 }
 
-function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=null){
-    // selection on the SVG canvas is handled by CanvasView; this handler serves the legacy HTML renderer
-    if(editor.canvas)
-        return;
-    if(editor.one_elem_check_disabling_propagation === false) {
-        editor.one_elem_check_disabling_propagation = true;
-
-        let block_instance = editor.getBlockByUID(block_uid);
-        let datalink_instance = editor.getDatalinkByUID(datalink_uid);
-        let ext_dataslot_instance = editor.getSlotByUID(ext_dataslot_uid);
-        if(ext_dataslot_instance)
-            if(ext_dataslot_instance.external === false)
-                ext_dataslot_instance = null;
-
-        // 0 = left
-        // 1 = middle
-        // 2 = right
-
-        if (event.button === 0 || event.button === 2) {
-            // block
-            editor.selected_block = block_instance;
-            let blocks = editor.getAllBlocks();
-            for (let i = 0; i < blocks.length; i++) {
-                blocks[i].getBlockDiv().classList.remove('we_block_selected');
-                blocks[i].getBlockMenuDiv().style.display = 'none';
-            }
-            if (editor.selected_block) {
-                editor.selected_block.getBlockDiv().classList.add('we_block_selected');
-            }
-
-            if (event.button === 2 && editor.selected_block) {
-                let block_menu = editor.selected_block.getBlockMenuDiv();
-                block_menu.style.display = 'block';
-            }
-
-            // datalink
-            editor.selected_datalink = null;
-            for (let i = 0; i < editor.datalinks.length; i++)
-                editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_selected');
-            if (datalink_instance) {
-                editor.selected_datalink = datalink_instance;
-                datalink_instance.getDatalinkDiv().classList.add('we_datalink_selected');
-            }
-
-            // external dataslot
-            editor.selected_slot_ext = null;
-            let slots = editor.workflowblock.getAllExternalDataSlots();
-            for (let i = 0; i < slots.length; i++)
-                slots[i].getDataslotDiv().classList.remove('slot_selected');
-            if (ext_dataslot_instance) {
-                editor.selected_slot_ext = ext_dataslot_instance;
-                ext_dataslot_instance.getDataslotDiv().classList.add('slot_selected');
-            }
-        }
-    }
-}
-
-function datalinkHoverOut(){
-    for (let i = 0; i < editor.datalinks.length; i++)
-        editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_hover');
-}
-
-function datalinkHoverIn(datalink_uid){
-    let datalink_instance = editor.getDatalinkByUID(datalink_uid);
-    for (let i = 0; i < editor.datalinks.length; i++)
-        editor.datalinks[i].getDatalinkDiv().classList.remove('we_datalink_hover');
-    if (datalink_instance) {
-        datalink_instance.getDatalinkDiv().classList.add('we_datalink_hover');
-    }
-}
-
-function datalink_creation_begin(slot_uid){
-    editor.selected_slot_1 = editor.getSlotByUID(slot_uid);
-}
-
-function datalink_creation_finalize(slot_uid){
-    editor.selected_slot_2 = editor.getSlotByUID(slot_uid);
-
-    if(editor.selected_slot_1 && editor.selected_slot_2){
-        editor.addDatalink(editor.selected_slot_1, editor.selected_slot_2);
-        editor.selected_slot_1 = null;
-        editor.selected_slot_2 = null;
-    }
-    editor.generateWorkflowHtml();
-}
-
 function focusOnEditor(){
     document.getElementById('workflowContainer').style.display = 'block';
     document.getElementById('projectSettingsContainer').style.display = 'none';
@@ -4005,11 +3712,8 @@ function main(visual=false)
     editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
-    // the SVG canvas is used unless the legacy renderer is requested (or the view scripts are not loaded)
-    if(visual && !legacy_view && typeof CanvasView !== 'undefined') {
+    if(visual)
         editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
-        document.getElementById('workflowContainer').classList.add('canvas_mode');
-    }
 
     if(visual) {
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');
@@ -4816,21 +4520,6 @@ class Slot{
     // #########################
     // ########## NEW ##########
     // #########################
-
-    getSlotHtml(){
-        let temp_inout = inout_invertor(this.inout, this.external);
-
-        let html = '';
-        if(temp_inout === 'in')
-            html = '<div class="slot_input" id="'+this.id+'" onmousedown="anyClick(event, \'\',\'\',\''+this.id+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;"><div class="slot_marker" onmousedown="datalink_creation_begin(\''+this.getUID()+'\')" onmouseup="datalink_creation_finalize(\''+this.getUID()+'\');"><div class="slot_point" id="point_'+this.getUID()+'"></div></div><div class="slot_name">'+this.name+'</div></div>';
-        if(temp_inout === 'out')
-            html = '<div class="slot_output" id="'+this.id+'" onmousedown="anyClick(event, \'\',\'\',\''+this.id+'\');" onmouseup="editor.one_elem_check_disabling_propagation=false;"><div class="slot_name">'+this.name+'</div><div class="slot_marker" onmousedown="datalink_creation_begin(\''+this.getUID()+'\')" onmouseup="datalink_creation_finalize(\''+this.getUID()+'\');"><div class="slot_point" id="point_'+this.getUID()+'"></div></div></div>';
-        return html;
-    }
-
-    getDataslotDiv(){
-        return document.getElementById(this.id);
-    }
 }
 
 class SlotExt extends Slot{
@@ -4896,18 +4585,15 @@ class WorkflowEditor{
 
         this.list_of_model_metadata = [];
 
-        this.one_elem_check_disabling_propagation = false;
         this.selected_block = null;
-        this.selected_slot_1 = null;
-        this.selected_slot_2 = null;
         this.selected_datalink = null;
         this.selected_slot_ext = null;
 
         this.visual = true;
 
         /**
-         * SVG canvas showing the workflow (see src/view/CanvasView.js), or null when the legacy HTML renderer
-         * is used or the editor runs headless (visual = false).
+         * SVG canvas showing the workflow (see src/view/CanvasView.js), or null when the editor runs headless
+         * (visual = false), e.g., in the Node code generator.
          * @type {CanvasView|null}
          */
         this.canvas = null;
@@ -5488,27 +5174,11 @@ class WorkflowEditor{
     }
 
     /**
-     * Redraw the workflow after a change of the model: by the SVG canvas when available, otherwise by the
-     * legacy HTML renderer.
+     * Redraw the workflow after a change of the model (no-op when the editor runs headless).
      */
     generateWorkflowHtml(){
-        if(this.canvas !== null){
+        if(this.canvas !== null)
             this.canvas.render();
-            return;
-        }
-        // workflow content
-        this.workflowblock.generateAllElementCodeNames();
-        // this.generateAllDatalinksCodeNames();
-
-        let code = '';
-        code += this.workflowblock.getBlockHtml();
-        let container = document.getElementById('workflowSubContainer');
-        code += '';
-        container.innerHTML = code;
-
-        // datalinks
-        for(let i=0;i<this.datalinks.length;i++)
-            container.innerHTML += this.datalinks[i].getDatalinkHtml();
     }
 
     getAllBlocks(){

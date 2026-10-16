@@ -1,26 +1,15 @@
 /*
- * Styles of the SVG workflow canvas (src/view/CanvasView.js).
- *
- * #workflowContainer hosts both renderers: the legacy HTML renderer (#workflowSubContainer) and the canvas
- * (#workflowCanvas). The class canvas_mode, set in main() when the canvas is used, selects which one is shown.
+ * Styles of the SVG workflow canvas (src/view/CanvasView.js) hosted by #workflowContainer.
  */
-
-div#workflowContainer.canvas_mode div#workflowSubContainer{
-    display: none;
-}
-
-div#workflowContainer:not(.canvas_mode) div#workflowCanvas{
-    display: none;
-}
 
 /* the content view must not grow with the paper (flex items do by default), so that the paper scrolls */
 div#contentView{
     min-width: 0;
 }
 
-/* in canvas mode the container fills the content view; the paper fills the container (zoom and pan instead
-   of scrolling, see src/view/ZoomPan.js) */
-div#workflowContainer.canvas_mode{
+/* the container fills the content view; the paper fills the container (zoom and pan instead of scrolling,
+   see src/view/ZoomPan.js) */
+div#workflowContainer{
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;

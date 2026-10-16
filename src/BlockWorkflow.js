@@ -610,22 +610,4 @@ class BlockWorkflow extends Block{
         return html;
     }
 
-    getBlockHtmlContent(){
-        let html = '';
-        html += this.getBlockHtml_header();
-        html += this.getBlockHtml_params();
-        html += '<div class="block_over_content">';
-        html += '<div>';
-        html += this.getBlockHtml_slots_output();
-        html += '</div><div>';
-        html += this.getBlockHtml_content();
-        html += '</div><div>';
-        html += this.getBlockHtml_slots_input();
-        html += '</div>';
-        html += '</div>';
-        html += this.getBlockHtml_footer();
-        html += this.getBlockHtml_menu();
-        return html;
-    }
-
 }
