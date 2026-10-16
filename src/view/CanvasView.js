@@ -17,10 +17,19 @@
  * Cell ids are derived from session-stable identifiers (see Shapes.js); ``getModelOfCell`` maps a cell back to
  * the model object it represents.
  *
+ * View -> model sync
+ * ------------------
+ * When the user drops a dragged element, ``commitMove`` writes its new position (relative to its container) to
+ * the model. With JointJS' embedding mode, the dragged block is detached from its container during the drag and
+ * attached to the container under the mouse pointer on drop; when that container differs from the original
+ * one, the block is moved to it in the model as well (appended as its last child, i.e., executed last).
+ * The canvas is then rebuilt from the model, which also grows containers around their (new) children.
+ *
  * JointJS features used
  * ---------------------
- * ``dia.Graph`` / ``dia.Paper`` (embedding of child elements via the ``parent``/``embeds`` attributes,
- * ``fitToContent`` for the scrollable drawing area).
+ * ``dia.Graph`` / ``dia.Paper`` (embedding of child elements via the ``parent``/``embeds`` attributes and the
+ * paper's ``embeddingMode`` with ``validateEmbedding``, ``fitToContent`` for the scrollable drawing area),
+ * paper pointer events.
  */
 class CanvasView{
     /**
@@ -32,6 +41,9 @@ class CanvasView{
         this.el = el;
         /** Model object (Block, SlotExt or Datalink) for every cell id. @type {Map<string, Object>} */
         this.cell_models = new Map();
+
+        /** State of the element being dragged (see ``onPointerDown``), or null. @type {Object|null} */
+        this.drag = null;
 
         this.graph = new joint.dia.Graph({}, {cellNamespace: joint.shapes});
         this.paper = new joint.dia.Paper({
@@ -45,10 +57,82 @@ class CanvasView{
             background: {color: '#f7f8fa'},
             async: false,
             sorting: joint.dia.Paper.sorting.APPROX,
-            interactive: false,
-            defaultConnectionPoint: {name: 'anchor'}
+            interactive: {elementMove: true, linkMove: false, labelMove: false, addLinkFromMagnet: false},
+            defaultConnectionPoint: {name: 'anchor'},
+            // nesting by drag and drop: a dropped block is embedded in the container under the pointer
+            embeddingMode: true,
+            frontParentOnly: false,
+            findParentBy: 'pointer',
+            validateEmbedding: (child_view, parent_view) => this.canEmbed(child_view.model, parent_view.model)
         });
+
+        this.paper.on('element:pointerdown', (view, evt, x, y) => this.onPointerDown(view));
+        this.paper.on('element:pointerup', (view, evt, x, y) => this.onPointerUp(view));
     }
+
+    /**
+     * Embedding rule: only blocks can be nested, and only in container blocks.
+     *
+     * @param {joint.dia.Element} child_cell
+     * @param {joint.dia.Element} parent_cell
+     * @returns {boolean} true when the child cell may be dropped into the parent cell
+     */
+    canEmbed(child_cell, parent_cell){
+        let child = this.getModelOfCell(child_cell);
+        let parent = this.getModelOfCell(parent_cell);
+        return child instanceof Block && parent instanceof Block && parent.isContainer();
+    }
+
+    /**
+     * Remember the position and container of an element before it is dragged.
+     *
+     * @param {joint.dia.ElementView} view
+     */
+    onPointerDown(view){
+        let cell = view.model;
+        this.drag = {id: cell.id, position: cell.position(), parent: cell.get('parent') || null};
+    }
+
+    /**
+     * Commit the move of an element when the user drops it (clicks without movement are ignored).
+     *
+     * @param {joint.dia.ElementView} view
+     */
+    onPointerUp(view){
+        let drag = this.drag;
+        this.drag = null;
+        let cell = view.model;
+        if(drag === null || drag.id !== cell.id)
+            return;
+        let p = cell.position();
+        if(p.x === drag.position.x && p.y === drag.position.y && (cell.get('parent') || null) === drag.parent)
+            return;
+        this.commitMove(cell);
+    }
+
+    /**
+     * Write the position (and the container) of a dropped element to the model and rebuild the canvas.
+     *
+     * @param {joint.dia.Element} cell - block or external slot terminal
+     */
+    commitMove(cell){
+        let model = this.getModelOfCell(cell);
+        let p = cell.position();
+        if(model instanceof SlotExt){
+            model.setLayout({x: p.x, y: p.y});
+        }else if(model instanceof Block){
+            let parent_cell = cell.getParentCell();
+            let new_parent = parent_cell ? this.getModelOfCell(parent_cell) : this.editor.workflowblock;
+            if(new_parent !== model.getParentBlock())
+                model.moveToContainer(new_parent);
+            // layouts are relative to the container (see BlockLayout)
+            let origin = parent_cell ? parent_cell.position() : {x: 0, y: 0};
+            let layout = Object.assign({}, model.getLayout() || {}, {x: p.x - origin.x, y: p.y - origin.y});
+            model.setLayout(layout);
+        }
+        this.editor.generateWorkflowHtml();
+    }
+
 
     /**
      * @param {Block} block

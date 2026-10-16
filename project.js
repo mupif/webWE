@@ -507,6 +507,24 @@ class Block{
         }
     }
 
+    /**
+     * Move the block (with its children) into another container block. The block becomes the last child of
+     * the container, i.e., it is executed after the other children. Data links are kept.
+     *
+     * @param {Block} container - new parent: the workflow or a container block; it must not be the block itself
+     *                            or one of its descendants
+     * @returns {boolean} true when the block was moved
+     */
+    moveToContainer(container){
+        if(container === null || !container.isContainer() || container === this ||
+            container.getParentBlockChain().includes(this) || this.parent_block === null)
+            return false;
+        this.parent_block.removeBlockFromList(this);
+        this.parent_block = container;
+        container.addBlock(this);
+        return true;
+    }
+
     moveMeUp(){
         this.parent_block.moveChildBlockUp(this);
     }
@@ -3586,6 +3604,9 @@ function keyPress(e){
 }
 
 function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=null){
+    // selection on the SVG canvas is handled by CanvasView; this handler serves the legacy HTML renderer
+    if(editor.canvas)
+        return;
     if(editor.one_elem_check_disabling_propagation === false) {
         editor.one_elem_check_disabling_propagation = true;
 

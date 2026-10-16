@@ -37,3 +37,8 @@ div#workflowCanvas text{
 div#workflowCanvas svg{
     letter-spacing: normal;
 }
+
+/* blocks and external slot terminals can be dragged */
+div#workflowCanvas .joint-element{
+    cursor: move;
+}

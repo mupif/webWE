@@ -56,6 +56,9 @@ function keyPress(e){
 }
 
 function anyClick(event, block_uid=null, datalink_uid=null, ext_dataslot_uid=null){
+    // selection on the SVG canvas is handled by CanvasView; this handler serves the legacy HTML renderer
+    if(editor.canvas)
+        return;
     if(editor.one_elem_check_disabling_propagation === false) {
         editor.one_elem_check_disabling_propagation = true;
 

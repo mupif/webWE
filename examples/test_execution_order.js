@@ -178,6 +178,27 @@ t.test('data flow ranks of a cycle', () => {
     t.assert(ranks[0] < ranks[1] && ranks[1] < ranks[3], 'cycle broken in execution order: ' + ranks);
 });
 
+t.test('moving a block into another container', () => {
+    let ed = t.createEditor(1);
+    let wf = ed.workflowblock;
+    let tl = wf.getBlocks(BlockTimeloop)[0];
+    let m4 = tl.getBlocks()[3];
+    let prop = wf.getBlocks(BlockProperty)[0];
+    t.assert(m4.moveToContainer(wf), 'model out of the loop');
+    t.assertEqual(m4.getExecutionLabel(), '9', 'appended as the last top-level block');
+    t.assert(prop.moveToContainer(tl), 'property into the loop');
+    t.assert(prop.getParentBlock() === tl && tl.getBlocks()[3] === prop);
+    t.assertEqual(prop.getExecutionLabel(), '7.4');
+    t.assertEqual(ed.datalinks.length, 11, 'data links are kept');
+    t.assert(!tl.moveToContainer(tl), 'not into itself');
+    t.assert(!wf.moveToContainer(tl), 'the workflow cannot be moved');
+    t.assert(!prop.moveToContainer(m4), 'not into a non-container');
+    wf.addBlockByName('dowhile');
+    let dw = wf.getBlocks(BlockDoWhile)[0];
+    t.assert(dw.moveToContainer(tl), 'DoWhile into the loop');
+    t.assert(!tl.moveToContainer(dw), 'not into a descendant');
+});
+
 t.test('reordering does not change generated code of a valid workflow', () => {
     let ed = t.createEditor(1);
     let code = ed.getExecutionCode();
