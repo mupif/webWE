@@ -2,9 +2,9 @@
  * Unit tests of execution labels (Block.getExecutionLabel) and of the execution order analysis
  * (src/ExecutionOrder.js).
  *
- * Example 1 used below: blocks 1-7 are constants and input files, block 8 is a Timeloop containing the
- * models 8.1-8.4; model_1 (8.1) provides 'temperature' to model_2 (8.2) and model_3 (8.3), model_2 provides
- * 'displacement' to model_4 (8.4).
+ * Example 1 used below: seven constants and input files (data blocks, not executed, hence unlabelled) followed
+ * by a Timeloop (block 1) containing the models 1.1-1.4; model_1 (1.1) provides 'temperature' to model_2 (1.2)
+ * and model_3 (1.3), model_2 provides 'displacement' to model_4 (1.4).
  *
  * Run: ``node test_execution_order.js`` (requires an up-to-date ``project.js``, see ``unify.py``).
  */
@@ -30,12 +30,39 @@ function moveTo(container, block, index){
     container.blocks.splice(index, 0, block);
 }
 
-t.test('hierarchical execution labels', () => {
+/**
+ * Example 1 with a Variable block inserted at the given top-level position.
+ *
+ * @param {number} index - position of the Variable among the top-level blocks
+ * @returns {{ed: WorkflowEditor, wf: BlockWorkflow, tl: BlockTimeloop, models: Block[], variable: BlockVariable}}
+ */
+function exampleWithVariable(index){
+    let ed = t.createEditor(1);
+    let wf = ed.workflowblock;
+    wf.addBlockByName('variable');
+    let variable = wf.getBlocks(BlockVariable)[0];
+    moveTo(wf, variable, index);
+    let tl = wf.getBlocks(BlockTimeloop)[0];
+    return {ed, wf, tl, models: tl.getBlocks().slice(), variable};
+}
+
+t.test('hierarchical execution labels number executable blocks only', () => {
     let ed = t.createEditor(1);
     let l = labels(ed);
-    t.assertEqual(l.slice(6), ['7:input_file_2', '8:timeloop_1', '8.1:model_1', '8.2:model_2', '8.3:model_3', '8.4:model_4']);
+    t.assertEqual(l.slice(5), [':input_file_1', ':input_file_2', '1:timeloop_1', '1.1:model_1', '1.2:model_2', '1.3:model_3', '1.4:model_4']);
     t.assertEqual(ed.workflowblock.getExecutionLabel(), '');
     t.assertEqual(ed.workflowblock.getExecutionIndex(), -1);
+    t.assertEqual(ed.workflowblock.getBlocks()[0].getExecutionIndex(), -1, 'data block has no index');
+});
+
+t.test('executable and non-executable blocks', () => {
+    let ed = t.createEditor();
+    let names = ['physicalquantity', 'property', 'file', 'value_comparison', 'property_to_quantity', 'quantity_to_property',
+        'number_to_quantity', 'number_to_property', 'datalist_length', 'get_item_from_datalist',
+        'model', 'variable', 'wait_for_background_processes', 'timeloop', 'dowhile', 'run_in_background', 'allocate_model_at_runtime'];
+    names.forEach(n => ed.workflowblock.addBlockByName(n));
+    t.assertEqual(ed.workflowblock.getBlocks().map(b => b.isExecutable()), names.map((n, i) => i >= 10));
+    t.assertEqual(ed.workflowblock.getBlocks().slice(9).map(b => b.getExecutionLabel()), ['', '1', '2', '3', '4', '5', '6', '7']);
 });
 
 t.test('labels follow reordering', () => {
@@ -43,10 +70,12 @@ t.test('labels follow reordering', () => {
     let tl = ed.workflowblock.getBlocks(BlockTimeloop)[0];
     let m1 = tl.getBlocks()[0];
     m1.moveMeDown();
-    t.assertEqual(m1.getExecutionLabel(), '8.2');
-    tl.moveMeUp();
-    t.assertEqual(tl.getExecutionLabel(), '7');
-    t.assertEqual(m1.getExecutionLabel(), '7.2');
+    t.assertEqual(m1.getExecutionLabel(), '1.2');
+    ed.workflowblock.addBlockByName('variable');
+    t.assertEqual(ed.workflowblock.getBlocks(BlockVariable)[0].getExecutionLabel(), '2');
+    tl.moveMeDown();
+    t.assertEqual(tl.getExecutionLabel(), '2');
+    t.assertEqual(m1.getExecutionLabel(), '2.2');
 });
 
 t.test('container and loop classification', () => {
@@ -77,29 +106,53 @@ t.test('liftToCommonContainer', () => {
     t.assertEqual(liftToCommonContainer(m2, m2), null);
 });
 
-t.test('consumer before producer at top level is an error', () => {
+t.test('data blocks can be placed anywhere', () => {
     let ed = t.createEditor(1);
     let wf = ed.workflowblock;
-    let moved = wf.getBlocks()[0];
-    moveTo(wf, moved, wf.getBlocks().length - 1);   // start_time constant after the Timeloop
+    moveTo(wf, wf.getBlocks()[0], wf.getBlocks().length - 1);   // start_time constant after the Timeloop
+    moveTo(wf, wf.getBlocks(BlockInputFile)[0], wf.getBlocks().length - 1);   // input file of model_1 as well
+    t.assertEqual(findOrderViolations(ed).length, 0, 'constants are evaluated where they are read');
+});
+
+t.test('consumer before producer at top level is an error', () => {
+    let {ed, variable, models} = exampleWithVariable(0);   // the Variable runs before the Timeloop
+    ed.addDatalink(models[0].getSlots('out')[0], variable.getDataSlotWithName('in'));
     let v = findOrderViolations(ed);
     t.assertEqual(v.length, 1);
     t.assertEqual(v[0].severity, 'error');
-    t.assert(v[0].producer === moved, 'producer is the moved constant');
-    t.assert(v[0].consumer instanceof BlockTimeloop, 'consumer is the Timeloop');
+    t.assert(v[0].producer === models[0], 'producer is the model');
+    t.assert(v[0].consumer === variable, 'consumer is the Variable');
     t.assert(v[0].message.indexOf('executed later') > 0, 'message explains the problem');
 });
 
 t.test('nested consumer is lifted to its container', () => {
-    let ed = t.createEditor(1);
-    let wf = ed.workflowblock;
-    let tl = wf.getBlocks(BlockTimeloop)[0];
-    let file1 = wf.getBlocks(BlockInputFile)[0];
-    moveTo(wf, file1, wf.getBlocks().length - 1);   // input file consumed by model 8.1 moved after the loop
+    let {ed, wf, models, variable} = exampleWithVariable(8);   // the Variable runs after the Timeloop
+    let free = models[0].getSlots('in').find(s => !s.connected());
+    ed.addDatalink(variable.getDataSlotWithName('out'), free);
     let v = findOrderViolations(ed);
     t.assertEqual(v.length, 1);
-    t.assert(v[0].consumer === tl.getBlocks()[0], 'consumer is the nested model');
+    t.assert(v[0].consumer === models[0], 'consumer is the nested model');
     t.assertEqual(v[0].severity, 'error', 'top level is not inside a loop');
+    moveTo(wf, variable, 0);
+    t.assertEqual(findOrderViolations(ed).length, 0, 'fixed by running the Variable first');
+});
+
+t.test('values read through helper blocks depend on their executable producers', () => {
+    let ed = t.createEditor(1);
+    let tl = ed.workflowblock.getBlocks(BlockTimeloop)[0];
+    let [m1, m2] = tl.getBlocks();
+    tl.addBlockByName('quantity_to_property');
+    let helper = tl.getBlocks()[4];
+    moveTo(tl, helper, 0);   // the position of the helper does not matter
+    ed.addDatalink(m2.getDataSlotWithName('displacement'), helper.getSlots('in')[0]);
+    ed.addDatalink(helper.getSlots('out')[0], m1.getSlots('in').find(s => !s.connected()));
+    let producers = executableProducers(helper);
+    t.assert(producers.length === 1 && producers[0] === m2, 'the helper depends on model_2');
+    let v = findOrderViolations(ed);
+    t.assertEqual(v.length, 1);
+    t.assert(v[0].producer === m2 && v[0].consumer === m1, 'model_1 reads model_2 through the helper');
+    t.assertEqual(v[0].severity, 'warning', 'inside the loop');
+    t.assert(v[0].message.indexOf('through ' + helper.getCodeName()) > 0, 'message names the helper');
 });
 
 t.test('consumer before producer inside a loop is a warning', () => {
@@ -185,10 +238,10 @@ t.test('moving a block into another container', () => {
     let m4 = tl.getBlocks()[3];
     let prop = wf.getBlocks(BlockProperty)[0];
     t.assert(m4.moveToContainer(wf), 'model out of the loop');
-    t.assertEqual(m4.getExecutionLabel(), '9', 'appended as the last top-level block');
+    t.assertEqual(m4.getExecutionLabel(), '2', 'appended as the last top-level block, after the Timeloop');
     t.assert(prop.moveToContainer(tl), 'property into the loop');
     t.assert(prop.getParentBlock() === tl && tl.getBlocks()[3] === prop);
-    t.assertEqual(prop.getExecutionLabel(), '7.4');
+    t.assertEqual(prop.getExecutionLabel(), '', 'data blocks are not numbered');
     t.assertEqual(ed.datalinks.length, 11, 'data links are kept');
     t.assert(!tl.moveToContainer(tl), 'not into itself');
     t.assert(!wf.moveToContainer(tl), 'the workflow cannot be moved');

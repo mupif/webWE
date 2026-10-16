@@ -26,6 +26,14 @@ class BlockPhysicalQuantity extends Block{
         return [];
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }

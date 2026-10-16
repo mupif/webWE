@@ -149,11 +149,22 @@ function describeBlock(block){
 /**
  * Width of the execution label badge.
  *
- * @param {string} label - e.g., '2.1'
- * @returns {number}
+ * @param {string} label - e.g., '2.1'; empty for blocks which are not executed (data and helper blocks), which
+ *        have no badge
+ * @returns {number} badge width (0 for no badge)
  */
 function badgeWidth(label){
+    if(label === '')
+        return 0;
     return Math.max(SHAPE_GEOMETRY.BADGE_H, measureTextWidth(label, 11, true) + 12);
+}
+
+/**
+ * @param {string} label - execution label of the block
+ * @returns {number} x coordinate of the block title (right of the badge, which overlaps the top-left corner)
+ */
+function titleX(label){
+    return label === '' ? SHAPE_GEOMETRY.PAD : badgeWidth(label) - 8 + SHAPE_GEOMETRY.PAD;
 }
 
 /**
@@ -180,8 +191,8 @@ function measureBlock(block){
     let max_in = d.inputs.reduce((m, s) => Math.max(m, label_w(s)), 0);
     let max_out = d.outputs.reduce((m, s) => Math.max(m, label_w(s)), 0);
 
-    let title_w = badgeWidth(block.getExecutionLabel()) + measureTextWidth(d.title, 12, true) +
-        measureTextWidth(d.codeName, 10) + 3 * g.PAD;
+    let title_w = titleX(block.getExecutionLabel()) + measureTextWidth(d.title, 12, true) +
+        measureTextWidth(d.codeName, 10) + 2 * g.PAD;
     let params_w = d.params.reduce((m, l) => Math.max(m, measureTextWidth(l, 10)), 0) + 2 * g.PAD;
     let ports_w = max_in + max_out + 2 * (g.PORT_LABEL_OFFSET + g.PAD) + 3 * g.PAD;
 
@@ -348,11 +359,12 @@ function createBlockCell(block, box, id, z){
         size: {width: box.w, height: box.h},
         attrs: {
             body: {fill: d.color, fillOpacity: d.container ? 0.35 : 1},
-            title: {x: badge_w - 8 + g.PAD, text: d.title},
+            title: {x: titleX(label), text: d.title},
             codeName: {text: d.codeName},
             params: {text: d.params.join('\n')},
-            badgeBody: {width: badge_w},
-            badgeLabel: {x: badge_w / 2 - 8, text: label}
+            // only executed blocks have an execution label
+            badgeBody: {width: badge_w, display: label === '' ? 'none' : null},
+            badgeLabel: {x: badge_w / 2 - 8, text: label, display: label === '' ? 'none' : null}
         },
         ports: {items: slotPortItems(d.inputs, 'in', 0, top).concat(slotPortItems(d.outputs, 'out', box.w, top))}
     });

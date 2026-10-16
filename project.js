@@ -123,24 +123,36 @@ class Block{
     }
 
     /**
-     * @returns {number} zero-based position of the block among the children of its parent, i.e., its
-     *                   execution order within the parent; -1 for the workflow (root) block
+     * @returns {boolean} true when the block emits execution code, i.e., it is executed at its position among
+     *          its siblings (models, variables, loops and other containers). Data and helper blocks (constants,
+     *          input files, conversions, comparisons) override this method and return false: their value is
+     *          evaluated where a consumer reads it, so their position in the child list does not matter.
      */
-    getExecutionIndex(){
-        if(this.parent_block === null)
-            return -1;
-        return this.parent_block.blocks.indexOf(this);
+    isExecutable(){
+        return true;
     }
 
     /**
-     * Hierarchical execution label of the block, e.g., '2' for the second top-level block and '2.1' for the
-     * first block nested in it. The label reflects the order in which the generated code executes the
-     * blocks; the workflow (root) block has an empty label.
+     * @returns {number} zero-based position of the block among the *executable* children of its parent, i.e.,
+     *                   its execution order within the parent; -1 for the workflow (root) block and for blocks
+     *                   which are not executable (see {@link Block#isExecutable})
+     */
+    getExecutionIndex(){
+        if(this.parent_block === null || !this.isExecutable())
+            return -1;
+        return this.parent_block.blocks.filter(b => b.isExecutable()).indexOf(this);
+    }
+
+    /**
+     * Hierarchical execution label of the block, e.g., '2' for the second executed top-level block and '2.1'
+     * for the first executed block nested in it. The label reflects the order in which the generated code
+     * executes the blocks. The workflow (root) block and non-executable blocks (data and helper blocks, see
+     * {@link Block#isExecutable}) have an empty label.
      *
      * @returns {string} execution label
      */
     getExecutionLabel(){
-        if(this.parent_block === null)
+        if(this.parent_block === null || !this.isExecutable())
             return '';
         let parent_label = this.parent_block.getExecutionLabel();
         let own = String(this.getExecutionIndex() + 1);
@@ -949,6 +961,14 @@ class BlockInputFile extends Block{
         return push_indents_before_each_line(code, indent);
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
@@ -1371,6 +1391,14 @@ class BlockPhysicalQuantity extends Block{
         return [];
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
@@ -1489,6 +1517,14 @@ class BlockProperty extends Block{
 
     getInitializationCode(indent=0, metaDataStr="{}"){
         return [];
+    }
+
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
     }
 
     getExecutionCode(indent=0, timestep="", solvefunc=false){
@@ -2459,6 +2495,14 @@ class BlockValueComparison extends Block{
         return [];
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
@@ -2505,6 +2549,14 @@ class BlockPropertyToQuantity extends Block{
 
     getInitializationCode(indent=0, metaDataStr="{}"){
         return [];
+    }
+
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
     }
 
     getExecutionCode(indent=0, timestep="", solvefunc=false){
@@ -2564,6 +2616,14 @@ class BlockQuantityToProperty extends Block{
         return [];
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
@@ -2619,6 +2679,14 @@ class BlockNumberToQuantity extends Block{
 
     getInitializationCode(indent=0, metaDataStr="{}"){
         return [];
+    }
+
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
     }
 
     getExecutionCode(indent=0, timestep="", solvefunc=false){
@@ -2678,6 +2746,14 @@ class BlockNumberToProperty extends Block{
         return [];
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
@@ -2733,6 +2809,14 @@ class BlockDataListLength extends Block{
 
     getInitializationCode(indent=0, metaDataStr="{}"){
         return [];
+    }
+
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
     }
 
     getExecutionCode(indent=0, timestep="", solvefunc=false){
@@ -3110,6 +3194,14 @@ class BlockGetItemFromDataList extends Block{
         return [];
     }
 
+    /**
+     * @returns {boolean} false; the block emits no execution code, its value is evaluated where a
+     *                   consumer reads it, so it takes no part in the execution order
+     */
+    isExecutable(){
+        return false;
+    }
+
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
     }
@@ -3279,15 +3371,20 @@ class Datalink{
  * Terminology: for a data link, the *producer* is the block owning the output slot (``inout === 'out'``) and
  * the *consumer* is the block owning the input slot. External workflow inputs are stored as output slots of
  * the workflow block, so the rule holds for them as well.
+ *
+ * Only executable blocks (``Block.isExecutable``) take part in the execution order. Data and helper blocks
+ * (constants, conversions, comparisons) emit no execution code; their value is evaluated where it is read. A
+ * value read through such blocks therefore depends on the executable blocks feeding them (see
+ * ``executableProducers``).
  */
 
 /**
  * Result of the execution order analysis of a single data link.
  *
  * @typedef {Object} OrderViolation
- * @property {Datalink} datalink - the offending data link
- * @property {Block} producer - block providing the data
- * @property {Block} consumer - block consuming the data (executed before the producer)
+ * @property {Datalink} datalink - the offending data link (ending at the consumer)
+ * @property {Block} producer - executable block computing the data (directly or through data/helper blocks)
+ * @property {Block} consumer - executable block consuming the data (executed before the producer)
  * @property {string} severity - 'error' when the value is read before it is ever computed; 'warning' when
  *           the blocks are inside a loop, where the consumer reads the value from the previous iteration
  *           (a legitimate pattern, e.g., for staggered coupling, but undefined in the first iteration)
@@ -3345,10 +3442,43 @@ function isInsideLoop(block){
 }
 
 /**
- * Find data links whose consumer is executed before their producer.
+ * Executable blocks whose results are needed to evaluate the given block's outputs.
  *
- * Links from/to external workflow slots and links between a container and its own (nested) children are
- * ignored, as their timing is not defined by the sibling order.
+ * An executable block is its own producer. The value of a non-executable (data or helper) block is evaluated
+ * when it is read, from the values linked to its inputs; its producers are therefore the executable producers
+ * of its linked inputs (searched recursively). External workflow inputs are available from the start and
+ * have no producer.
+ *
+ * @param {Block} block - block owning an output slot
+ * @param {Set<Block>} [visited] - blocks already searched (protection against cyclic links)
+ * @returns {Block[]} executable blocks the outputs of ``block`` depend on
+ */
+function executableProducers(block, visited=new Set()){
+    if(block.isExecutable())
+        return [block];
+    if(visited.has(block))
+        return [];
+    visited.add(block);
+    let producers = [];
+    block.getSlots('in').forEach(slot => {
+        let linked = slot.getLinkedDataSlot();
+        if(linked !== null && !linked.external)
+            executableProducers(linked.getParentBlock(), visited).forEach(p => {
+                if(!producers.includes(p))
+                    producers.push(p);
+            });
+    });
+    return producers;
+}
+
+/**
+ * Find data links whose executable consumer is executed before (one of) its producer(s).
+ *
+ * For every data link ending at an executable block, the executable producers of the linked value are found
+ * (through data and helper blocks, see ``executableProducers``) and compared with the consumer by their
+ * sibling order in the lowest common container. Links from external workflow slots, links read by
+ * non-executable blocks (they are checked at their executable consumers) and links between a container and
+ * its own (nested) children are not reported, as their timing is not defined by the sibling order.
  *
  * @param {WorkflowEditor} editor
  * @returns {OrderViolation[]} detected violations (in the order of ``editor.datalinks``)
@@ -3360,16 +3490,22 @@ function findOrderViolations(editor){
         let dir = getDatalinkDirection(dl);
         if(dir === null || dir.producer.external || dir.consumer.external)
             continue;
-        let producer = dir.producer.getParentBlock();
         let consumer = dir.consumer.getParentBlock();
-        let lifted = liftToCommonContainer(producer, consumer);
-        if(lifted === null)
+        if(!consumer.isExecutable())
             continue;
-        if(lifted.b.getExecutionIndex() < lifted.a.getExecutionIndex()){
+        let source = dir.producer.getParentBlock();
+        executableProducers(source).forEach(producer => {
+            let lifted = liftToCommonContainer(producer, consumer);
+            if(lifted === null)
+                return;
+            let siblings = lifted.container.blocks;
+            if(siblings.indexOf(lifted.b) >= siblings.indexOf(lifted.a))
+                return;
             let in_loop = isInsideLoop(lifted.container);
+            let via = source === producer ? '' : ' (through ' + source.getCodeName() + ')';
             let message = 'Block ' + consumer.getExecutionLabel() + ' (' + consumer.getCodeName() + ') reads \'' +
-                dir.consumer.getName() + '\' from block ' + producer.getExecutionLabel() + ' (' + producer.getCodeName() +
-                ') which is executed later';
+                dir.consumer.getName() + '\'' + via + ' computed by block ' + producer.getExecutionLabel() + ' (' +
+                producer.getCodeName() + ') which is executed later';
             message += in_loop ? '; the value of the previous iteration is used.' : '.';
             violations.push({
                 datalink: dl,
@@ -3378,7 +3514,7 @@ function findOrderViolations(editor){
                 severity: in_loop ? 'warning' : 'error',
                 message: message
             });
-        }
+        });
     }
     return violations;
 }

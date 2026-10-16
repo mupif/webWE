@@ -111,24 +111,36 @@ class Block{
     }
 
     /**
-     * @returns {number} zero-based position of the block among the children of its parent, i.e., its
-     *                   execution order within the parent; -1 for the workflow (root) block
+     * @returns {boolean} true when the block emits execution code, i.e., it is executed at its position among
+     *          its siblings (models, variables, loops and other containers). Data and helper blocks (constants,
+     *          input files, conversions, comparisons) override this method and return false: their value is
+     *          evaluated where a consumer reads it, so their position in the child list does not matter.
      */
-    getExecutionIndex(){
-        if(this.parent_block === null)
-            return -1;
-        return this.parent_block.blocks.indexOf(this);
+    isExecutable(){
+        return true;
     }
 
     /**
-     * Hierarchical execution label of the block, e.g., '2' for the second top-level block and '2.1' for the
-     * first block nested in it. The label reflects the order in which the generated code executes the
-     * blocks; the workflow (root) block has an empty label.
+     * @returns {number} zero-based position of the block among the *executable* children of its parent, i.e.,
+     *                   its execution order within the parent; -1 for the workflow (root) block and for blocks
+     *                   which are not executable (see {@link Block#isExecutable})
+     */
+    getExecutionIndex(){
+        if(this.parent_block === null || !this.isExecutable())
+            return -1;
+        return this.parent_block.blocks.filter(b => b.isExecutable()).indexOf(this);
+    }
+
+    /**
+     * Hierarchical execution label of the block, e.g., '2' for the second executed top-level block and '2.1'
+     * for the first executed block nested in it. The label reflects the order in which the generated code
+     * executes the blocks. The workflow (root) block and non-executable blocks (data and helper blocks, see
+     * {@link Block#isExecutable}) have an empty label.
      *
      * @returns {string} execution label
      */
     getExecutionLabel(){
-        if(this.parent_block === null)
+        if(this.parent_block === null || !this.isExecutable())
             return '';
         let parent_label = this.parent_block.getExecutionLabel();
         let own = String(this.getExecutionIndex() + 1);
