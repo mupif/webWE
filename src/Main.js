@@ -77,6 +77,12 @@ function keyboardFocusIsElsewhere(){
 }
 
 function keyPress(e){
+    // Escape cancels an open confirmation dialog
+    let dialog = document.getElementById('myQuery_container');
+    if(e.key === 'Escape' && dialog !== null && dialog.style.display === 'block'){
+        myQuery_hide();
+        return;
+    }
     // the editor shortcuts do not apply while typing in a text field or with a dialog open
     if(keyboardFocusIsElsewhere())
         return;

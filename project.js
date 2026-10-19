@@ -3713,6 +3713,12 @@ function keyboardFocusIsElsewhere(){
 }
 
 function keyPress(e){
+    // Escape cancels an open confirmation dialog
+    let dialog = document.getElementById('myQuery_container');
+    if(e.key === 'Escape' && dialog !== null && dialog.style.display === 'block'){
+        myQuery_hide();
+        return;
+    }
     // the editor shortcuts do not apply while typing in a text field or with a dialog open
     if(keyboardFocusIsElsewhere())
         return;
@@ -4478,16 +4484,57 @@ function myQuery_hide(){
     myquery_temp_instance = null;
 }
 
-function myQuery_show_note(text){
-    let html = '<p style="color:black;">' + text + '</p>';
-    html += '';
-    myQuery_show(html, 'note');
+/**
+ * Show a non-blocking notification (toast) in the bottom-right corner of the window. It disappears after a
+ * while or when clicked; the work in the editor is not interrupted.
+ *
+ * @param {string} html - message (HTML)
+ * @param {string} [kind='info'] - 'info' or 'error' (color and duration)
+ * @returns {HTMLElement} the notification element
+ */
+function showToast(html, kind='info'){
+    let container = document.getElementById('toast_container');
+    if(container === null){
+        container = document.createElement('div');
+        container.id = 'toast_container';
+        container.setAttribute('role', 'status');
+        container.setAttribute('aria-live', 'polite');
+        document.body.appendChild(container);
+    }
+    let toast = document.createElement('div');
+    toast.className = 'toast toast_' + kind;
+    toast.innerHTML = '<span class="toast_icon">' + (kind === 'error' ? '!' : 'i') + '</span><div class="toast_text">' + html + '</div>';
+    toast.title = 'Click to close';
+    let close = () => {
+        toast.classList.add('toast_hiding');
+        setTimeout(() => toast.remove(), 200);
+    };
+    toast.addEventListener('click', close);
+    setTimeout(close, kind === 'error' ? 7000 : 4000);
+    container.appendChild(toast);
+    // at most four notifications at a time
+    while(container.children.length > 4)
+        container.firstChild.remove();
+    return toast;
 }
 
+/**
+ * Show an information message (a notification, see showToast).
+ *
+ * @param {string} text - message (HTML)
+ */
+function myQuery_show_note(text){
+    showToast(text, 'info');
+}
+
+/**
+ * Show an error message (a notification, see showToast); e.g., an invalid data link or why code cannot be
+ * generated.
+ *
+ * @param {string} text - message (HTML)
+ */
 function myQuery_show_error(text){
-    let html = '<p style="color:red;">' + text + '</p>';
-    html += '';
-    myQuery_show(html, 'note');
+    showToast(text, 'error');
 }
 
 let slot_id = 1;
