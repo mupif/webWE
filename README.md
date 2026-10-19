@@ -2,6 +2,8 @@
 
 The Workflow Editor and Code Generator is a part of MuPIF platform (http://mupif.org). It enables easy creation of simulation workflows and also provides generating of executable Python code of the simulations.
 
+![The workflow editor with the thermo-mechanical example: block palette, workflow canvas with execution order labels and flow arrows, and the inspector of the selected model](docs/screenshots/editor.png)
+
 ## Usage and Installation
 
 At the present time, this tool is available at http://mupif.org/wecg/ for everyone to be used as a web application.
@@ -40,6 +42,8 @@ repository root); `workflow_editor.html?example_id=1` opens an example. The wind
 The side panels can be collapsed with the « / » buttons in their headers (a collapsed panel leaves a narrow rail
 to open it again) or from the *View* menu (*Block palette*, *Sidebar*, *Canvas only*), and resized by dragging
 their edge towards the canvas; the browser remembers their state and widths.
+
+![The dark theme with the code preview: the execution code of the selected model is highlighted](docs/screenshots/editor-dark-code.png)
 
 On the canvas:
 
