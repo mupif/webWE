@@ -23,6 +23,53 @@ class WorkflowEditor{
          * @type {EditHistory|null}
          */
         this.history = null;
+
+        /**
+         * Top bar of the editor application (see src/view/AppShell.js), or null when the editor runs headless.
+         * @type {AppShell|null}
+         */
+        this.shell = null;
+
+        /**
+         * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
+         * @type {Object<string, Function[]>}
+         */
+        this.listeners = {};
+    }
+
+    /**
+     * Register a callback of an editor event. The events are:
+     *
+     * - 'change': the project was redrawn after a change (or undo/redo, loading a project);
+     * - 'selection': the selected block, data link or external slot changed;
+     * - 'history': the undo/redo history changed.
+     *
+     * @param {string} event
+     * @param {Function} callback - called with the editor
+     */
+    on(event, callback){
+        (this.listeners[event] = this.listeners[event] || []).push(callback);
+    }
+
+    /**
+     * Call the callbacks registered for an event.
+     *
+     * @param {string} event
+     */
+    emit(event){
+        (this.listeners[event] || []).forEach(callback => callback(this));
+    }
+
+    /**
+     * Replace the edited project by a new, empty one (with default settings). The undo history starts anew.
+     */
+    newProject(){
+        this.workflowblock = new BlockWorkflow(this, null);
+        this.datalinks = [];
+        this.selected_block = null;
+        this.selected_datalink = null;
+        this.selected_slot_ext = null;
+        this.generateWorkflowHtml();
     }
 
     /**
@@ -610,6 +657,7 @@ class WorkflowEditor{
             this.canvas.render(options);
         if(this.history !== null)
             this.history.record();
+        this.emit('change');
     }
 
     /**

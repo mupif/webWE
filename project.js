@@ -3842,6 +3842,71 @@ function addCommaToLastLine(code_lines){
 
 
 /**
+ * Ask for confirmation and delete the selected data link, block or external slot (Delete key, Edit menu).
+ */
+function confirmDeleteSelection(){
+    if(editor.selected_datalink){
+        myquery_temp_instance = editor;
+        let q_html = '';
+        q_html += '<b>Delete selected datalink?</b><br>';
+        q_html += '<button onclick="myquery_temp_instance.myquery_proceed(\'delete_selected_datalink\');">Yes</button>';
+        q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
+
+        myQuery_show(q_html);
+    }
+    if(editor.selected_block && editor.selected_block !== editor.workflowblock){
+        myquery_temp_instance = editor;
+        let q_html = '';
+        q_html += '<b>Delete selected block?</b><br>';
+        q_html += '<button onclick="myquery_temp_instance.myquery_proceed(\'delete_selected_block\');">Yes</button>';
+        q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
+
+        myQuery_show(q_html);
+    }
+    if(editor.selected_slot_ext){
+        myquery_temp_instance = editor;
+        let q_html = '';
+        q_html += '<b>Delete selected external dataslot?</b><br>';
+        q_html += '<button onclick="myquery_temp_instance.myquery_proceed(\'delete_selected_ext_slot\');">Yes</button>';
+        q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
+
+        myQuery_show(q_html);
+    }
+}
+
+/**
+ * Ask for confirmation and start a new, empty project (File menu). Unsaved changes are lost.
+ */
+function confirmNewProject(){
+    let q_html = '<b>Start a new project?</b><br>Unsaved changes of the current project will be lost.<br>';
+    q_html += '<button onclick="myQuery_hide();editor.newProject();">New project</button>';
+    q_html += '&nbsp;<button onclick="myQuery_hide();">Cancel</button>';
+    myQuery_show(q_html);
+}
+
+/**
+ * Show the keyboard and mouse controls of the editor (Help menu).
+ */
+function showShortcutHelp(){
+    let rows = [
+        ['Drag a block', 'move it; drop it onto a container to nest it'],
+        ['Drag from a slot', 'draw a data link'],
+        ['Right click', 'context menu'],
+        ['Wheel / drag the background', 'zoom / pan'],
+        ['Delete', 'delete the selection'],
+        ['&uarr; / &darr;', 'execute the selected block earlier / later'],
+        ['O', 're-arrange the children of the selected container'],
+        ['Ctrl+Z / Ctrl+Y', 'undo / redo'],
+        ['Ctrl+S / Ctrl+O', 'save / open a project'],
+        ['Esc', 'close menus, clear the selection']
+    ];
+    let html = '<b>Keyboard and mouse</b><table class="shortcut_table">';
+    rows.forEach(r => { html += '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; });
+    html += '</table><button onclick="myQuery_hide();">Close</button>';
+    myQuery_show(html);
+}
+
+/**
  * @returns {boolean} true when the keyboard focus is in a text field or a dialog is open; editor shortcuts are
  *          not handled then (e.g., Ctrl+Z undoes the typing in the field)
  */
@@ -3854,10 +3919,11 @@ function keyboardFocusIsElsewhere(){
 }
 
 function keyPress(e){
+    // the editor shortcuts do not apply while typing in a text field or with a dialog open
+    if(keyboardFocusIsElsewhere())
+        return;
     // undo: Ctrl+Z, redo: Ctrl+Y or Ctrl+Shift+Z (Cmd on macOS)
     if((e.ctrlKey || e.metaKey) && !e.altKey && (e.which === 90 || e.which === 89)){
-        if(keyboardFocusIsElsewhere())
-            return;
         e.preventDefault();
         if(e.which === 90 && !e.shiftKey)
             editor.undo();
@@ -3865,35 +3931,8 @@ function keyPress(e){
             editor.redo();
         return;
     }
-    if(e.which === 46){
-        if(editor.selected_datalink){
-            myquery_temp_instance = editor;
-            let q_html = '';
-            q_html += '<b>Delete selected datalink?</b><br>';
-            q_html += '<button onclick="myquery_temp_instance.myquery_proceed(\'delete_selected_datalink\');">Yes</button>';
-            q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
-
-            myQuery_show(q_html);
-        }
-        if(editor.selected_block && editor.selected_block !== editor.workflowblock){
-            myquery_temp_instance = editor;
-            let q_html = '';
-            q_html += '<b>Delete selected block?</b><br>';
-            q_html += '<button onclick="myquery_temp_instance.myquery_proceed(\'delete_selected_block\');">Yes</button>';
-            q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
-
-            myQuery_show(q_html);
-        }
-        if(editor.selected_slot_ext){
-            myquery_temp_instance = editor;
-            let q_html = '';
-            q_html += '<b>Delete selected external dataslot?</b><br>';
-            q_html += '<button onclick="myquery_temp_instance.myquery_proceed(\'delete_selected_ext_slot\');">Yes</button>';
-            q_html += '&nbsp;<button onclick="myQuery_hide();">No</button>';
-
-            myQuery_show(q_html);
-        }
-    }
+    if(e.which === 46)
+        confirmDeleteSelection();
     // moving blocks up
     if(e.which === 38){
         if(editor.selected_block && editor.selected_block !== editor.workflowblock){
@@ -3927,9 +3966,7 @@ function focusOnEditor(){
     document.getElementById('projectSettingsContainer').style.display = 'none';
     document.getElementById('modelListContainer').style.display = 'none';
 
-    document.getElementById('nav_editor').style.backgroundColor = 'gray';
-    document.getElementById('nav_settings').style.backgroundColor = 'transparent';
-    document.getElementById('nav_models').style.backgroundColor = 'transparent';
+    editor.shell.markPage('editor');
 
     editor.generateWorkflowHtml()
 }
@@ -3939,9 +3976,7 @@ function focusOnProjectSettings(){
     document.getElementById('projectSettingsContainer').style.display = 'block';
     document.getElementById('modelListContainer').style.display = 'none';
 
-    document.getElementById('nav_editor').style.backgroundColor = 'transparent';
-    document.getElementById('nav_settings').style.backgroundColor = 'gray';
-    document.getElementById('nav_models').style.backgroundColor = 'transparent';
+    editor.shell.markPage('settings');
 }
 
 function focusOnModelList(){
@@ -3949,9 +3984,7 @@ function focusOnModelList(){
     document.getElementById('projectSettingsContainer').style.display = 'none';
     document.getElementById('modelListContainer').style.display = 'block';
 
-    document.getElementById('nav_editor').style.backgroundColor = 'transparent';
-    document.getElementById('nav_settings').style.backgroundColor = 'transparent';
-    document.getElementById('nav_models').style.backgroundColor = 'gray';
+    editor.shell.markPage('models');
 }
 
 function deleteMetaDataByListID(list_id){
@@ -3995,7 +4028,9 @@ function loadJsonProjectFileContent(){
         editor.loadFromJsonData(json_dict);
         editor.generateWorkflowHtml();
     });
-    reader.readAsText(document.getElementById('form_json_file_selector').files[0]);
+    let input = document.getElementById('form_json_file_selector');
+    reader.readAsText(input.files[0]);
+    input.value = '';// choosing the same file again triggers the change event again
 }
 
 function loadJsonMetaDataFileContent(){
@@ -4086,7 +4121,8 @@ function main(visual=false)
         editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
         // the history records every redraw which changed the project (see WorkflowEditor.generateWorkflowHtml)
         editor.history = new EditHistory(editor);
-        editor.history.onChange = () => editor.canvas.updateUndoButtons();
+        editor.history.onChange = () => editor.emit('history');
+        editor.shell = new AppShell(editor, document.getElementById('app_topbar'));
     }
 
     if(visual) {
@@ -5000,6 +5036,53 @@ class WorkflowEditor{
          * @type {EditHistory|null}
          */
         this.history = null;
+
+        /**
+         * Top bar of the editor application (see src/view/AppShell.js), or null when the editor runs headless.
+         * @type {AppShell|null}
+         */
+        this.shell = null;
+
+        /**
+         * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
+         * @type {Object<string, Function[]>}
+         */
+        this.listeners = {};
+    }
+
+    /**
+     * Register a callback of an editor event. The events are:
+     *
+     * - 'change': the project was redrawn after a change (or undo/redo, loading a project);
+     * - 'selection': the selected block, data link or external slot changed;
+     * - 'history': the undo/redo history changed.
+     *
+     * @param {string} event
+     * @param {Function} callback - called with the editor
+     */
+    on(event, callback){
+        (this.listeners[event] = this.listeners[event] || []).push(callback);
+    }
+
+    /**
+     * Call the callbacks registered for an event.
+     *
+     * @param {string} event
+     */
+    emit(event){
+        (this.listeners[event] || []).forEach(callback => callback(this));
+    }
+
+    /**
+     * Replace the edited project by a new, empty one (with default settings). The undo history starts anew.
+     */
+    newProject(){
+        this.workflowblock = new BlockWorkflow(this, null);
+        this.datalinks = [];
+        this.selected_block = null;
+        this.selected_datalink = null;
+        this.selected_slot_ext = null;
+        this.generateWorkflowHtml();
     }
 
     /**
@@ -5587,6 +5670,7 @@ class WorkflowEditor{
             this.canvas.render(options);
         if(this.history !== null)
             this.history.record();
+        this.emit('change');
     }
 
     /**

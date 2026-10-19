@@ -163,4 +163,31 @@ t.test('onChange is called on every change of the history', () => {
     t.assertEqual(calls, 3);
 });
 
+t.test('editor events: change after a redraw, history after a step', () => {
+    let ed = t.createEditor(1);
+    let events = [];
+    ed.history = new EditHistory(ed);
+    ed.history.onChange = () => ed.emit('history');
+    ed.on('change', () => events.push('change'));
+    ed.on('history', () => events.push('history'));
+    ed.generateWorkflowHtml();   // baseline
+    firstProperty(ed).value = '9.0';
+    ed.generateWorkflowHtml();   // step
+    ed.generateWorkflowHtml();   // no change
+    t.assertEqual(events, ['history', 'change', 'history', 'change', 'change']);
+});
+
+t.test('a new project is empty and starts a new history', () => {
+    let ed = t.createEditor(1);
+    ed.history = new EditHistory(ed);
+    ed.generateWorkflowHtml();
+    firstProperty(ed).value = '9.0';
+    ed.generateWorkflowHtml();
+    ed.selected_block = ed.workflowblock.getBlocks()[0];
+    ed.newProject();
+    t.assertEqual([ed.workflowblock.getBlocksRecursive().length, ed.datalinks.length, ed.selected_block], [0, 0, null]);
+    t.assertEqual(ed.workflowblock.project_name, 'My unnamed project');
+    t.assert(!ed.history.canUndo(), 'history reset');
+});
+
 t.finish();

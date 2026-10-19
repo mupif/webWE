@@ -60,13 +60,7 @@ div#modelListContainer, div#projectSettingsContainer, div#workflowContainer{
 
 }
 
-div#contentView{
-    height: 800px;
-}
 
-div.contentView{
-    flex: 1 0 0;
-}
 
 b.message{
     color:white;
@@ -108,85 +102,14 @@ table.mainpage_list_examples td a{
 }
 
 
-div#menu_new{
-    width:180px;
-    z-index: 100;
-    cursor: default;
-}
 
-div#menu_new .melem_separator{
-    position: relative;
-    /*display:block;*/
-    /*color:white;*/
-    background-color:transparent;
-    width:180px;
-    /*padding:3px 6px 3px 6px;*/
-    padding-left: 10px;
-    padding-right: 10px;
-    line-height:20px;
-    z-index: 100;
-    cursor: default;
-    margin:0;
-    border-bottom:2px solid black;
 
-    height:20px;
-    vertical-align:bottom;
-    font-style:italic;
-    font-size:12px;
-}
 
-div#menu_new .melem{
-    position: relative;
-    display:block;
-    font-weight:bold;
-    /*color:white;*/
-    background-color:transparent;
-    width:180px;
-    /*padding:3px 6px 3px 6px;*/
-    padding-left: 10px;
-    padding-right: 10px;
-    font-size:14px;
-    line-height:24px;
-    height:auto;
-    z-index: 100;
-    cursor: default;
-    margin:0;
-    border-bottom:2px solid black;
-}
 
-div#menu_new .melem:hover{
-    background-color:silver;
-}
 
-div#menu_new .msubmenu{
 
-}
 
-div#menu_new .melem .msubmenu{
-    display:none;
-    position:absolute;
-    width:180px;
-    z-index: 100;
-    margin:0;
-    cursor: default;top:0;
-    left:180px;
-    /*background-color:#3a3a3a;*/
-    background-color:white;
-    border-top:2px solid black;
-    border-right: 2px solid black;
-}
 
-div#menu_new .melem:hover .msubmenu{
-    display: block;
-}
-
-div#menu_new .melem .msubmenu .melem .msubmenu{
-    display:none;
-}
-
-div#menu_new .melem .msubmenu .melem:hover .msubmenu{
-    display: block;
-}
 
 a.link_file{
     color:lightblue;
@@ -238,4 +161,3 @@ div.settings_section{
     box-shadow: 6px 6px 6px 1px rgba(50, 50, 50, .5);
 }
 
-div.side_space{width: 10px;}

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./StyleWE_blocks.css">
     <link rel="stylesheet" href="./StyleMyQuery.css">
     <link rel="stylesheet" href="./StyleCanvas.css">
+    <link rel="stylesheet" href="./StyleApp.css">
 
     <script type="text/javascript" src="src/Init.js"></script>
     <script type="text/javascript">
@@ -50,6 +51,7 @@
     <script type="text/javascript" src="src/view/ZoomPan.js"></script>
     <script type="text/javascript" src="src/view/FlowOverlay.js"></script>
     <script type="text/javascript" src="src/view/CanvasView.js"></script>
+    <script type="text/javascript" src="src/view/AppShell.js"></script>
     <script type="text/javascript" src="src/WorkflowEditor.js"></script>
     <script type="text/javascript" src="src/Main.js"></script>
 </head>
@@ -60,83 +62,27 @@
 </div>
 
 
-<div id="mainpage_all">
+<div id="app">
+    <!-- top bar: menus, project name, page tabs, undo/redo (built by src/view/AppShell.js) -->
+    <header id="app_topbar"></header>
 
-    <div class="vbox">
-
-        <div class="hbox gap20 justify_content_flex_start align_items_flex_start header">
-            <a href="./" class="cursor_pointer" target="_blank"><div class="mupif_logo_bgcolor"><img src="mupif-logo.png" class="mupif_logo"></div></a>
-            <h1>Workflow Editor and Code Generator</h1>
+    <main id="app_main">
+        <div id="workflowContainer">
+            <div id="workflowCanvas"></div>
         </div>
 
-        <div class="vbox">
-            <div class="hbox">
-                
-                <div id="menu_new" class="vbox gap10">
-                    
-                    <div></div>
-                    <div class="vbox">
-                        <div class="melem_separator">navigation:</div>
-                        <div class="melem" id="nav_editor" onclick="focusOnEditor();">Editor</div>
-                        <div class="melem" id="nav_settings" onclick="editor.selectSettingsAndUpdate();">Settings</div>
-                        <div class="melem" id="nav_models" onclick="focusOnModelList();">Models</div>
-                    </div>
-                        
-                    <div></div>
-                    <div class="vbox">
-                        <div class="melem_separator">menu:</div>
-                        <div class="melem">Project >
-                            <div class="msubmenu">
-                                <div class="melem" onclick="editor.menu_download_json();">Save to JSON</div>
-                                <div class="melem" id="">
-                                    <form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;" id="form_json_data">
-                                        <label for="form_json_file_selector" style="display:block;width:100%;height:100%;">
-                                            Load from JSON
-                                            <input type="file" id="form_json_file_selector" name="json_file" style="display:none;width:100px;" onchange="loadJsonProjectFileContent();">
-                                        </label>
-                                        <input type="hidden" value="Load from JSON" name="file_upload">
-                                    </form>
-                                </div>
-                                <div class="melem" onclick="editor.menu_download_exec_code();">Generate Python Execution code</div>
-                                <div class="melem" onclick="editor.menu_download_class_code();">Generate Python Class code</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                
-                <div class="vbox contentView" id="contentView">
-                    <div id="workflowContainer">
-                        <div id="workflowCanvas"></div>
-                    </div>
-
-                    <div id="projectSettingsContainer">
-                        <div id="block_list_of_settings"></div>
-                    </div>
-                    
-                    <div id="modelListContainer">
-                        <div id="block_list_of_models"></div>
-                    </div>
-                </div>
-                
-                <div class="side_space"></div>
-            </div>
+        <div id="projectSettingsContainer">
+            <div id="block_list_of_settings"></div>
         </div>
 
-    </div>
-
+        <div id="modelListContainer">
+            <div id="block_list_of_models"></div>
+        </div>
+    </main>
 </div>
 
-<script type="text/javascript">
-    function windowResize(){
-        document.getElementById('contentView').style.height = (window.innerHeight-100).toString() + 'px';
-    }
-    
-    addEventListener("resize", (event) => {
-        windowResize();
-    });
-    windowResize();
-</script>
+<!-- file selector of File > Open project -->
+<input type="file" id="form_json_file_selector" accept=".json,application/json" style="display:none;" onchange="loadJsonProjectFileContent();">
 
 </body>
 </html>

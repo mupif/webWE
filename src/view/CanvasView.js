@@ -31,8 +31,9 @@
  * ``Block.modificationQuery``. A block added from the menu is placed where the menu was opened.
  *
  * The paper fills the editor area; zooming and panning are provided by ``CanvasZoomPan`` (ZoomPan.js) and a
- * toolbar above the canvas (zoom buttons, fit to content, project name opening the project settings). A newly
- * shown or loaded project is fitted to the editor area.
+ * toolbar floating above the canvas (zoom buttons, fit to content, execution flow and order status; the
+ * application commands are in the top bar, see AppShell.js). A newly shown or loaded project is fitted to the
+ * editor area.
  *
  * The execution order is shown by the badges of the blocks and by flow arrows (FlowOverlay.js), which can be
  * switched off in the toolbar (the choice is remembered by the browser). Execution order problems are marked on
@@ -40,7 +41,7 @@
  * that producers are executed before their consumers (``orderChildrenByDependencies``).
  *
  * Undo and redo (EditHistory.js, Ctrl+Z / Ctrl+Y) restore the project and rebuild the canvas with
- * ``render({keepView: true})``, which keeps the zoom and pan; the toolbar shows undo/redo buttons.
+ * ``render({keepView: true})``, which keeps the zoom and pan.
  *
  * Data links are created by dragging from a slot port to another one. While dragging, the ports accepting the
  * link are highlighted (``validateConnection`` asks ``WorkflowEditor.canLinkSlots``); on connection the data
@@ -153,11 +154,6 @@ class CanvasView{
         this.toolbar_el = document.createElement('div');
         this.toolbar_el.className = 'canvas_toolbar';
         this.toolbar_el.innerHTML =
-            '<span class="canvas_project" title="Project settings"></span>' +
-            '<span class="canvas_toolbar_group">' +
-            '<button data-cmd="undo" title="Undo (Ctrl+Z)" disabled>&#x21B6;</button>' +
-            '<button data-cmd="redo" title="Redo (Ctrl+Y)" disabled>&#x21B7;</button>' +
-            '</span>' +
             '<span class="canvas_toolbar_group">' +
             '<button data-cmd="zoom-out" title="Zoom out (mouse wheel)">&minus;</button>' +
             '<span class="canvas_zoom"></span>' +
@@ -176,9 +172,7 @@ class CanvasView{
             'zoom-in': () => this.zoom.zoomBy(ZOOM_STEP),
             'fit': () => this.zoom.fit(),
             'reset': () => this.zoom.zoomTo(1),
-            'order': () => this.orderByDependencies(),
-            'undo': () => this.editor.undo(),
-            'redo': () => this.editor.redo()
+            'order': () => this.orderByDependencies()
         };
         let checkbox = this.toolbar_el.querySelector('.canvas_show_flow');
         checkbox.checked = this.show_flow;
@@ -186,7 +180,6 @@ class CanvasView{
         this.toolbar_el.querySelectorAll('button[data-cmd]').forEach(button => {
             button.addEventListener('click', () => commands[button.dataset.cmd]());
         });
-        this.toolbar_el.querySelector('.canvas_project').addEventListener('click', () => this.editor.selectSettingsAndUpdate());
         this.el.parentElement.insertBefore(this.toolbar_el, this.el);
     }
 
@@ -258,19 +251,10 @@ class CanvasView{
     }
 
     /**
-     * Enable the undo and redo buttons of the toolbar according to the editor's history.
-     */
-    updateUndoButtons(){
-        let history = this.editor.history;
-        this.toolbar_el.querySelector('button[data-cmd="undo"]').disabled = !(history && history.canUndo());
-        this.toolbar_el.querySelector('button[data-cmd="redo"]').disabled = !(history && history.canRedo());
-    }
-
-    /**
-     * Show the current project name and zoom factor in the toolbar.
+     * Show the current zoom factor and the state of the flow arrows in the toolbar.
      */
     updateToolbar(){
-        this.toolbar_el.querySelector('.canvas_project').textContent = this.editor.workflowblock.project_name;
+        this.toolbar_el.querySelector('.canvas_show_flow').checked = this.show_flow;
         this.toolbar_el.querySelector('.canvas_zoom').textContent = Math.round(this.zoom.getScale() * 100) + ' %';
     }
 
@@ -378,6 +362,7 @@ class CanvasView{
         this.editor.selected_datalink = model instanceof Datalink ? model : null;
         this.editor.selected_slot_ext = model instanceof SlotExt ? model : null;
         this.showSelection();
+        this.editor.emit('selection');
     }
 
     /**

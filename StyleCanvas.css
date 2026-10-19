@@ -25,27 +25,23 @@ div#workflowCanvas.panning{
     cursor: grabbing;
 }
 
-/* toolbar in the top-left corner of the editor area */
+/* toolbar floating in the top-left corner of the canvas */
 div.canvas_toolbar{
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 10px;
+    left: 10px;
     z-index: 10;
     display: flex;
-    gap: 10px;
+    gap: 6px;
     align-items: center;
-    padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid #c9ced6;
-    border-radius: 6px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    padding: 3px 6px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--app-border, #d0d7de);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(31, 35, 40, 0.12);
     font-size: 12px;
 }
 
-div.canvas_toolbar span.canvas_project{
-    font-weight: bold;
-    cursor: pointer;
-}
 
 div.canvas_toolbar span.canvas_toolbar_group{
     display: flex;
@@ -60,7 +56,27 @@ div.canvas_toolbar span.canvas_zoom{
 
 div.canvas_toolbar button{
     min-width: 26px;
-    padding: 2px 6px;
+    padding: 3px 7px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+div.canvas_toolbar button:hover:not(:disabled){
+    background: var(--app-hover, #eaeef2);
+}
+
+div.canvas_toolbar span.canvas_toolbar_group + span.canvas_toolbar_group{
+    border-left: 1px solid var(--app-border, #d0d7de);
+    padding-left: 6px;
+}
+
+div.canvas_toolbar label{
+    display: flex;
+    align-items: center;
+    gap: 4px;
     cursor: pointer;
 }
 

@@ -1,0 +1,220 @@
+/*
+ * Layout and controls of the editor application (workflow_editor.html): the top bar (src/view/AppShell.js),
+ * the main area hosting the canvas and the pages, and the shared look of buttons, menus and dialogs.
+ */
+
+:root{
+    --app-font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --app-text: #1f2328;
+    --app-muted: #59636e;
+    --app-border: #d0d7de;
+    --app-panel: #f6f8fa;
+    --app-hover: #eaeef2;
+    --app-accent: #1e66f5;
+    --app-topbar-h: 44px;
+}
+
+html, body{
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+div#app{
+    display: grid;
+    grid-template-rows: var(--app-topbar-h) 1fr;
+    height: 100vh;
+    font-family: var(--app-font);
+    font-size: 13px;
+    letter-spacing: normal;
+    color: var(--app-text);
+}
+
+div#app button{
+    font-family: inherit;
+}
+
+/* ---------- top bar ---------- */
+
+header#app_topbar{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--app-border);
+    z-index: 200;
+}
+
+header#app_topbar a.app_logo img{
+    display: block;
+    height: 28px;
+}
+
+header#app_topbar span.app_title{
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+header#app_topbar span.app_spacer{
+    flex: 1;
+}
+
+header#app_topbar span.app_divider{
+    width: 1px;
+    height: 22px;
+    background: var(--app-border);
+    margin: 0 4px;
+}
+
+header#app_topbar button{
+    border: none;
+    background: transparent;
+    color: var(--app-text);
+    font-size: 13px;
+    padding: 5px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+header#app_topbar button:hover:not(:disabled){
+    background: var(--app-hover);
+}
+
+header#app_topbar button:disabled{
+    color: #b0b7bf;
+    cursor: default;
+}
+
+header#app_topbar button.app_project_name{
+    font-weight: 600;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+header#app_topbar button.app_icon_button{
+    display: flex;
+    padding: 5px;
+}
+
+/* page tabs */
+header#app_topbar nav.app_tabs{
+    display: flex;
+    background: var(--app-panel);
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+header#app_topbar nav.app_tabs button.active{
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    font-weight: 600;
+}
+
+/* menus */
+header#app_topbar nav.app_menubar{
+    display: flex;
+}
+
+div.app_menu{
+    position: relative;
+}
+
+div.app_menu.open button.app_menu_title{
+    background: var(--app-hover);
+}
+
+div.app_menu div.app_menu_list{
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 240px;
+    padding: 4px;
+    background: #ffffff;
+    border: 1px solid var(--app-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(31, 35, 40, 0.18);
+}
+
+div.app_menu.open div.app_menu_list{
+    display: block;
+}
+
+div.app_menu_list hr{
+    border: none;
+    border-top: 1px solid var(--app-border);
+    margin: 4px 0;
+}
+
+header#app_topbar button.app_menu_item{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    text-align: left;
+    padding: 6px 8px;
+}
+
+header#app_topbar button.app_menu_item:hover:not(:disabled){
+    background: var(--app-accent);
+    color: #ffffff;
+}
+
+button.app_menu_item span.app_menu_check{
+    width: 18px;
+}
+
+button.app_menu_item span.app_menu_label{
+    flex: 1;
+}
+
+button.app_menu_item span.app_menu_shortcut{
+    margin-left: 24px;
+    color: var(--app-muted);
+    font-size: 12px;
+}
+
+header#app_topbar button.app_menu_item:hover:not(:disabled) span.app_menu_shortcut{
+    color: #dbe5ff;
+}
+
+/* ---------- main area ---------- */
+
+main#app_main{
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+}
+
+main#app_main > div{
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+}
+
+div#projectSettingsContainer, div#modelListContainer{
+    overflow: auto;
+    background: var(--app-panel);
+}
+
+/* ---------- dialogs (src/myQuery.js) ---------- */
+
+table.shortcut_table{
+    margin: 10px 0;
+    border-collapse: collapse;
+}
+
+table.shortcut_table td{
+    padding: 3px 12px 3px 0;
+    color: var(--app-text);
+}
+
+table.shortcut_table td:first-child{
+    font-weight: 600;
+    white-space: nowrap;
+}
