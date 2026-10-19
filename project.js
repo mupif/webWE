@@ -595,6 +595,13 @@ class Block{
         this.parent_block.moveChildBlockDown(this);
     }
 
+    /**
+     * Create a block of the given kind and append it as the last child of this block.
+     *
+     * @param {string} name - kind of the block, e.g., 'model', 'timeloop', 'property' (see the list below and
+     *        the block palette, src/view/Palette.js)
+     * @returns {Block|null} the new block, or null for an unknown kind
+     */
     addBlockByName(name) {
         let block = null;
 
@@ -637,6 +644,7 @@ class Block{
         if (block !== null) {
             this.addBlock(block);
         }
+        return block;
     }
 
     generateCodeName(all_blocks, base_name='block_'){
@@ -3964,7 +3972,6 @@ function keyPress(e){
 function focusOnEditor(){
     document.getElementById('workflowContainer').style.display = 'block';
     document.getElementById('projectSettingsContainer').style.display = 'none';
-    document.getElementById('modelListContainer').style.display = 'none';
 
     editor.shell.markPage('editor');
 
@@ -3974,17 +3981,8 @@ function focusOnEditor(){
 function focusOnProjectSettings(){
     document.getElementById('workflowContainer').style.display = 'none';
     document.getElementById('projectSettingsContainer').style.display = 'block';
-    document.getElementById('modelListContainer').style.display = 'none';
 
     editor.shell.markPage('settings');
-}
-
-function focusOnModelList(){
-    document.getElementById('workflowContainer').style.display = 'none';
-    document.getElementById('projectSettingsContainer').style.display = 'none';
-    document.getElementById('modelListContainer').style.display = 'block';
-
-    editor.shell.markPage('models');
 }
 
 function deleteMetaDataByListID(list_id){
@@ -3992,33 +3990,12 @@ function deleteMetaDataByListID(list_id){
     updateHtmlOfListOfModels();
 }
 
+/**
+ * Show the current list of loaded model metadata in the block palette (after loading or removing metadata).
+ */
 function updateHtmlOfListOfModels(){
-    if(editor.visual) {
-        let elem_list_of_models = document.getElementById('block_list_of_models');
-        let temp_html = '<h2 style="margin-bottom:20px;"><b>Project models</b>' +
-            '<form action="" method="post" enctype="multipart/form-data" style="margin:0;padding:0;display:inline-block;" id="form_metadata_data">' +
-            '<label for="form_metadata_file_selector" id="label_form_metadata_file_selector" style="display:none;">' +
-            'Load MetaData JSON from file' +
-            '<input type="file" id="form_metadata_file_selector" name="metadata_file" style="display:none;width:100px;" onchange="loadJsonMetaDataFileContent();">' +
-            '</label>' +
-            '<input type="hidden" value="Load from JSON" name="file_upload">' +
-            '</form>' +
-            '<button onclick="document.getElementById(\'label_form_metadata_file_selector\').click();" style="margin-left:30px;">Load MetaData JSON from file</button>' +
-            '</h2>';
-
-        temp_html += '<table style="color:black;">';
-        for (let i = 0; i < editor.list_of_model_metadata.length; i++) {
-            temp_html += '' +
-                '<tr>' +
-                '<td>' + (i + 1) + ']</td><td style="padding:3px 10px 3px 10px;"><b>' + editor.list_of_model_metadata[i]['Name'] + '</b></td>' +
-                '<td><button onclick="editor.download_ith_metadata(' + i + ');">download</button></td>' +
-                '<td><button onclick="deleteMetaDataByListID(' + i + ');">delete</button></td>' +
-                '</tr>';
-        }
-        temp_html += '</table>';
-
-        elem_list_of_models.innerHTML = temp_html;
-    }
+    if(editor.visual && editor.palette)
+        editor.palette.renderModels();
 }
 
 function loadJsonProjectFileContent(){
@@ -4040,10 +4017,12 @@ function loadJsonMetaDataFileContent(){
         if(checkMetaDataValidity(json_dict))
             editor.list_of_model_metadata.push(json_dict);
         else
-            console.log('MetaData JSON is not valid for usage.');
+            myQuery_show_error('The file does not contain valid model metadata<br>(Name, ID, Inputs, Outputs and Execution_settings are required).');
         updateHtmlOfListOfModels();
     });
-    reader.readAsText(document.getElementById('form_metadata_file_selector').files[0]);
+    let input = document.getElementById('form_metadata_file_selector');
+    reader.readAsText(input.files[0]);
+    input.value = '';// choosing the same file again triggers the change event again
 }
 
 function loadMetaDataFromJSONOnServer(filename){
@@ -4123,6 +4102,7 @@ function main(visual=false)
         editor.history = new EditHistory(editor);
         editor.history.onChange = () => editor.emit('history');
         editor.shell = new AppShell(editor, document.getElementById('app_topbar'));
+        editor.palette = new BlockPalette(editor, document.getElementById('app_palette'));
     }
 
     if(visual) {
@@ -5042,6 +5022,12 @@ class WorkflowEditor{
          * @type {AppShell|null}
          */
         this.shell = null;
+
+        /**
+         * Block palette (see src/view/Palette.js), or null when the editor runs headless.
+         * @type {BlockPalette|null}
+         */
+        this.palette = null;
 
         /**
          * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.

@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
     <title>Workflow Editor</title>
     <link rel="stylesheet" href="./StyleBase.css">
     <link rel="stylesheet" href="./StyleCommon.css">
@@ -52,6 +54,7 @@
     <script type="text/javascript" src="src/view/FlowOverlay.js"></script>
     <script type="text/javascript" src="src/view/CanvasView.js"></script>
     <script type="text/javascript" src="src/view/AppShell.js"></script>
+    <script type="text/javascript" src="src/view/Palette.js"></script>
     <script type="text/javascript" src="src/WorkflowEditor.js"></script>
     <script type="text/javascript" src="src/Main.js"></script>
 </head>
@@ -67,16 +70,15 @@
     <header id="app_topbar"></header>
 
     <main id="app_main">
+        <!-- block palette (src/view/Palette.js) -->
+        <aside id="app_palette"></aside>
+
         <div id="workflowContainer">
             <div id="workflowCanvas"></div>
         </div>
 
         <div id="projectSettingsContainer">
             <div id="block_list_of_settings"></div>
-        </div>
-
-        <div id="modelListContainer">
-            <div id="block_list_of_models"></div>
         </div>
     </main>
 </div>

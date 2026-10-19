@@ -197,7 +197,7 @@ main#app_main > div{
     min-height: 0;
 }
 
-div#projectSettingsContainer, div#modelListContainer{
+div#projectSettingsContainer{
     overflow: auto;
     background: var(--app-panel);
 }
@@ -217,4 +217,132 @@ table.shortcut_table td{
 table.shortcut_table td:first-child{
     font-weight: 600;
     white-space: nowrap;
+}
+
+/* ---------- block palette (src/view/Palette.js) ---------- */
+
+aside#app_palette{
+    display: flex;
+    flex-direction: column;
+    width: 232px;
+    flex: 0 0 232px;
+    min-height: 0;
+    background: var(--app-panel);
+    border-right: 1px solid var(--app-border);
+}
+
+div.palette_search{
+    padding: 10px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+div.palette_search input{
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    font: inherit;
+    background: #ffffff;
+}
+
+div.palette_search input:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px rgba(30, 102, 245, 0.15);
+}
+
+div.palette_scroll{
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 8px 16px 8px;
+}
+
+section.palette_section h3{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 4px 4px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-muted);
+}
+
+div.palette_item{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+div.palette_item:hover{
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(31, 35, 40, 0.15);
+}
+
+span.palette_swatch{
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+span.palette_label{
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+span.palette_label small{
+    display: block;
+    color: var(--app-muted);
+    font-size: 11px;
+}
+
+button.palette_load, button.palette_icon{
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 5px;
+    padding: 1px 6px;
+    cursor: pointer;
+    color: var(--app-muted);
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 12px;
+}
+
+button.palette_load{
+    border-color: var(--app-border);
+    background: #ffffff;
+    color: var(--app-text);
+}
+
+button.palette_load:hover, button.palette_icon:hover{
+    background: var(--app-hover);
+    color: var(--app-text);
+}
+
+p.palette_empty{
+    margin: 4px 6px;
+    color: var(--app-muted);
+}
+
+/* the entry following the pointer while dragging */
+div.palette_ghost{
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(31, 35, 40, 0.25);
+    font-family: var(--app-font);
+    font-size: 13px;
+    letter-spacing: normal;
+    opacity: 0.95;
 }

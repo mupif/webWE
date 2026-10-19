@@ -231,6 +231,15 @@ t.test('data flow ranks of a cycle', () => {
     t.assert(ranks[0] < ranks[1] && ranks[1] < ranks[3], 'cycle broken in execution order: ' + ranks);
 });
 
+t.test('addBlockByName returns the appended block', () => {
+    let ed = t.createEditor(1);
+    let tl = ed.workflowblock.getBlocks(BlockTimeloop)[0];
+    let block = tl.addBlockByName('variable');
+    t.assert(block instanceof BlockVariable && tl.getBlocks()[4] === block && block.getParentBlock() === tl);
+    t.assertEqual(tl.addBlockByName('no_such_kind'), null);
+    t.assertEqual(tl.getBlocks().length, 5);
+});
+
 t.test('moving a block into another container', () => {
     let ed = t.createEditor(1);
     let wf = ed.workflowblock;

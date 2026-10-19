@@ -590,6 +590,13 @@ class Block{
         this.parent_block.moveChildBlockDown(this);
     }
 
+    /**
+     * Create a block of the given kind and append it as the last child of this block.
+     *
+     * @param {string} name - kind of the block, e.g., 'model', 'timeloop', 'property' (see the list below and
+     *        the block palette, src/view/Palette.js)
+     * @returns {Block|null} the new block, or null for an unknown kind
+     */
     addBlockByName(name) {
         let block = null;
 
@@ -632,6 +639,7 @@ class Block{
         if (block !== null) {
             this.addBlock(block);
         }
+        return block;
     }
 
     generateCodeName(all_blocks, base_name='block_'){

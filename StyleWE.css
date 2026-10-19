@@ -23,7 +23,7 @@ div#menu{
     background-color:silver;
 }
 
-div#modelListContainer, div#projectSettingsContainer{
+div#projectSettingsContainer{
     margin:0 auto 0 20px;
     position:relative;
 
@@ -56,7 +56,7 @@ div#workflowContainer{
     resize: none;
 }
 
-div#modelListContainer, div#projectSettingsContainer, div#workflowContainer{
+div#projectSettingsContainer, div#workflowContainer{
 
 }
 
@@ -120,9 +120,6 @@ a.link_file:hover{
     cursor: pointer;
 }
 
-div#block_list_of_models{
-    margin:15px;
-}
 
 div#block_list_of_settings{
     margin:15px;

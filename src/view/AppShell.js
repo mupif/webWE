@@ -103,7 +103,7 @@ class AppShell{
             '<button class="app_project_name" title="Project settings"></button>' +
             '<span class="app_spacer"></span>' +
             '<nav class="app_tabs">' +
-            '<button data-page="editor">Editor</button><button data-page="settings">Settings</button><button data-page="models">Models</button>' +
+            '<button data-page="editor">Editor</button><button data-page="settings">Settings</button>' +
             '</nav>' +
             '<span class="app_divider"></span>' +
             '<button class="app_icon_button" data-action="undo" title="Undo (Ctrl+Z)">' + appIcon('undo') + '</button>' +
@@ -219,21 +219,19 @@ class AppShell{
     /**
      * Show one of the pages of the editor and mark its tab.
      *
-     * @param {string} page - 'editor', 'settings' or 'models'
+     * @param {string} page - 'editor' or 'settings'
      */
     showPage(page){
         if(page === 'editor')
             focusOnEditor();
         else if(page === 'settings')
             this.editor.selectSettingsAndUpdate();
-        else if(page === 'models')
-            focusOnModelList();
     }
 
     /**
      * Mark the tab of the shown page.
      *
-     * @param {string} page - 'editor', 'settings' or 'models'
+     * @param {string} page - 'editor' or 'settings'
      */
     markPage(page){
         this.el.querySelectorAll('.app_tabs button').forEach(b => b.classList.toggle('active', b.dataset.page === page));

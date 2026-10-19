@@ -31,6 +31,12 @@ class WorkflowEditor{
         this.shell = null;
 
         /**
+         * Block palette (see src/view/Palette.js), or null when the editor runs headless.
+         * @type {BlockPalette|null}
+         */
+        this.palette = null;
+
+        /**
          * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
          * @type {Object<string, Function[]>}
          */

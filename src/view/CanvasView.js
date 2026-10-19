@@ -518,6 +518,58 @@ class CanvasView{
     }
 
     /**
+     * Find where a block dropped at a point of the screen would be placed: the innermost container block under
+     * the point (or the workflow) and the position of the dropped block in it. The position is snapped to the
+     * grid and moved into the content area of the container (below its header), so that it does not shift the
+     * other children.
+     *
+     * @param {number} client_x - point in client (screen) coordinates
+     * @param {number} client_y
+     * @returns {{container: Block, x: number, y: number}|null} the container and the position relative to it;
+     *          null when the point is not on the canvas
+     */
+    dropTargetAt(client_x, client_y){
+        let rect = this.el.getBoundingClientRect();
+        if(client_x < rect.left || client_x > rect.right || client_y < rect.top || client_y > rect.bottom)
+            return null;
+        let point = this.paper.clientToLocalPoint(client_x, client_y);
+        let grid = SHAPE_GEOMETRY.GRID;
+        point = {x: Math.round(point.x / grid) * grid, y: Math.round(point.y / grid) * grid};
+        let cell = null;
+        this.graph.findElementsAtPoint(point).forEach(el => {
+            let model = this.getModelOfCell(el);
+            if(model instanceof Block && model.isContainer() && (cell === null || el.get('z') > cell.get('z')))
+                cell = el;
+        });
+        if(cell === null)
+            return {container: this.editor.workflowblock, x: point.x, y: point.y};
+        let container = this.getModelOfCell(cell);
+        let origin = cell.position();
+        return {
+            container: container,
+            x: Math.max(point.x - origin.x, LAYOUT_PADDING),
+            y: Math.max(point.y - origin.y, measureBlock(container).contentTop + LAYOUT_PADDING)
+        };
+    }
+
+    /**
+     * Outline the container receiving a dragged block (or remove the outline).
+     *
+     * @param {Block|null} container - container block, or null (the workflow has no outline)
+     */
+    highlightDropTarget(container){
+        joint.highlighters.stroke.removeAll(this.paper, 'drop');
+        if(container === null || container === this.editor.workflowblock)
+            return;
+        let view = this.paper.findViewByModel(this.blockCellId(container));
+        if(view)
+            joint.highlighters.stroke.add(view, 'body', 'drop', {
+                padding: 6, rx: 10, ry: 10,
+                attrs: {'stroke': EXECUTION_FLOW_COLOR, 'stroke-width': 3, 'stroke-dasharray': '8 5'}
+            });
+    }
+
+    /**
      * Rebuild all canvas cells from the model.
      *
      * A newly loaded project (a different workflow block) is fitted to the editor area, unless ``keepView`` is
