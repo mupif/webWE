@@ -249,6 +249,7 @@ class Block{
     addMoveMenuItems(){
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('move_me', 'up', 'Up'), 'Move');
         this.getMenu().addItemIntoSubMenu(new VisualMenuItem('move_me', 'down', 'Down'), 'Move');
+        this.getMenu().addItem(new VisualMenuItem('duplicate_me', '', 'Duplicate'));
         this.getMenu().addItem(new VisualMenuItem('delete_me', '', 'Delete'));
     }
 
@@ -366,6 +367,12 @@ class Block{
             this.addBlockByName(value);
         if(keyword === 'delete_me') {
             this.deleteSelf();
+        }
+        if(keyword === 'duplicate_me'){
+            // the copy is selected; duplicateSelection redraws the canvas itself
+            this.editor.selected_block = this;
+            this.editor.duplicateSelection();
+            return;
         }
         if(keyword === 'move_me'){
             if(value === 'up')

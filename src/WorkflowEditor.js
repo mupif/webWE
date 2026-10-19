@@ -1,4 +1,11 @@
 class WorkflowEditor{
+    /**
+     * Number of paste operations of the session; makes the temporary UIDs of pasted blocks unique (see
+     * {@link WorkflowEditor#pasteBlocks}).
+     * @type {number}
+     */
+    static paste_counter = 0;
+
     constructor(){
         this.workflowblock = null;
         this.datalinks = [];
@@ -48,6 +55,12 @@ class WorkflowEditor{
          * @type {CodePreview|null}
          */
         this.code_preview = null;
+
+        /**
+         * Copied block (clipboard record, see {@link WorkflowEditor#copyBlock}), or null.
+         * @type {{blocks: Object[], datalinks: Object[]}|null}
+         */
+        this.clipboard = null;
 
         /**
          * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
@@ -536,6 +549,141 @@ class WorkflowEditor{
             this.canvas.select(block === this.workflowblock ? null : block);
         }
         return true;
+    }
+
+    /**
+     * Copy a block, with its nested blocks and the data links among them, into a clipboard record. Data links to
+     * blocks outside the copied subtree are not copied.
+     *
+     * @param {Block} block - block to copy (not the workflow)
+     * @returns {{blocks: Object[], datalinks: Object[]}} clipboard record (JSON records as in the project file)
+     */
+    copyBlock(block){
+        this.workflowblock.generateAllElementCodeNames();
+        let blocks = [block].concat(block.getBlocksRecursive());
+        let slots = new Set();
+        blocks.forEach(b => b.getSlots().forEach(s => slots.add(s)));
+        let datalinks = this.datalinks.filter(dl => slots.has(dl.slot1) && slots.has(dl.slot2));
+        return JSON.parse(JSON.stringify({
+            blocks: blocks.map(b => b.getDictForJSON()),
+            datalinks: datalinks.map(dl => dl.getDictForJSON())
+        }));
+    }
+
+    /**
+     * Insert a copy of the blocks of a clipboard record (see {@link WorkflowEditor#copyBlock}) into a container.
+     * The copies get new slot UIDs and new names (code names are regenerated when the workflow is redrawn); the
+     * data links among the copied blocks are recreated. The nested blocks keep their arrangement.
+     *
+     * @param {{blocks: Object[], datalinks: Object[]}} record - clipboard record
+     * @param {Block} container - the workflow or a container block receiving the copy (as its last child)
+     * @param {BlockLayout|null} [position=null] - position of the copy in the container; null for automatic
+     *        placement
+     * @returns {Block|null} the copy of the top block, or null when the record is empty
+     */
+    pasteBlocks(record, container, position=null){
+        if(!record || !record.blocks || record.blocks.length === 0 || !container.isContainer())
+            return null;
+        let records = JSON.parse(JSON.stringify(record.blocks));
+        // unique temporary block UIDs (they become the code names until the next redraw)
+        let block_uids = new Map();
+        let paste_id = ++WorkflowEditor.paste_counter;
+        records.forEach((r, i) => block_uids.set(r['uid'], 'pasted_' + paste_id + '_' + i));
+        let slot_uids = new Map();
+        let remap_slot = uid => {
+            if(!slot_uids.has(uid))
+                slot_uids.set(uid, generateNewSlotID());
+            return slot_uids.get(uid);
+        };
+        records.forEach((r, i) => {
+            r['parent_uid'] = i === 0 ? container.getUID() : block_uids.get(r['parent_uid']);
+            r['uid'] = block_uids.get(r['uid']);
+            r['slot_in_uids'] = (r['slot_in_uids'] || []).map(remap_slot);
+            r['slot_out_uids'] = (r['slot_out_uids'] || []).map(remap_slot);
+        });
+        if(position !== null)
+            records[0]['layout'] = Object.assign({}, records[0]['layout'] || {}, position);
+        else
+            delete records[0]['layout'];
+        records.forEach(r => this.addBlockByJsonRecord(r));
+        (record.datalinks || []).forEach(dl => this.addDatalinkByJsonRecord({
+            'ds1_uid': slot_uids.get(dl['ds1_uid']), 'ds2_uid': slot_uids.get(dl['ds2_uid'])
+        }));
+        return this.getBlockByUID(records[0]['uid']);
+    }
+
+    /**
+     * Copy the selected block into the clipboard (Edit > Copy, Ctrl+C).
+     *
+     * @returns {boolean} true when a block was copied
+     */
+    copySelection(){
+        let block = this.selected_block;
+        if(!block || block === this.workflowblock)
+            return false;
+        this.clipboard = this.copyBlock(block);
+        if(this.visual)
+            myQuery_show_note('Copied ' + block.getCodeName() + (block.blocks.length ? ' with its content' : '') + '.');
+        return true;
+    }
+
+    /**
+     * Paste the clipboard (Edit > Paste, Ctrl+V): into the selected container block, otherwise into the container
+     * under the center of the canvas at that point (or the workflow when the editor runs headless). The copy is
+     * selected and the canvas redrawn.
+     *
+     * @returns {Block|null} the pasted block
+     */
+    pasteClipboard(){
+        if(this.clipboard === null)
+            return null;
+        let container = this.workflowblock;
+        let position = null;
+        if(this.selected_block && this.selected_block.isContainer()){
+            container = this.selected_block;
+        }else if(this.canvas !== null){
+            let rect = this.canvas.el.getBoundingClientRect();
+            let target = this.canvas.dropTargetAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            if(target !== null){
+                container = target.container;
+                position = {x: target.x, y: target.y};
+            }
+        }
+        let block = this.pasteBlocks(this.clipboard, container, position);
+        this.generateWorkflowHtml({keepView: true});
+        if(block !== null && this.canvas !== null)
+            this.canvas.select(block);
+        return block;
+    }
+
+    /**
+     * Duplicate the selected block next to the original (Edit > Duplicate, Ctrl+D, block context menu); the copy is
+     * selected.
+     *
+     * @returns {Block|null} the copy
+     */
+    duplicateSelection(){
+        let block = this.selected_block;
+        if(!block || block === this.workflowblock)
+            return null;
+        let copy = this.duplicateBlock(block);
+        this.generateWorkflowHtml({keepView: true});
+        if(copy !== null && this.canvas !== null)
+            this.canvas.select(copy);
+        return copy;
+    }
+
+    /**
+     * Duplicate a block (with its nested blocks and the data links among them) next to the original, in the same
+     * container.
+     *
+     * @param {Block} block - block to duplicate (not the workflow)
+     * @returns {Block|null} the copy
+     */
+    duplicateBlock(block){
+        let layout = block.getLayout();
+        let position = layout !== null ? {x: layout.x + 30, y: layout.y + 30} : null;
+        return this.pasteBlocks(this.copyBlock(block), block.getParentBlock(), position);
     }
 
     getAllBlocks(){

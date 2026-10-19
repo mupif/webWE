@@ -48,6 +48,9 @@ const APP_MENUS = [
         {id: 'undo', label: 'Undo', shortcut: 'Ctrl+Z', enabled: s => s.editor.history !== null && s.editor.history.canUndo()},
         {id: 'redo', label: 'Redo', shortcut: 'Ctrl+Y', enabled: s => s.editor.history !== null && s.editor.history.canRedo()},
         '-',
+        {id: 'copy', label: 'Copy block', shortcut: 'Ctrl+C', enabled: s => s.blockSelected()},
+        {id: 'paste', label: 'Paste block', shortcut: 'Ctrl+V', enabled: s => s.editor.clipboard !== null},
+        {id: 'duplicate', label: 'Duplicate block', shortcut: 'Ctrl+D', enabled: s => s.blockSelected()},
         {id: 'delete', label: 'Delete selection', shortcut: 'Del',
             enabled: s => !!(s.editor.selected_block || s.editor.selected_datalink || s.editor.selected_slot_ext)},
         '-',
@@ -179,6 +182,9 @@ class AppShell{
             'export-class': () => editor.menu_download_class_code(),
             'undo': () => editor.undo(),
             'redo': () => editor.redo(),
+            'copy': () => editor.copySelection(),
+            'paste': () => editor.pasteClipboard(),
+            'duplicate': () => editor.duplicateSelection(),
             'delete': () => confirmDeleteSelection(),
             'order': () => canvas.orderByDependencies(),
             'zoom-in': () => canvas.zoom.zoomBy(ZOOM_STEP),
@@ -196,6 +202,14 @@ class AppShell{
         };
         if(id in actions)
             actions[id]();
+    }
+
+    /**
+     * @returns {boolean} true when a block (not the workflow) is selected
+     */
+    blockSelected(){
+        let block = this.editor.selected_block;
+        return !!block && block !== this.editor.workflowblock;
     }
 
     /**

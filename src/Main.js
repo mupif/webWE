@@ -55,6 +55,7 @@ function showShortcutHelp(){
         ['&uarr; / &darr;', 'execute the selected block earlier / later'],
         ['O', 're-arrange the children of the selected container'],
         ['Ctrl+Z / Ctrl+Y', 'undo / redo'],
+        ['Ctrl+C / Ctrl+V / Ctrl+D', 'copy / paste / duplicate the selected block'],
         ['Ctrl+S / Ctrl+O', 'save / open a project'],
         ['Esc', 'close menus, clear the selection']
     ];
@@ -86,6 +87,17 @@ function keyPress(e){
     // the editor shortcuts do not apply while typing in a text field or with a dialog open
     if(keyboardFocusIsElsewhere())
         return;
+    // copy, paste and duplicate blocks: Ctrl+C, Ctrl+V, Ctrl+D (Cmd on macOS)
+    if((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.which === 67 || e.which === 86 || e.which === 68)){
+        e.preventDefault();
+        if(e.which === 67)
+            editor.copySelection();
+        else if(e.which === 86)
+            editor.pasteClipboard();
+        else
+            editor.duplicateSelection();
+        return;
+    }
     // undo: Ctrl+Z, redo: Ctrl+Y or Ctrl+Shift+Z (Cmd on macOS)
     if((e.ctrlKey || e.metaKey) && !e.altKey && (e.which === 90 || e.which === 89)){
         e.preventDefault();
