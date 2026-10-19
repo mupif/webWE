@@ -3638,7 +3638,30 @@ function addCommaToLastLine(code_lines){
 }
 
 
+/**
+ * @returns {boolean} true when the keyboard focus is in a text field or a dialog is open; editor shortcuts are
+ *          not handled then (e.g., Ctrl+Z undoes the typing in the field)
+ */
+function keyboardFocusIsElsewhere(){
+    let el = document.activeElement;
+    if(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable))
+        return true;
+    let dialog = document.getElementById('myQuery_container');
+    return dialog !== null && dialog.style.display === 'block';
+}
+
 function keyPress(e){
+    // undo: Ctrl+Z, redo: Ctrl+Y or Ctrl+Shift+Z (Cmd on macOS)
+    if((e.ctrlKey || e.metaKey) && !e.altKey && (e.which === 90 || e.which === 89)){
+        if(keyboardFocusIsElsewhere())
+            return;
+        e.preventDefault();
+        if(e.which === 90 && !e.shiftKey)
+            editor.undo();
+        else
+            editor.redo();
+        return;
+    }
     if(e.which === 46){
         if(editor.selected_datalink){
             myquery_temp_instance = editor;
@@ -3856,8 +3879,12 @@ function main(visual=false)
     editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
-    if(visual)
+    if(visual) {
         editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
+        // the history records every redraw which changed the project (see WorkflowEditor.generateWorkflowHtml)
+        editor.history = new EditHistory(editor);
+        editor.history.onChange = () => editor.canvas.updateUndoButtons();
+    }
 
     if(visual) {
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');
@@ -4741,6 +4768,12 @@ class WorkflowEditor{
          * @type {CanvasView|null}
          */
         this.canvas = null;
+
+        /**
+         * Undo / redo history of the project (see src/EditHistory.js), or null when the editor runs headless.
+         * @type {EditHistory|null}
+         */
+        this.history = null;
     }
 
     /**
@@ -5318,11 +5351,60 @@ class WorkflowEditor{
     }
 
     /**
-     * Redraw the workflow after a change of the model (no-op when the editor runs headless).
+     * Redraw the workflow after a change of the model and record the change in the undo history (no-op when the
+     * editor runs headless).
+     *
+     * @param {Object} [options] - redraw options passed to CanvasView.render (e.g., ``keepView``)
      */
-    generateWorkflowHtml(){
+    generateWorkflowHtml(options={}){
         if(this.canvas !== null)
-            this.canvas.render();
+            this.canvas.render(options);
+        if(this.history !== null)
+            this.history.record();
+    }
+
+    /**
+     * Undo the last edit of the project (see EditHistory). The selected block stays selected when it still
+     * exists and an open project settings page shows the restored values.
+     *
+     * @returns {boolean} true when an edit was undone
+     */
+    undo(){
+        return this.restoreFromHistory(() => this.history.undo());
+    }
+
+    /**
+     * Redo the last undone edit of the project (see {@link WorkflowEditor#undo}).
+     *
+     * @returns {boolean} true when an edit was redone
+     */
+    redo(){
+        return this.restoreFromHistory(() => this.history.redo());
+    }
+
+    /**
+     * Perform an undo or redo step while preserving the selection of a block (by its UID) and refreshing the
+     * project settings page when it is shown.
+     *
+     * @param {function(): boolean} step - EditHistory.undo or EditHistory.redo
+     * @returns {boolean} true when a state was restored
+     */
+    restoreFromHistory(step){
+        if(this.history === null)
+            return false;
+        let selected_uid = this.selected_block ? this.selected_block.getUID() : null;
+        if(!step())
+            return false;
+        if(this.canvas !== null){
+            let block = selected_uid !== null ? this.getBlockByUID(selected_uid) : null;
+            this.canvas.select(block === this.workflowblock ? null : block);
+        }
+        if(this.visual){
+            let settings = document.getElementById('projectSettingsContainer');
+            if(settings && settings.style.display === 'block')
+                this.updateHtmlOfProjectSettings();
+        }
+        return true;
     }
 
     getAllBlocks(){

@@ -1,5 +1,28 @@
 
+/**
+ * @returns {boolean} true when the keyboard focus is in a text field or a dialog is open; editor shortcuts are
+ *          not handled then (e.g., Ctrl+Z undoes the typing in the field)
+ */
+function keyboardFocusIsElsewhere(){
+    let el = document.activeElement;
+    if(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable))
+        return true;
+    let dialog = document.getElementById('myQuery_container');
+    return dialog !== null && dialog.style.display === 'block';
+}
+
 function keyPress(e){
+    // undo: Ctrl+Z, redo: Ctrl+Y or Ctrl+Shift+Z (Cmd on macOS)
+    if((e.ctrlKey || e.metaKey) && !e.altKey && (e.which === 90 || e.which === 89)){
+        if(keyboardFocusIsElsewhere())
+            return;
+        e.preventDefault();
+        if(e.which === 90 && !e.shiftKey)
+            editor.undo();
+        else
+            editor.redo();
+        return;
+    }
     if(e.which === 46){
         if(editor.selected_datalink){
             myquery_temp_instance = editor;
@@ -217,8 +240,12 @@ function main(visual=false)
     editor.workflowblock = new BlockWorkflow(editor, null);
     editor.visual = visual;
 
-    if(visual)
+    if(visual) {
         editor.canvas = new CanvasView(editor, document.getElementById('workflowCanvas'));
+        // the history records every redraw which changed the project (see WorkflowEditor.generateWorkflowHtml)
+        editor.history = new EditHistory(editor);
+        editor.history.onChange = () => editor.canvas.updateUndoButtons();
+    }
 
     if(visual) {
         loadMetaDataFromJSONOnServer('examples/metadata/md01.json');

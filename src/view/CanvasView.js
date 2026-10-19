@@ -39,6 +39,9 @@
  * the canvas and counted in the toolbar, where "Order by dependencies" reorders the blocks of all containers so
  * that producers are executed before their consumers (``orderChildrenByDependencies``).
  *
+ * Undo and redo (EditHistory.js, Ctrl+Z / Ctrl+Y) restore the project and rebuild the canvas with
+ * ``render({keepView: true})``, which keeps the zoom and pan; the toolbar shows undo/redo buttons.
+ *
  * Data links are created by dragging from a slot port to another one. While dragging, the ports accepting the
  * link are highlighted (``validateConnection`` asks ``WorkflowEditor.canLinkSlots``); on connection the data
  * link is added to the model (``onLinkConnect``). Hovering a link shows a remove button.
@@ -152,6 +155,10 @@ class CanvasView{
         this.toolbar_el.innerHTML =
             '<span class="canvas_project" title="Project settings"></span>' +
             '<span class="canvas_toolbar_group">' +
+            '<button data-cmd="undo" title="Undo (Ctrl+Z)" disabled>&#x21B6;</button>' +
+            '<button data-cmd="redo" title="Redo (Ctrl+Y)" disabled>&#x21B7;</button>' +
+            '</span>' +
+            '<span class="canvas_toolbar_group">' +
             '<button data-cmd="zoom-out" title="Zoom out (mouse wheel)">&minus;</button>' +
             '<span class="canvas_zoom"></span>' +
             '<button data-cmd="zoom-in" title="Zoom in (mouse wheel)">+</button>' +
@@ -169,7 +176,9 @@ class CanvasView{
             'zoom-in': () => this.zoom.zoomBy(ZOOM_STEP),
             'fit': () => this.zoom.fit(),
             'reset': () => this.zoom.zoomTo(1),
-            'order': () => this.orderByDependencies()
+            'order': () => this.orderByDependencies(),
+            'undo': () => this.editor.undo(),
+            'redo': () => this.editor.redo()
         };
         let checkbox = this.toolbar_el.querySelector('.canvas_show_flow');
         checkbox.checked = this.show_flow;
@@ -246,6 +255,15 @@ class CanvasView{
             el.textContent = '\u26a0 ' + parts.join(', ');
             el.title = violations.map(v => v.message).join('\n');
         }
+    }
+
+    /**
+     * Enable the undo and redo buttons of the toolbar according to the editor's history.
+     */
+    updateUndoButtons(){
+        let history = this.editor.history;
+        this.toolbar_el.querySelector('button[data-cmd="undo"]').disabled = !(history && history.canUndo());
+        this.toolbar_el.querySelector('button[data-cmd="redo"]').disabled = !(history && history.canRedo());
     }
 
     /**
@@ -516,8 +534,14 @@ class CanvasView{
 
     /**
      * Rebuild all canvas cells from the model.
+     *
+     * A newly loaded project (a different workflow block) is fitted to the editor area, unless ``keepView`` is
+     * set: undo and redo also load a new workflow block, but the user's zoom and pan are kept.
+     *
+     * @param {Object} [options]
+     * @param {boolean} [options.keepView=false] - keep the zoom and pan
      */
-    render(){
+    render(options={}){
         let workflow = this.editor.workflowblock;
         workflow.generateAllElementCodeNames();
         this.hideMenu();
@@ -569,7 +593,8 @@ class CanvasView{
         this.showSelection();
         if(this.shown_workflow !== workflow){
             this.shown_workflow = workflow;
-            this.zoom.fit();
+            if(!options.keepView)
+                this.zoom.fit();
         }
         this.updateToolbar();
     }
