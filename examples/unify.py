@@ -28,6 +28,7 @@ if __name__ == '__main__':
         '../src/BlockGetItemFromDataList.js',
         '../src/Datalink.js',
         '../src/ExecutionOrder.js',
+        '../src/EditHistory.js',
         '../src/helpers.js',
         '../src/Main.js',
         '../src/Menu.js',
