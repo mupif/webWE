@@ -951,29 +951,6 @@ class BlockInputFile extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_file', '', 'Input&nbsp;file'), 'Set');
-    }
-
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_file') {
-            this.filename = document.getElementById('myQuery_temp_val').value;
-            console.log('Value set to "'+this.filename+'"');
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        if(keyword === 'set_file'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Input file:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.filename+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-        super.modificationQuery(keyword, value);
     }
 
     getClassName() {
@@ -1236,57 +1213,6 @@ class BlockModel extends Block {
         return "None";
     }
 
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_work_dir') {
-            this.input_file_directory = document.getElementById('myQuery_temp_val').value;
-            console.log('Working directory was set to "'+this.input_file_directory+'"');
-        }
-        if(action==='set_md') {
-            let md_list = this.editor.list_of_model_metadata;
-            for (let i = 0; i < md_list.length; i++) {
-                if (p1 === md_list[i]['ID']) {
-                    this.setMetadataAndUpdate(md_list[i]);
-                }
-            }
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        // if (keyword === 'set_metadata') {
-        //     let md_list = this.editor.list_of_model_metadata;
-        //     for (let i = 0; i < md_list.length; i++) {
-        //         if (value === md_list[i]['ID']) {
-        //             this.setMetadataAndUpdate(md_list[i]);
-        //         }
-        //     }
-        // }
-        if (keyword === 'set_work_dir') {
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Working directory:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.input_file_directory+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-        if (keyword === 'set_md') {
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Metadata:</b>&nbsp;';
-            let md_list = this.editor.list_of_model_metadata;
-            for (let i = 0; i < md_list.length; i++)
-                q_html += '<br><button style="margin-top:2px;" onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\', \''+md_list[i]['ID']+'\');">'+md_list[i]['Name']+'</button>';
-
-            q_html += '<br><button style="margin-top:2px;color:red;" onclick="myQuery_hide();">Cancel</button>';
-
-            myQuery_show(q_html);
-        }
-
-
-        super.modificationQuery(keyword, value);
-    }
-
     /**
      * @returns {EditableParameter[]} the model metadata (chosen from the models loaded in the editor) and the
      *          working directory
@@ -1329,12 +1255,6 @@ class BlockModel extends Block {
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_input_file', '', 'Input&nbsp;file'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_work_dir', '', 'Working&nbsp;directory'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_md', '', 'Metadata'), 'Set');
-        // let md_list = this.editor.list_of_model_metadata;
-        // for (let i = 0; i < md_list.length; i++)
-        //     this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_metadata', md_list[i]['ID'], md_list[i]['Name']), 'Set.MD');
     }
 
     getClassName() {
@@ -1451,51 +1371,6 @@ class BlockPhysicalQuantity extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value', '', 'Value'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_units', '', 'Units'), 'Set');
-    }
-
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_value') {
-            this.value = document.getElementById('myQuery_temp_val').value;
-            console.log('Value set to "'+this.value+'"');
-        }
-        if(action==='set_units') {
-            this.units = document.getElementById('myQuery_temp_val').value;
-            console.log('Units set to "'+this.units+'"');
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        if(keyword === 'set_value'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Value:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.value+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-        if(keyword === 'set_units'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Choose Units:</b>&nbsp;';
-            q_html += '<select id="myQuery_temp_val">';
-            for(let i=0;i<mupif_Units.length;i++) {
-                q_html += '<option value="'+mupif_Units[i]+'"';
-                if(this.units === mupif_Units[i])
-                    q_html += ' selected';
-                q_html += '>'+mupif_Units[i]+'</option>';
-            }
-            q_html += '</select>';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-
-        super.modificationQuery(keyword, value);
     }
 
     getClassName() {
@@ -1623,95 +1498,6 @@ class BlockProperty extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value', '', 'Value'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_units', '', 'Units'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_property_id', '', 'Property&nbsp;ID'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value_type', '', 'Value&nbsp;type'), 'Set');
-    }
-
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_value') {
-            this.value = document.getElementById('myQuery_temp_val').value;
-            console.log('Value set to "'+this.value+'"');
-        }
-        if(action==='set_units') {
-            this.units = document.getElementById('myQuery_temp_val').value;
-            console.log('Units set to "'+this.units+'"');
-        }
-        if(action==='set_property_id') {
-            this.property_id = 'mupif.DataID.'+document.getElementById('myQuery_temp_val').value;
-            console.log('Property ID set to "'+this.property_id+'"');
-        }
-        if(action==='set_value_type') {
-            this.value_type = 'mupif.ValueType.'+document.getElementById('myQuery_temp_val').value;
-            console.log('Value type set to "'+this.value_type+'"');
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        if(keyword === 'set_value'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Value:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.value+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-        if(keyword === 'set_units'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Choose Units:</b>&nbsp;';
-            q_html += '<select id="myQuery_temp_val">';
-            for(let i=0;i<mupif_Units.length;i++) {
-                q_html += '<option value="'+mupif_Units[i]+'"';
-                if(this.units === mupif_Units[i])
-                    q_html += ' selected';
-                q_html += '>'+mupif_Units[i]+'</option>';
-            }
-            q_html += '</select>';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-        if(keyword === 'set_property_id'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Choose PropertyID:</b>&nbsp;';
-            q_html += '<select id="myQuery_temp_val">';
-            for(let i=0;i<mupif_DataID.length;i++) {
-                q_html += '<option value="'+mupif_DataID[i]+'"';
-                if(this.property_id === 'mupif.DataID.'+mupif_DataID[i])
-                    q_html += ' selected';
-                q_html += '>'+mupif_DataID[i]+'</option>';
-            }
-            q_html += '</select>';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-        if(keyword === 'set_value_type'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Choose ValueType:</b>&nbsp;';
-            q_html += '<select id="myQuery_temp_val">';
-            for(let i=0;i<mupif_ValueType.length;i++) {
-                q_html += '<option value="'+mupif_ValueType[i]+'"';
-                if(this.value_type === 'mupif.ValueType.'+mupif_ValueType[i])
-                    q_html += ' selected';
-                q_html += '>'+mupif_ValueType[i]+'</option>';
-            }
-            q_html += '</select>';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-        super.modificationQuery(keyword, value);
     }
 
     getClassName() {
@@ -3969,22 +3755,6 @@ function keyPress(e){
     }
 }
 
-function focusOnEditor(){
-    document.getElementById('workflowContainer').style.display = 'block';
-    document.getElementById('projectSettingsContainer').style.display = 'none';
-
-    editor.shell.markPage('editor');
-
-    editor.generateWorkflowHtml()
-}
-
-function focusOnProjectSettings(){
-    document.getElementById('workflowContainer').style.display = 'none';
-    document.getElementById('projectSettingsContainer').style.display = 'block';
-
-    editor.shell.markPage('settings');
-}
-
 function deleteMetaDataByListID(list_id){
     editor.list_of_model_metadata.splice(list_id, 1);
     updateHtmlOfListOfModels();
@@ -4103,6 +3873,7 @@ function main(visual=false)
         editor.history.onChange = () => editor.emit('history');
         editor.shell = new AppShell(editor, document.getElementById('app_topbar'));
         editor.palette = new BlockPalette(editor, document.getElementById('app_palette'));
+        editor.inspector = new Inspector(editor, document.getElementById('app_inspector'));
     }
 
     if(visual) {
@@ -4145,7 +3916,6 @@ function main(visual=false)
 
     if(visual) {
         updateHtmlOfListOfModels();
-        focusOnEditor();
         editor.generateWorkflowHtml();
     }
 
@@ -5030,6 +4800,12 @@ class WorkflowEditor{
         this.palette = null;
 
         /**
+         * Inspector panel (see src/view/Inspector.js), or null when the editor runs headless.
+         * @type {Inspector|null}
+         */
+        this.inspector = null;
+
+        /**
          * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
          * @type {Object<string, Function[]>}
          */
@@ -5435,185 +5211,6 @@ class WorkflowEditor{
         return this.workflowblock.jobman_name;
     }
 
-    selectSettingsAndUpdate(){
-        this.updateHtmlOfProjectSettings();
-        focusOnProjectSettings();
-    }
-
-    updateHtmlOfProjectSettings(){
-        let slots;
-        let slot;
-        
-        let html = '';
-
-        html += '<div class="settings_section">';
-        
-        html += '<h2><b>Project settings</b></h2>';
-        html += '<table cellspacing="0" class="settings">';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>Name:</td>';
-        html += '<td><b>'+this.workflowblock.project_name+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_name+'" id="new_project_name"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>ClassName:</td>';
-        html += '<td><b>'+this.workflowblock.project_classname+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_classname+'" id="new_project_classname"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>ModuleName:</td>';
-        html += '<td><b>'+this.workflowblock.project_modulename+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_modulename+'" id="new_project_modulename"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>ID:</td>';
-        html += '<td><b>'+this.workflowblock.project_id+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_id+'" id="new_project_id"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-        html += '<tr><td colspan="10" style="height:10px;border-top:1px solid black"></td>';
-
-        html += '<tr>';
-        html += '<td>Default NameServer host:</td>';
-        html += '<td><b>'+this.workflowblock.project_nshost+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_nshost+'" id="new_project_nshost"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>Default NameServer port:</td>';
-        html += '<td><b>'+this.workflowblock.project_nsport+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_nsport+'" id="new_project_nsport"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-        html += '<tr><td colspan="10" style="height:10px;border-top:1px solid black"></td>';
-
-        
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td><button onclick="editor.save_project_detials();">Save</button></td>';
-        html += '</tr>';
-
-        html += '</table>';
-
-        html += '</div>';
-
-        //
-
-        html += '<div class="settings_section">';
-        
-        html += '<h2><b>External data slots</b></h2>';
-        html += '<table class="tbl_ext_slots" cellspacing="0">';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-        html += '<tr>';
-        html += '<td>#</td>';
-        html += '<td>name</td>';
-        html += '</tr>';
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td colspan="10"><b>Inputs:</b></td>';
-        html += '</tr>';
-
-        slots = this.workflowblock.output_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            html += '<tr>';
-            html += '<td>'+i+']</td>';
-
-            html += '<td><input id="in_slot_'+i+'_name" value="' + slot.name + '"></td>';
-
-            html += '</tr>';
-        }
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td colspan="10"><b>Outputs:</b></td>';
-        html += '</tr>';
-
-        slots = this.workflowblock.input_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            html += '<tr>';
-            html += '<td>'+i+']</td>';
-
-            html += '<td><input id="out_slot_'+i+'_name"  value="' + slot.name + '"></td>';
-            html += '</tr>';
-        }
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td><button onclick="editor.save_external_data_slots();">Save</button></td>';
-
-        html += '</tr>';
-
-        html += '</table>';
-
-        html += '</div>';
-
-        document.getElementById('block_list_of_settings').innerHTML = html;
-    }
-
-    save_external_data_slots(){
-        let slots;
-        let slot;
-
-        slots = this.workflowblock.output_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            slot.name = document.getElementById('in_slot_'+i+'_name').value;
-        }
-
-        slots = this.workflowblock.input_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            slot.name = document.getElementById('out_slot_'+i+'_name').value;
-        }
-
-        console.log('External data slots saved');
-        this.generateWorkflowHtml();
-    }
-
-    save_project_detials(){
-        let val;
-        val = document.getElementById('new_project_name').value;
-        this.setProjectName(val);
-        val = document.getElementById('new_project_classname').value;
-        this.setProjectClassName(val);
-        val = document.getElementById('new_project_modulename').value;
-        this.setProjectModuleName(val);
-        val = document.getElementById('new_project_id').value;
-        this.setProjectID(val);
-        val = document.getElementById('new_project_nshost').value;
-        this.setProjectNSHost(val);
-        val = document.getElementById('new_project_nsport').value;
-        this.setProjectNSPort(val);
-        
-        this.updateHtmlOfProjectSettings();
-        console.log('Project settings saved');
-        this.generateWorkflowHtml();
-    }
-
     download(filename, text) {
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -5661,7 +5258,7 @@ class WorkflowEditor{
 
     /**
      * Undo the last edit of the project (see EditHistory). The selected block stays selected when it still
-     * exists and an open project settings page shows the restored values.
+     * exists.
      *
      * @returns {boolean} true when an edit was undone
      */
@@ -5679,8 +5276,7 @@ class WorkflowEditor{
     }
 
     /**
-     * Perform an undo or redo step while preserving the selection of a block (by its UID) and refreshing the
-     * project settings page when it is shown.
+     * Perform an undo or redo step while preserving the selection of a block (by its UID).
      *
      * @param {function(): boolean} step - EditHistory.undo or EditHistory.redo
      * @returns {boolean} true when a state was restored
@@ -5694,11 +5290,6 @@ class WorkflowEditor{
         if(this.canvas !== null){
             let block = selected_uid !== null ? this.getBlockByUID(selected_uid) : null;
             this.canvas.select(block === this.workflowblock ? null : block);
-        }
-        if(this.visual){
-            let settings = document.getElementById('projectSettingsContainer');
-            if(settings && settings.style.display === 'block')
-                this.updateHtmlOfProjectSettings();
         }
         return true;
     }

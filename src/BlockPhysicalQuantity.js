@@ -72,51 +72,6 @@ class BlockPhysicalQuantity extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_value', '', 'Value'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_units', '', 'Units'), 'Set');
-    }
-
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_value') {
-            this.value = document.getElementById('myQuery_temp_val').value;
-            console.log('Value set to "'+this.value+'"');
-        }
-        if(action==='set_units') {
-            this.units = document.getElementById('myQuery_temp_val').value;
-            console.log('Units set to "'+this.units+'"');
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        if(keyword === 'set_value'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Value:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.value+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-        if(keyword === 'set_units'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Choose Units:</b>&nbsp;';
-            q_html += '<select id="myQuery_temp_val">';
-            for(let i=0;i<mupif_Units.length;i++) {
-                q_html += '<option value="'+mupif_Units[i]+'"';
-                if(this.units === mupif_Units[i])
-                    q_html += ' selected';
-                q_html += '>'+mupif_Units[i]+'</option>';
-            }
-            q_html += '</select>';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-
-        super.modificationQuery(keyword, value);
     }
 
     getClassName() {

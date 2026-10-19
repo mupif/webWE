@@ -101,20 +101,6 @@ header#app_topbar button.app_icon_button{
     padding: 5px;
 }
 
-/* page tabs */
-header#app_topbar nav.app_tabs{
-    display: flex;
-    background: var(--app-panel);
-    border: 1px solid var(--app-border);
-    border-radius: 8px;
-    padding: 2px;
-}
-
-header#app_topbar nav.app_tabs button.active{
-    background: #ffffff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-    font-weight: 600;
-}
 
 /* menus */
 header#app_topbar nav.app_menubar{
@@ -197,10 +183,6 @@ main#app_main > div{
     min-height: 0;
 }
 
-div#projectSettingsContainer{
-    overflow: auto;
-    background: var(--app-panel);
-}
 
 /* ---------- dialogs (src/myQuery.js) ---------- */
 
@@ -345,4 +327,228 @@ div.palette_ghost{
     font-size: 13px;
     letter-spacing: normal;
     opacity: 0.95;
+}
+
+/* ---------- inspector (src/view/Inspector.js) ---------- */
+
+aside#app_inspector{
+    width: 300px;
+    flex: 0 0 300px;
+    overflow-y: auto;
+    background: #ffffff;
+    border-left: 1px solid var(--app-border);
+    padding-bottom: 16px;
+}
+
+div.inspector_header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 14px 12px 14px;
+    border-bottom: 1px solid var(--app-border);
+    background: var(--app-panel);
+}
+
+span.inspector_swatch{
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+div.inspector_names{
+    flex: 1;
+    min-width: 0;
+}
+
+div.inspector_title{
+    font-weight: 600;
+    font-size: 14px;
+}
+
+div.inspector_subtitle{
+    color: var(--app-muted);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+span.inspector_badge{
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--app-accent);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+section.inspector_section{
+    padding: 4px 14px 8px 14px;
+}
+
+section.inspector_section h3{
+    margin: 10px 0 6px 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--app-muted);
+}
+
+label.inspector_field{
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    align-items: center;
+    gap: 2px 8px;
+    margin-bottom: 6px;
+}
+
+span.inspector_field_label{
+    color: var(--app-muted);
+    font-size: 12px;
+}
+
+label.inspector_field input, label.inspector_field select, div.inspector_actions select{
+    min-width: 0;
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid var(--app-border);
+    border-radius: 5px;
+    font: inherit;
+    background: #ffffff;
+}
+
+label.inspector_field input:focus, label.inspector_field select:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px rgba(30, 102, 245, 0.15);
+}
+
+label.inspector_field input.invalid{
+    border-color: #e03131;
+}
+
+span.inspector_field_error{
+    grid-column: 2;
+    color: #e03131;
+    font-size: 11px;
+}
+
+span.inspector_field_error:empty{
+    display: none;
+}
+
+div.inspector_ext_slot{
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+div.inspector_ext_slot label.inspector_field{
+    flex: 1;
+    grid-template-columns: 40px 1fr;
+}
+
+div.inspector_kv{
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 8px;
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+ul.inspector_slots{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.inspector_slots li{
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #eef1f4;
+}
+
+span.inspector_dot{
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    margin-top: 3px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+div.inspector_slot_text{
+    min-width: 0;
+}
+
+div.inspector_slot_name{
+    word-break: break-word;
+}
+
+div.inspector_slot_detail{
+    color: var(--app-muted);
+    font-size: 11px;
+    word-break: break-word;
+}
+
+div.inspector_slot_detail.missing{
+    color: #e03131;
+}
+
+p.inspector_muted{
+    color: var(--app-muted);
+    margin: 2px 0;
+}
+
+p.inspector_problem{
+    margin: 0 0 6px 0;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+p.inspector_problem.error{
+    background: #fff0f0;
+    border-left: 3px solid #e03131;
+}
+
+p.inspector_problem.warning{
+    background: #fff8e6;
+    border-left: 3px solid #f08c00;
+}
+
+div.inspector_actions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+button.inspector_button{
+    padding: 4px 10px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: #ffffff;
+    font: inherit;
+    cursor: pointer;
+}
+
+button.inspector_button:hover:not(:disabled){
+    background: var(--app-hover);
+}
+
+button.inspector_button:disabled{
+    color: #b0b7bf;
+    cursor: default;
+}
+
+button.inspector_button.danger{
+    color: #c92a2a;
+}
+
+button.inspector_button.danger:hover{
+    background: #fff0f0;
+    border-color: #ffa8a8;
 }

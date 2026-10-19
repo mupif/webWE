@@ -225,57 +225,6 @@ class BlockModel extends Block {
         return "None";
     }
 
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_work_dir') {
-            this.input_file_directory = document.getElementById('myQuery_temp_val').value;
-            console.log('Working directory was set to "'+this.input_file_directory+'"');
-        }
-        if(action==='set_md') {
-            let md_list = this.editor.list_of_model_metadata;
-            for (let i = 0; i < md_list.length; i++) {
-                if (p1 === md_list[i]['ID']) {
-                    this.setMetadataAndUpdate(md_list[i]);
-                }
-            }
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        // if (keyword === 'set_metadata') {
-        //     let md_list = this.editor.list_of_model_metadata;
-        //     for (let i = 0; i < md_list.length; i++) {
-        //         if (value === md_list[i]['ID']) {
-        //             this.setMetadataAndUpdate(md_list[i]);
-        //         }
-        //     }
-        // }
-        if (keyword === 'set_work_dir') {
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Working directory:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.input_file_directory+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-        if (keyword === 'set_md') {
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Metadata:</b>&nbsp;';
-            let md_list = this.editor.list_of_model_metadata;
-            for (let i = 0; i < md_list.length; i++)
-                q_html += '<br><button style="margin-top:2px;" onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\', \''+md_list[i]['ID']+'\');">'+md_list[i]['Name']+'</button>';
-
-            q_html += '<br><button style="margin-top:2px;color:red;" onclick="myQuery_hide();">Cancel</button>';
-
-            myQuery_show(q_html);
-        }
-
-
-        super.modificationQuery(keyword, value);
-    }
-
     /**
      * @returns {EditableParameter[]} the model metadata (chosen from the models loaded in the editor) and the
      *          working directory
@@ -318,12 +267,6 @@ class BlockModel extends Block {
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_input_file', '', 'Input&nbsp;file'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_work_dir', '', 'Working&nbsp;directory'), 'Set');
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_md', '', 'Metadata'), 'Set');
-        // let md_list = this.editor.list_of_model_metadata;
-        // for (let i = 0; i < md_list.length; i++)
-        //     this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_metadata', md_list[i]['ID'], md_list[i]['Name']), 'Set.MD');
     }
 
     getClassName() {

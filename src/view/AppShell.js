@@ -1,5 +1,5 @@
 /**
- * Top bar of the editor application: menus, project name, page tabs and undo/redo buttons.
+ * Top bar of the editor application: menus, project name and undo/redo buttons.
  *
  * Responsibility
  * --------------
@@ -100,12 +100,8 @@ class AppShell{
             '<span class="app_title">Workflow Editor</span>' +
             '<nav class="app_menubar">' + menus + '</nav>' +
             '<span class="app_divider"></span>' +
-            '<button class="app_project_name" title="Project settings"></button>' +
+            '<button class="app_project_name" title="Project settings (shown in the inspector)"></button>' +
             '<span class="app_spacer"></span>' +
-            '<nav class="app_tabs">' +
-            '<button data-page="editor">Editor</button><button data-page="settings">Settings</button>' +
-            '</nav>' +
-            '<span class="app_divider"></span>' +
             '<button class="app_icon_button" data-action="undo" title="Undo (Ctrl+Z)">' + appIcon('undo') + '</button>' +
             '<button class="app_icon_button" data-action="redo" title="Redo (Ctrl+Y)">' + appIcon('redo') + '</button>';
 
@@ -121,8 +117,6 @@ class AppShell{
         this.el.querySelectorAll('[data-action]').forEach(button =>
             button.addEventListener('click', () => this.run(button.dataset.action)));
         this.el.querySelector('.app_project_name').addEventListener('click', () => this.run('settings'));
-        this.el.querySelectorAll('.app_tabs button').forEach(button =>
-            button.addEventListener('click', () => this.showPage(button.dataset.page)));
     }
 
     /**
@@ -190,7 +184,8 @@ class AppShell{
             'flow': () => canvas.setShowFlow(!canvas.show_flow),
             'shortcuts': () => showShortcutHelp(),
             'mupif': () => window.open('http://mupif.org', '_blank'),
-            'settings': () => editor.selectSettingsAndUpdate()
+            // the inspector shows the project settings when nothing is selected
+            'settings': () => canvas.select(null)
         };
         if(id in actions)
             actions[id]();
@@ -214,27 +209,6 @@ class AppShell{
                 this.run(key === 's' ? 'save' : 'open');
             }
         }
-    }
-
-    /**
-     * Show one of the pages of the editor and mark its tab.
-     *
-     * @param {string} page - 'editor' or 'settings'
-     */
-    showPage(page){
-        if(page === 'editor')
-            focusOnEditor();
-        else if(page === 'settings')
-            this.editor.selectSettingsAndUpdate();
-    }
-
-    /**
-     * Mark the tab of the shown page.
-     *
-     * @param {string} page - 'editor' or 'settings'
-     */
-    markPage(page){
-        this.el.querySelectorAll('.app_tabs button').forEach(b => b.classList.toggle('active', b.dataset.page === page));
     }
 
     /**

@@ -5,7 +5,6 @@
     <title>Workflow Editor</title>
     <link rel="stylesheet" href="./StyleBase.css">
     <link rel="stylesheet" href="./StyleCommon.css">
-    <link rel="stylesheet" href="./StyleWE.css">
     <link rel="stylesheet" href="./StyleWE_blocks.css">
     <link rel="stylesheet" href="./StyleMyQuery.css">
     <link rel="stylesheet" href="./StyleCanvas.css">
@@ -55,6 +54,7 @@
     <script type="text/javascript" src="src/view/CanvasView.js"></script>
     <script type="text/javascript" src="src/view/AppShell.js"></script>
     <script type="text/javascript" src="src/view/Palette.js"></script>
+    <script type="text/javascript" src="src/view/Inspector.js"></script>
     <script type="text/javascript" src="src/WorkflowEditor.js"></script>
     <script type="text/javascript" src="src/Main.js"></script>
 </head>
@@ -77,9 +77,8 @@
             <div id="workflowCanvas"></div>
         </div>
 
-        <div id="projectSettingsContainer">
-            <div id="block_list_of_settings"></div>
-        </div>
+        <!-- inspector of the selection (src/view/Inspector.js) -->
+        <aside id="app_inspector"></aside>
     </main>
 </div>
 

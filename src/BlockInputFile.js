@@ -63,29 +63,6 @@ class BlockInputFile extends Block{
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
-        this.getMenu().addItemIntoSubMenu(new VisualMenuItem('set_file', '', 'Input&nbsp;file'), 'Set');
-    }
-
-    myquery_proceed(action, p1=null, p2=null){
-        if(action==='set_file') {
-            this.filename = document.getElementById('myQuery_temp_val').value;
-            console.log('Value set to "'+this.filename+'"');
-        }
-        super.myquery_proceed(action, p1, p2);
-    }
-
-    modificationQuery(keyword, value = null) {
-        if(keyword === 'set_file'){
-            myquery_temp_instance = this;
-            let q_html = '';
-            q_html += '<b>Set Input file:</b>&nbsp;';
-            q_html += '<input type="text" id="myQuery_temp_val" value="'+this.filename+'" style="width:100px;">';
-            q_html += '&nbsp;<button onclick="myquery_temp_instance.myquery_proceed(\''+keyword+'\');">OK</button>';
-
-            myQuery_show(q_html);
-        }
-
-        super.modificationQuery(keyword, value);
     }
 
     getClassName() {

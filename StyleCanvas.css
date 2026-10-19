@@ -10,6 +10,7 @@ div#contentView{
 /* the container fills the content view; the paper fills the container (zoom and pan instead of scrolling,
    see src/view/ZoomPan.js) */
 div#workflowContainer{
+    position: relative;
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;

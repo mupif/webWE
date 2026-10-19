@@ -119,22 +119,6 @@ function keyPress(e){
     }
 }
 
-function focusOnEditor(){
-    document.getElementById('workflowContainer').style.display = 'block';
-    document.getElementById('projectSettingsContainer').style.display = 'none';
-
-    editor.shell.markPage('editor');
-
-    editor.generateWorkflowHtml()
-}
-
-function focusOnProjectSettings(){
-    document.getElementById('workflowContainer').style.display = 'none';
-    document.getElementById('projectSettingsContainer').style.display = 'block';
-
-    editor.shell.markPage('settings');
-}
-
 function deleteMetaDataByListID(list_id){
     editor.list_of_model_metadata.splice(list_id, 1);
     updateHtmlOfListOfModels();
@@ -253,6 +237,7 @@ function main(visual=false)
         editor.history.onChange = () => editor.emit('history');
         editor.shell = new AppShell(editor, document.getElementById('app_topbar'));
         editor.palette = new BlockPalette(editor, document.getElementById('app_palette'));
+        editor.inspector = new Inspector(editor, document.getElementById('app_inspector'));
     }
 
     if(visual) {
@@ -295,7 +280,6 @@ function main(visual=false)
 
     if(visual) {
         updateHtmlOfListOfModels();
-        focusOnEditor();
         editor.generateWorkflowHtml();
     }
 

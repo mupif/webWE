@@ -37,6 +37,12 @@ class WorkflowEditor{
         this.palette = null;
 
         /**
+         * Inspector panel (see src/view/Inspector.js), or null when the editor runs headless.
+         * @type {Inspector|null}
+         */
+        this.inspector = null;
+
+        /**
          * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
          * @type {Object<string, Function[]>}
          */
@@ -442,185 +448,6 @@ class WorkflowEditor{
         return this.workflowblock.jobman_name;
     }
 
-    selectSettingsAndUpdate(){
-        this.updateHtmlOfProjectSettings();
-        focusOnProjectSettings();
-    }
-
-    updateHtmlOfProjectSettings(){
-        let slots;
-        let slot;
-        
-        let html = '';
-
-        html += '<div class="settings_section">';
-        
-        html += '<h2><b>Project settings</b></h2>';
-        html += '<table cellspacing="0" class="settings">';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>Name:</td>';
-        html += '<td><b>'+this.workflowblock.project_name+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_name+'" id="new_project_name"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>ClassName:</td>';
-        html += '<td><b>'+this.workflowblock.project_classname+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_classname+'" id="new_project_classname"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>ModuleName:</td>';
-        html += '<td><b>'+this.workflowblock.project_modulename+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_modulename+'" id="new_project_modulename"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>ID:</td>';
-        html += '<td><b>'+this.workflowblock.project_id+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_id+'" id="new_project_id"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-        html += '<tr><td colspan="10" style="height:10px;border-top:1px solid black"></td>';
-
-        html += '<tr>';
-        html += '<td>Default NameServer host:</td>';
-        html += '<td><b>'+this.workflowblock.project_nshost+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_nshost+'" id="new_project_nshost"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td>Default NameServer port:</td>';
-        html += '<td><b>'+this.workflowblock.project_nsport+'</b></td>';
-        html += '<td><input type="text" value="'+this.workflowblock.project_nsport+'" id="new_project_nsport"></td>';
-        html += '</tr>';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-        html += '<tr><td colspan="10" style="height:10px;border-top:1px solid black"></td>';
-
-        
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td><button onclick="editor.save_project_detials();">Save</button></td>';
-        html += '</tr>';
-
-        html += '</table>';
-
-        html += '</div>';
-
-        //
-
-        html += '<div class="settings_section">';
-        
-        html += '<h2><b>External data slots</b></h2>';
-        html += '<table class="tbl_ext_slots" cellspacing="0">';
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-        html += '<tr>';
-        html += '<td>#</td>';
-        html += '<td>name</td>';
-        html += '</tr>';
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td colspan="10"><b>Inputs:</b></td>';
-        html += '</tr>';
-
-        slots = this.workflowblock.output_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            html += '<tr>';
-            html += '<td>'+i+']</td>';
-
-            html += '<td><input id="in_slot_'+i+'_name" value="' + slot.name + '"></td>';
-
-            html += '</tr>';
-        }
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td colspan="10"><b>Outputs:</b></td>';
-        html += '</tr>';
-
-        slots = this.workflowblock.input_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            html += '<tr>';
-            html += '<td>'+i+']</td>';
-
-            html += '<td><input id="out_slot_'+i+'_name"  value="' + slot.name + '"></td>';
-            html += '</tr>';
-        }
-
-        html += '<tr><td colspan="10" style="height:10px;"></td>';
-
-        html += '<tr>';
-        html += '<td><button onclick="editor.save_external_data_slots();">Save</button></td>';
-
-        html += '</tr>';
-
-        html += '</table>';
-
-        html += '</div>';
-
-        document.getElementById('block_list_of_settings').innerHTML = html;
-    }
-
-    save_external_data_slots(){
-        let slots;
-        let slot;
-
-        slots = this.workflowblock.output_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            slot.name = document.getElementById('in_slot_'+i+'_name').value;
-        }
-
-        slots = this.workflowblock.input_slots;
-        for(let i=0;i<slots.length;i++) {
-            slot = slots[i];
-            slot.name = document.getElementById('out_slot_'+i+'_name').value;
-        }
-
-        console.log('External data slots saved');
-        this.generateWorkflowHtml();
-    }
-
-    save_project_detials(){
-        let val;
-        val = document.getElementById('new_project_name').value;
-        this.setProjectName(val);
-        val = document.getElementById('new_project_classname').value;
-        this.setProjectClassName(val);
-        val = document.getElementById('new_project_modulename').value;
-        this.setProjectModuleName(val);
-        val = document.getElementById('new_project_id').value;
-        this.setProjectID(val);
-        val = document.getElementById('new_project_nshost').value;
-        this.setProjectNSHost(val);
-        val = document.getElementById('new_project_nsport').value;
-        this.setProjectNSPort(val);
-        
-        this.updateHtmlOfProjectSettings();
-        console.log('Project settings saved');
-        this.generateWorkflowHtml();
-    }
-
     download(filename, text) {
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
@@ -668,7 +495,7 @@ class WorkflowEditor{
 
     /**
      * Undo the last edit of the project (see EditHistory). The selected block stays selected when it still
-     * exists and an open project settings page shows the restored values.
+     * exists.
      *
      * @returns {boolean} true when an edit was undone
      */
@@ -686,8 +513,7 @@ class WorkflowEditor{
     }
 
     /**
-     * Perform an undo or redo step while preserving the selection of a block (by its UID) and refreshing the
-     * project settings page when it is shown.
+     * Perform an undo or redo step while preserving the selection of a block (by its UID).
      *
      * @param {function(): boolean} step - EditHistory.undo or EditHistory.redo
      * @returns {boolean} true when a state was restored
@@ -701,11 +527,6 @@ class WorkflowEditor{
         if(this.canvas !== null){
             let block = selected_uid !== null ? this.getBlockByUID(selected_uid) : null;
             this.canvas.select(block === this.workflowblock ? null : block);
-        }
-        if(this.visual){
-            let settings = document.getElementById('projectSettingsContainer');
-            if(settings && settings.style.display === 'block')
-                this.updateHtmlOfProjectSettings();
         }
         return true;
     }
