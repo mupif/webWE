@@ -331,13 +331,58 @@ div.palette_ghost{
 
 /* ---------- inspector (src/view/Inspector.js) ---------- */
 
-aside#app_inspector{
+/* right sidebar with the inspector and code tabs */
+aside#app_sidebar{
+    display: flex;
+    flex-direction: column;
     width: 300px;
     flex: 0 0 300px;
-    overflow-y: auto;
+    min-height: 0;
     background: #ffffff;
     border-left: 1px solid var(--app-border);
+}
+
+aside#app_sidebar.wide{
+    width: 560px;
+    flex-basis: 560px;
+}
+
+nav.sidebar_tabs{
+    display: flex;
+    gap: 2px;
+    padding: 6px 8px 0 8px;
+    border-bottom: 1px solid var(--app-border);
+    background: var(--app-panel);
+}
+
+nav.sidebar_tabs button{
+    padding: 6px 12px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: transparent;
+    font: inherit;
+    color: var(--app-muted);
+    cursor: pointer;
+    margin-bottom: -1px;
+}
+
+nav.sidebar_tabs button.active{
+    background: #ffffff;
+    border-color: var(--app-border);
+    color: var(--app-text);
+    font-weight: 600;
+}
+
+div#app_inspector{
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding-bottom: 16px;
+}
+
+div#app_inspector[hidden], div#app_code[hidden]{
+    display: none;
 }
 
 div.inspector_header{
@@ -552,3 +597,95 @@ button.inspector_button.danger:hover{
     background: #fff0f0;
     border-color: #ffa8a8;
 }
+
+/* ---------- code preview (src/view/CodePreview.js) ---------- */
+
+div#app_code{
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+div.code_toolbar{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+div.code_toolbar select{
+    padding: 4px 6px;
+    border: 1px solid var(--app-border);
+    border-radius: 5px;
+    font: inherit;
+    background: #ffffff;
+}
+
+span.code_spacer{
+    flex: 1;
+}
+
+button.code_button{
+    padding: 4px 10px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: #ffffff;
+    font: inherit;
+    cursor: pointer;
+}
+
+button.code_button:hover{
+    background: var(--app-hover);
+}
+
+div.code_problems p{
+    margin: 8px 10px 0 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: #fff0f0;
+    border-left: 3px solid #e03131;
+    font-size: 12px;
+}
+
+pre.code_view{
+    flex: 1;
+    margin: 0;
+    padding: 8px 0;
+    overflow: auto;
+    background: #fbfcfd;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    counter-reset: code_line;
+    tab-size: 4;
+}
+
+span.code_line{
+    display: block;
+    padding: 0 12px 0 52px;
+    position: relative;
+    white-space: pre;
+}
+
+span.code_line::before{
+    content: attr(data-line);
+    position: absolute;
+    left: 0;
+    width: 40px;
+    text-align: right;
+    color: #a0a8b0;
+    user-select: none;
+}
+
+span.code_line.marked{
+    background: #fff4cc;
+}
+
+span.py_comment{ color: #6a737d; font-style: italic; }
+span.py_string{ color: #0a7b3b; }
+span.py_keyword{ color: #b3134d; font-weight: 600; }
+span.py_self{ color: #8250df; }
+span.py_decorator{ color: #b35900; }
+span.py_number{ color: #0550ae; }

@@ -244,6 +244,7 @@ function main(visual=false)
         editor.shell = new AppShell(editor, document.getElementById('app_topbar'));
         editor.palette = new BlockPalette(editor, document.getElementById('app_palette'));
         editor.inspector = new Inspector(editor, document.getElementById('app_inspector'));
+        editor.code_preview = new CodePreview(editor, document.getElementById('app_sidebar'));
     }
 
     if(visual) {

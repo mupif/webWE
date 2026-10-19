@@ -43,6 +43,13 @@ class WorkflowEditor{
         this.inspector = null;
 
         /**
+         * Code preview tab of the right sidebar (see src/view/CodePreview.js), or null when the editor runs
+         * headless.
+         * @type {CodePreview|null}
+         */
+        this.code_preview = null;
+
+        /**
          * Callbacks of editor events (see {@link WorkflowEditor#on}), by event name.
          * @type {Object<string, Function[]>}
          */

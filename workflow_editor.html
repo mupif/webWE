@@ -55,6 +55,7 @@
     <script type="text/javascript" src="src/view/AppShell.js"></script>
     <script type="text/javascript" src="src/view/Palette.js"></script>
     <script type="text/javascript" src="src/view/Inspector.js"></script>
+    <script type="text/javascript" src="src/view/CodePreview.js"></script>
     <script type="text/javascript" src="src/WorkflowEditor.js"></script>
     <script type="text/javascript" src="src/Main.js"></script>
 </head>
@@ -77,8 +78,15 @@
             <div id="workflowCanvas"></div>
         </div>
 
-        <!-- inspector of the selection (src/view/Inspector.js) -->
-        <aside id="app_inspector"></aside>
+        <!-- right sidebar: inspector of the selection (src/view/Inspector.js) and code preview (src/view/CodePreview.js) -->
+        <aside id="app_sidebar">
+            <nav class="sidebar_tabs">
+                <button data-tab="inspector" class="active">Inspector</button>
+                <button data-tab="code">Code</button>
+            </nav>
+            <div id="app_inspector"></div>
+            <div id="app_code" hidden></div>
+        </aside>
     </main>
 </div>
 
