@@ -42,17 +42,24 @@ const SHAPE_GEOMETRY = {
     GRID: 10              // sizes are rounded up to multiples of the grid size
 };
 
-/** Fill colors of blocks, keyed by the CSS class returned by Block.getBlockHtmlClass(). */
+/**
+ * Category colors of blocks (header of the block, tint of containers, palette swatches), keyed by the CSS class
+ * returned by Block.getBlockHtmlClass().
+ */
 const BLOCK_COLORS = {
-    'we_block_model': '#99ebff',
-    'we_block_default': '#cccccc',
-    'we_block_allocate_model_at_runtime': '#95b14a',
-    'we_block_run_in_background': '#eee04f',
-    'we_block_wait_for_background_processes': '#eee04f',
-    'we_block_data': '#ff80b3',
-    'we_block_helper': '#bea7e8',
-    'we_block_input_file': '#ffc77d'
+    'we_block_model': '#8fd3f4',
+    'we_block_default': '#c9d1d9',
+    'we_block_allocate_model_at_runtime': '#b5d67f',
+    'we_block_run_in_background': '#f3e27c',
+    'we_block_wait_for_background_processes': '#f3e27c',
+    'we_block_data': '#f6a9c9',
+    'we_block_helper': '#cbb8f2',
+    'we_block_input_file': '#ffd08a'
 };
+
+/** Text colors of the block shape. */
+const BLOCK_TEXT_COLOR = '#1f2328';
+const BLOCK_MUTED_TEXT_COLOR = '#57606a';
 
 /** Colors of data links and ports, keyed by the slot data type (Slot.getDataType()). */
 const DATA_TYPE_COLORS = {
@@ -266,16 +273,18 @@ function slotPortGroup(side){
 if(typeof joint !== 'undefined'){
     joint.dia.Element.define('mupif.Block', {
         attrs: {
-            body: {width: 'calc(w)', height: 'calc(h)', rx: 7, ry: 7, strokeWidth: 1.5, stroke: '#222'},
-            header: {width: 'calc(w)', height: SHAPE_GEOMETRY.HEADER_H, rx: 7, ry: 7, fill: '#2d3436'},
+            // white body with a soft shadow; the header carries the category color (set per block)
+            body: {width: 'calc(w)', height: 'calc(h)', rx: 8, ry: 8, strokeWidth: 1, stroke: '#8c959f', fill: '#ffffff',
+                filter: {name: 'dropShadow', args: {dx: 0, dy: 1, blur: 3, color: '#000000', opacity: 0.15}}},
+            header: {width: 'calc(w)', height: SHAPE_GEOMETRY.HEADER_H, rx: 8, ry: 8, fill: BLOCK_COLORS['we_block_default']},
             // squares the bottom corners of the rounded header
-            headerBase: {y: SHAPE_GEOMETRY.HEADER_H - 8, width: 'calc(w)', height: 8, fill: '#2d3436'},
+            headerBase: {y: SHAPE_GEOMETRY.HEADER_H - 8, width: 'calc(w)', height: 8, fill: BLOCK_COLORS['we_block_default']},
             title: {y: SHAPE_GEOMETRY.HEADER_H / 2, textVerticalAnchor: 'middle', fontSize: 12, fontWeight: 'bold',
-                fontFamily: CANVAS_FONT_FAMILY, fill: '#ffffff'},
+                fontFamily: CANVAS_FONT_FAMILY, fill: BLOCK_TEXT_COLOR},
             codeName: {x: 'calc(w-8)', y: SHAPE_GEOMETRY.HEADER_H / 2, textAnchor: 'end', textVerticalAnchor: 'middle',
-                fontSize: 10, fontFamily: CANVAS_FONT_FAMILY, fill: '#c8d0d4'},
+                fontSize: 10, fontFamily: CANVAS_FONT_FAMILY, fill: BLOCK_MUTED_TEXT_COLOR},
             params: {x: SHAPE_GEOMETRY.PAD, y: SHAPE_GEOMETRY.HEADER_H + SHAPE_GEOMETRY.PAD, textVerticalAnchor: 'top',
-                fontSize: 10, lineHeight: SHAPE_GEOMETRY.PARAM_LINE_H, fontFamily: CANVAS_FONT_FAMILY, fill: '#111'},
+                fontSize: 10, lineHeight: SHAPE_GEOMETRY.PARAM_LINE_H, fontFamily: CANVAS_FONT_FAMILY, fill: BLOCK_MUTED_TEXT_COLOR},
             badgeBody: {x: -8, y: -SHAPE_GEOMETRY.BADGE_H / 2 - 2, height: SHAPE_GEOMETRY.BADGE_H, rx: SHAPE_GEOMETRY.BADGE_H / 2,
                 ry: SHAPE_GEOMETRY.BADGE_H / 2, fill: EXECUTION_FLOW_COLOR, stroke: '#ffffff', strokeWidth: 1.5},
             badgeLabel: {y: -2, textAnchor: 'middle', textVerticalAnchor: 'middle', fontSize: 11, fontWeight: 'bold',
@@ -390,7 +399,10 @@ function createBlockCell(block, box, id, z){
         position: {x: box.x, y: box.y},
         size: {width: box.w, height: box.h},
         attrs: {
-            body: {fill: d.color, fillOpacity: d.container ? 0.35 : 1},
+            // containers are tinted with their color, so that nesting stays visible
+            body: d.container ? {fill: d.color, fillOpacity: 0.16} : {},
+            header: {fill: d.color},
+            headerBase: {fill: d.color},
             title: {x: titleX(label), text: d.title},
             codeName: {text: d.codeName},
             params: {text: d.params.join('\n')},
