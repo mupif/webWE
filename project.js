@@ -3909,6 +3909,7 @@ function main(visual=false)
         editor.palette = new BlockPalette(editor, document.getElementById('app_palette'));
         editor.inspector = new Inspector(editor, document.getElementById('app_inspector'));
         editor.code_preview = new CodePreview(editor, document.getElementById('app_sidebar'));
+        editor.theme = new ThemeManager(editor);
     }
 
     if(visual) {
@@ -4894,6 +4895,12 @@ class WorkflowEditor{
          * @type {CodePreview|null}
          */
         this.code_preview = null;
+
+        /**
+         * Light/dark theme of the editor (see src/view/Theme.js), or null when the editor runs headless.
+         * @type {ThemeManager|null}
+         */
+        this.theme = null;
 
         /**
          * Copied block (clipboard record, see {@link WorkflowEditor#copyBlock}), or null.
