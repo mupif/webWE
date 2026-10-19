@@ -127,6 +127,7 @@ class CanvasView{
         SHAPE_OPTIONS.hide_optional_inputs = this.loadOption('mupif_we_hide_optional_inputs', false);
         this.zoom = new CanvasZoomPan(this.paper, scale => this.updateToolbar());
         this.createToolbar();
+        this.minimap = new CanvasMinimap(this);
 
         this.paper.on('element:pointerdown', (view, evt, x, y) => this.onPointerDown(view));
         this.paper.on('element:pointerup', (view, evt, x, y) => this.onPointerUp(view));

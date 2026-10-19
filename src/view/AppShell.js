@@ -64,6 +64,7 @@ const APP_MENUS = [
         '-',
         {id: 'flow', label: 'Execution flow arrows', checked: s => s.editor.canvas.show_flow},
         {id: 'compact', label: 'Hide unconnected optional inputs', checked: s => SHAPE_OPTIONS.hide_optional_inputs},
+        {id: 'minimap', label: 'Minimap', checked: s => s.editor.canvas.minimap.visible},
         '-',
         {id: 'show-inspector', label: 'Inspector'},
         {id: 'show-code', label: 'Generated code'}
@@ -193,6 +194,7 @@ class AppShell{
             'actual-size': () => canvas.zoom.zoomTo(1),
             'flow': () => canvas.setShowFlow(!canvas.show_flow),
             'compact': () => canvas.setHideOptionalInputs(!SHAPE_OPTIONS.hide_optional_inputs),
+            'minimap': () => canvas.minimap.setVisible(!canvas.minimap.visible),
             'show-inspector': () => editor.code_preview.showTab('inspector'),
             'show-code': () => editor.code_preview.showTab('code'),
             'shortcuts': () => showShortcutHelp(),

@@ -144,3 +144,32 @@ div.canvas_toolbar button:disabled{
     cursor: default;
     opacity: 0.4;
 }
+
+/* overview of the workflow in the bottom-right corner (src/view/Minimap.js) */
+div.canvas_minimap{
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 10;
+    width: 220px;
+    height: 150px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--app-border, #d0d7de);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(31, 35, 40, 0.15);
+    cursor: pointer;
+    touch-action: none;
+}
+
+div.canvas_minimap .joint-paper, div.canvas_minimap svg{
+    pointer-events: none;
+}
+
+div.canvas_minimap_viewport{
+    position: absolute;
+    border: 2px solid #1e66f5;
+    background: rgba(30, 102, 245, 0.08);
+    border-radius: 3px;
+    pointer-events: none;
+}
