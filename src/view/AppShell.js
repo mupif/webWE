@@ -59,7 +59,8 @@ const APP_MENUS = [
         {id: 'fit', label: 'Fit to window'},
         {id: 'actual-size', label: 'Actual size'},
         '-',
-        {id: 'flow', label: 'Execution flow arrows', checked: s => s.editor.canvas.show_flow}
+        {id: 'flow', label: 'Execution flow arrows', checked: s => s.editor.canvas.show_flow},
+        {id: 'compact', label: 'Hide unconnected optional inputs', checked: s => SHAPE_OPTIONS.hide_optional_inputs}
     ]},
     {label: 'Help', items: [
         {id: 'shortcuts', label: 'Keyboard and mouse'},
@@ -182,6 +183,7 @@ class AppShell{
             'fit': () => canvas.zoom.fit(),
             'actual-size': () => canvas.zoom.zoomTo(1),
             'flow': () => canvas.setShowFlow(!canvas.show_flow),
+            'compact': () => canvas.setHideOptionalInputs(!SHAPE_OPTIONS.hide_optional_inputs),
             'shortcuts': () => showShortcutHelp(),
             'mupif': () => window.open('http://mupif.org', '_blank'),
             // the inspector shows the project settings when nothing is selected

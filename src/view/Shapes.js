@@ -68,6 +68,24 @@ const DATA_TYPE_DEFAULT_COLOR = '#555555';
 /** Accent color of the execution flow (badges and flow arrows). @type {string} */
 const EXECUTION_FLOW_COLOR = '#1e66f5';
 
+/** Color of required inputs which are not connected yet. @type {string} */
+const MISSING_INPUT_COLOR = '#e03131';
+
+/**
+ * Presentation options of the shapes, set by the canvas view (and remembered by the browser).
+ * ``hide_optional_inputs``: unconnected optional inputs are not drawn (compact blocks); the block shows how many
+ * inputs are hidden. Required and connected inputs are always drawn.
+ */
+const SHAPE_OPTIONS = {hide_optional_inputs: false};
+
+/**
+ * @param {Slot} slot
+ * @returns {boolean} true for an input of a block which the block requires but which is not connected
+ */
+function isMissingInput(slot){
+    return slot.inout === 'in' && !slot.external && slot.required === true && !slot.connected();
+}
+
 /** Canvas 2D context used to measure texts (created lazily). @type {CanvasRenderingContext2D|null} */
 let shape_measure_context = null;
 
@@ -124,7 +142,7 @@ function roundUpToGrid(v){
  * @property {string} codeName - name of the block in the generated code
  * @property {string} color - fill color
  * @property {string[]} params - parameter lines (e.g., 'Value = 1.0')
- * @property {Slot[]} inputs - input slots (ports on the left)
+ * @property {Slot[]} inputs - input slots shown as ports on the left (see SHAPE_OPTIONS.hide_optional_inputs)
  * @property {Slot[]} outputs - output slots (ports on the right)
  * @property {boolean} container - whether the block contains child blocks
  */
@@ -135,12 +153,20 @@ function roundUpToGrid(v){
  */
 function describeBlock(block){
     let css = block.getBlockHtmlClass().split(' ').find(c => c in BLOCK_COLORS);
+    let inputs = block.getSlots('in');
+    let params = htmlToTextLines(block.getBlockHtml_params());
+    if(SHAPE_OPTIONS.hide_optional_inputs){
+        let shown = inputs.filter(s => s.required === true || s.connected());
+        if(shown.length < inputs.length)
+            params.push('+' + (inputs.length - shown.length) + ' optional input' + (inputs.length - shown.length > 1 ? 's' : '') + ' hidden');
+        inputs = shown;
+    }
     return {
         title: block.getBlockHtmlName(),
         codeName: block.getCodeName(),
         color: BLOCK_COLORS[css] || BLOCK_COLORS['we_block_default'],
-        params: htmlToTextLines(block.getBlockHtml_params()),
-        inputs: block.getSlots('in'),
+        params: params,
+        inputs: inputs,
         outputs: block.getSlots('out'),
         container: block.isContainer()
     };
@@ -326,16 +352,21 @@ function slotTooltip(slot){
  */
 function slotPortItems(slots, group, x, top){
     let g = SHAPE_GEOMETRY;
-    return slots.map((s, i) => ({
-        id: s.getUID(),
-        group: group,
-        args: {x: x, y: top + i * g.PORT_ROW_H + g.PORT_ROW_H / 2},
-        attrs: {
-            portBody: {fill: dataTypeColor(s.getDataType())},
-            portTitle: {text: slotTooltip(s)},
-            label: {text: s.name, fontSize: 10, fontFamily: CANVAS_FONT_FAMILY, fill: '#111'}
-        }
-    }));
+    return slots.map((s, i) => {
+        // a required input which is not connected yet gets a red ring and label
+        let missing = isMissingInput(s);
+        return {
+            id: s.getUID(),
+            group: group,
+            args: {x: x, y: top + i * g.PORT_ROW_H + g.PORT_ROW_H / 2},
+            attrs: {
+                portBody: missing ? {fill: '#ffffff', stroke: MISSING_INPUT_COLOR, strokeWidth: 2.5} :
+                    {fill: dataTypeColor(s.getDataType())},
+                portTitle: {text: slotTooltip(s)},
+                label: {text: s.name, fontSize: 10, fontFamily: CANVAS_FONT_FAMILY, fill: missing ? MISSING_INPUT_COLOR : '#111'}
+            }
+        };
+    });
 }
 
 /**

@@ -123,12 +123,8 @@ class CanvasView{
         this.shown_workflow = null;
 
         /** Whether the flow arrows are shown (remembered in the browser's local storage). @type {boolean} */
-        this.show_flow = true;
-        try{
-            this.show_flow = window.localStorage.getItem('mupif_we_show_flow') !== 'false';
-        }catch(e){
-            // storage not available (e.g., disabled); the default is used
-        }
+        this.show_flow = this.loadOption('mupif_we_show_flow', true);
+        SHAPE_OPTIONS.hide_optional_inputs = this.loadOption('mupif_we_hide_optional_inputs', false);
         this.zoom = new CanvasZoomPan(this.paper, scale => this.updateToolbar());
         this.createToolbar();
 
@@ -184,18 +180,55 @@ class CanvasView{
     }
 
     /**
+     * Read a view option remembered by the browser.
+     *
+     * @param {string} key - local storage key
+     * @param {boolean} default_value - value when nothing is stored (or the storage is not available)
+     * @returns {boolean}
+     */
+    loadOption(key, default_value){
+        try{
+            let value = window.localStorage.getItem(key);
+            return value === null ? default_value : value === 'true';
+        }catch(e){
+            return default_value;
+        }
+    }
+
+    /**
+     * Remember a view option in the browser (if possible; otherwise it holds for this session only).
+     *
+     * @param {string} key - local storage key
+     * @param {boolean} value
+     */
+    saveOption(key, value){
+        try{
+            window.localStorage.setItem(key, value ? 'true' : 'false');
+        }catch(e){
+            // storage not available
+        }
+    }
+
+    /**
      * Show or hide the flow arrows.
      *
      * @param {boolean} show
      */
     setShowFlow(show){
         this.show_flow = show;
-        try{
-            window.localStorage.setItem('mupif_we_show_flow', show ? 'true' : 'false');
-        }catch(e){
-            // storage not available; the choice holds for this session only
-        }
-        this.render();
+        this.saveOption('mupif_we_show_flow', show);
+        this.render({keepView: true});
+    }
+
+    /**
+     * Hide or show the unconnected optional inputs of blocks (compact blocks, see SHAPE_OPTIONS).
+     *
+     * @param {boolean} hide
+     */
+    setHideOptionalInputs(hide){
+        SHAPE_OPTIONS.hide_optional_inputs = hide;
+        this.saveOption('mupif_we_hide_optional_inputs', hide);
+        this.render({keepView: true});
     }
 
     /**
