@@ -49,6 +49,26 @@ function normalizeLayout(data, with_size=true){
     return layout;
 }
 
+/**
+ * Description of an editable parameter of a block, of the project or of an external slot, used to build forms
+ * (e.g., the inspector panel of the editor). The value is changed with the ``setParameter`` method of the owner.
+ *
+ * @typedef {Object} EditableParameter
+ * @property {string} key - identifier passed to ``setParameter``
+ * @property {string} label - human readable name
+ * @property {string} type - 'text' (free text) or 'select' (one of ``options``)
+ * @property {string} value - current value
+ * @property {{value: string, label: string}[]} [options] - choices of a 'select' parameter
+ */
+
+/**
+ * @param {string[]} values
+ * @returns {{value: string, label: string}[]} select options showing the values themselves
+ */
+function parameterOptions(values){
+    return values.map(v => ({value: v, label: v}));
+}
+
 class Block{
     /**
      * @param {WorkflowEditor} editor - the editor owning the block
@@ -96,6 +116,25 @@ class Block{
         this.child_block_sort = 'vertical';
 
         this.defines_timestep = false;
+    }
+
+    /**
+     * @returns {EditableParameter[]} the parameters of the block which the user can edit (none by default;
+     *          blocks with parameters override this method together with {@link Block#setParameter})
+     */
+    getParameters(){
+        return [];
+    }
+
+    /**
+     * Change a parameter of the block (see {@link Block#getParameters}).
+     *
+     * @param {string} key - parameter key
+     * @param {string} value - new value
+     * @returns {boolean} true when the parameter exists and the value was accepted
+     */
+    setParameter(key, value){
+        return false;
     }
 
     /**
@@ -881,6 +920,26 @@ class BlockInputFile extends Block{
         return [];
     }
 
+    /**
+     * @returns {EditableParameter[]} name of the input file
+     */
+    getParameters(){
+        return [{key: 'filename', label: 'File name', type: 'text', value: this.filename}];
+    }
+
+    /**
+     * @param {string} key - 'filename'
+     * @param {string} value
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        if(key === 'filename'){
+            this.filename = String(value).trim();
+            return true;
+        }
+        return false;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
@@ -1220,6 +1279,45 @@ class BlockModel extends Block {
         super.modificationQuery(keyword, value);
     }
 
+    /**
+     * @returns {EditableParameter[]} the model metadata (chosen from the models loaded in the editor) and the
+     *          working directory
+     */
+    getParameters(){
+        let md_list = this.editor.list_of_model_metadata;
+        let options = md_list.map(md => ({value: md['ID'], label: md['Name']}));
+        let current = this.md['ID'] || '';
+        if(!options.some(o => o.value === current))
+            options.unshift({value: current, label: this.md['Name'] || '(no metadata)'});
+        return [
+            {key: 'metadata', label: 'Model', type: 'select', value: current, options: options},
+            {key: 'working_directory', label: 'Working directory', type: 'text', value: this.input_file_directory}
+        ];
+    }
+
+    /**
+     * @param {string} key - 'metadata' (the ID of a model loaded in the editor; replacing the metadata
+     *        rebuilds the slots and removes their data links) or 'working_directory'
+     * @param {string} value
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        if(key === 'working_directory'){
+            this.input_file_directory = String(value).trim();
+            return true;
+        }
+        if(key === 'metadata'){
+            if(value === (this.md['ID'] || ''))
+                return true;
+            let md = this.editor.list_of_model_metadata.find(m => m['ID'] === value);
+            if(!md)
+                return false;
+            this.setMetadataAndUpdate(md);
+            return true;
+        }
+        return false;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
@@ -1309,6 +1407,37 @@ class BlockPhysicalQuantity extends Block{
 
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
+    }
+
+    /**
+     * @returns {EditableParameter[]} value and units of the quantity
+     */
+    getParameters(){
+        return [
+            {key: 'value', label: 'Value', type: 'text', value: String(this.value)},
+            {key: 'units', label: 'Units', type: 'select', value: this.units, options: parameterOptions(mupif_Units)}
+        ];
+    }
+
+    /**
+     * The output slot carries a copy of the units (set when the block is constructed, e.g., from a project
+     * file), which is updated as well.
+     *
+     * @param {string} key - 'value' or 'units'
+     * @param {string} value
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        if(key === 'value' && String(value).trim() !== ''){
+            this.value = String(value).trim();
+            return true;
+        }
+        if(key === 'units'){
+            this.units = value;
+            this.getSlots('out')[0].units = value;
+            return true;
+        }
+        return false;
     }
 
     defineMenu() {
@@ -1437,6 +1566,50 @@ class BlockProperty extends Block{
 
     getExecutionCode(indent=0, timestep="", solvefunc=false){
         return [];
+    }
+
+    /**
+     * @returns {EditableParameter[]} value, units, property ID and value type of the property (the DataID and
+     *          ValueType are shown without their ``mupif.DataID.``/``mupif.ValueType.`` prefixes)
+     */
+    getParameters(){
+        return [
+            {key: 'value', label: 'Value', type: 'text', value: String(this.value)},
+            {key: 'units', label: 'Units', type: 'select', value: this.units, options: parameterOptions(mupif_Units)},
+            {key: 'property_id', label: 'Property ID', type: 'select', value: this.property_id.replace('mupif.DataID.', ''),
+                options: parameterOptions(mupif_DataID)},
+            {key: 'value_type', label: 'Value type', type: 'select', value: this.value_type.replace('mupif.ValueType.', ''),
+                options: parameterOptions(mupif_ValueType)}
+        ];
+    }
+
+    /**
+     * The output slot carries copies of the units, property ID and value type (set when the block is
+     * constructed, e.g., from a project file), which are updated as well.
+     *
+     * @param {string} key - 'value', 'units', 'property_id' or 'value_type'
+     * @param {string} value - for 'property_id' and 'value_type' without the mupif prefix
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        let slot = this.getSlots('out')[0];
+        if(key === 'value' && String(value).trim() !== ''){
+            this.value = String(value).trim();
+            return true;
+        }
+        if(key === 'units'){
+            this.units = slot.units = value;
+            return true;
+        }
+        if(key === 'property_id'){
+            this.property_id = slot.obj_type = 'mupif.DataID.' + value;
+            return true;
+        }
+        if(key === 'value_type'){
+            this.value_type = slot.value_type = 'mupif.ValueType.' + value;
+            return true;
+        }
+        return false;
     }
 
     defineMenu() {
@@ -2235,6 +2408,36 @@ class BlockWorkflow extends Block{
             return replace_tabs_with_spaces_for_each_line(code);
         }
         return '';
+    }
+
+    /**
+     * @returns {EditableParameter[]} the project settings
+     */
+    getParameters(){
+        return [
+            {key: 'project_name', label: 'Name', type: 'text', value: this.project_name},
+            {key: 'project_classname', label: 'Class name', type: 'text', value: this.project_classname},
+            {key: 'project_modulename', label: 'Module name', type: 'text', value: this.project_modulename},
+            {key: 'project_id', label: 'ID', type: 'text', value: this.project_id},
+            {key: 'project_nshost', label: 'Nameserver host', type: 'text', value: this.project_nshost},
+            {key: 'project_nsport', label: 'Nameserver port', type: 'text', value: this.project_nsport}
+        ];
+    }
+
+    /**
+     * @param {string} key - one of the keys of {@link BlockWorkflow#getParameters}
+     * @param {string} value - new value; the name, class name, module name and ID must not be empty
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        let keys = ['project_name', 'project_classname', 'project_modulename', 'project_id', 'project_nshost', 'project_nsport'];
+        if(!keys.includes(key))
+            return false;
+        value = String(value).trim();
+        if(value === '' && key !== 'project_nshost' && key !== 'project_nsport')
+            return false;
+        this[key] = value;
+        return true;
     }
 
     defineMenu() {
@@ -4717,6 +4920,29 @@ class SlotExt extends Slot{
     }
 
     getClassName(){return 'SlotExt';}
+
+    /**
+     * @returns {EditableParameter[]} the name of the external slot (the name of the input or output of the
+     *          workflow class)
+     */
+    getParameters(){
+        return [{key: 'name', label: 'Name', type: 'text', value: this.name}];
+    }
+
+    /**
+     * @param {string} key - 'name'
+     * @param {string} value - new name; it must be a non-empty name not used by another external slot
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        value = String(value).trim();
+        if(key !== 'name' || value === '')
+            return false;
+        if(this.parent_block.getSlots().some(s => s !== this && s.name === value))
+            return false;
+        this.name = value;
+        return true;
+    }
 
     /** @returns {BlockLayout|null} position of the slot terminal on the canvas */
     getLayout(){return this.layout;}

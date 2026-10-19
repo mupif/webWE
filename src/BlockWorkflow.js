@@ -514,6 +514,36 @@ class BlockWorkflow extends Block{
         return '';
     }
 
+    /**
+     * @returns {EditableParameter[]} the project settings
+     */
+    getParameters(){
+        return [
+            {key: 'project_name', label: 'Name', type: 'text', value: this.project_name},
+            {key: 'project_classname', label: 'Class name', type: 'text', value: this.project_classname},
+            {key: 'project_modulename', label: 'Module name', type: 'text', value: this.project_modulename},
+            {key: 'project_id', label: 'ID', type: 'text', value: this.project_id},
+            {key: 'project_nshost', label: 'Nameserver host', type: 'text', value: this.project_nshost},
+            {key: 'project_nsport', label: 'Nameserver port', type: 'text', value: this.project_nsport}
+        ];
+    }
+
+    /**
+     * @param {string} key - one of the keys of {@link BlockWorkflow#getParameters}
+     * @param {string} value - new value; the name, class name, module name and ID must not be empty
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        let keys = ['project_name', 'project_classname', 'project_modulename', 'project_id', 'project_nshost', 'project_nsport'];
+        if(!keys.includes(key))
+            return false;
+        value = String(value).trim();
+        if(value === '' && key !== 'project_nshost' && key !== 'project_nsport')
+            return false;
+        this[key] = value;
+        return true;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addAddBlockItems();

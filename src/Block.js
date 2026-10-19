@@ -44,6 +44,26 @@ function normalizeLayout(data, with_size=true){
     return layout;
 }
 
+/**
+ * Description of an editable parameter of a block, of the project or of an external slot, used to build forms
+ * (e.g., the inspector panel of the editor). The value is changed with the ``setParameter`` method of the owner.
+ *
+ * @typedef {Object} EditableParameter
+ * @property {string} key - identifier passed to ``setParameter``
+ * @property {string} label - human readable name
+ * @property {string} type - 'text' (free text) or 'select' (one of ``options``)
+ * @property {string} value - current value
+ * @property {{value: string, label: string}[]} [options] - choices of a 'select' parameter
+ */
+
+/**
+ * @param {string[]} values
+ * @returns {{value: string, label: string}[]} select options showing the values themselves
+ */
+function parameterOptions(values){
+    return values.map(v => ({value: v, label: v}));
+}
+
 class Block{
     /**
      * @param {WorkflowEditor} editor - the editor owning the block
@@ -91,6 +111,25 @@ class Block{
         this.child_block_sort = 'vertical';
 
         this.defines_timestep = false;
+    }
+
+    /**
+     * @returns {EditableParameter[]} the parameters of the block which the user can edit (none by default;
+     *          blocks with parameters override this method together with {@link Block#setParameter})
+     */
+    getParameters(){
+        return [];
+    }
+
+    /**
+     * Change a parameter of the block (see {@link Block#getParameters}).
+     *
+     * @param {string} key - parameter key
+     * @param {string} value - new value
+     * @returns {boolean} true when the parameter exists and the value was accepted
+     */
+    setParameter(key, value){
+        return false;
     }
 
     /**

@@ -40,6 +40,50 @@ class BlockProperty extends Block{
         return [];
     }
 
+    /**
+     * @returns {EditableParameter[]} value, units, property ID and value type of the property (the DataID and
+     *          ValueType are shown without their ``mupif.DataID.``/``mupif.ValueType.`` prefixes)
+     */
+    getParameters(){
+        return [
+            {key: 'value', label: 'Value', type: 'text', value: String(this.value)},
+            {key: 'units', label: 'Units', type: 'select', value: this.units, options: parameterOptions(mupif_Units)},
+            {key: 'property_id', label: 'Property ID', type: 'select', value: this.property_id.replace('mupif.DataID.', ''),
+                options: parameterOptions(mupif_DataID)},
+            {key: 'value_type', label: 'Value type', type: 'select', value: this.value_type.replace('mupif.ValueType.', ''),
+                options: parameterOptions(mupif_ValueType)}
+        ];
+    }
+
+    /**
+     * The output slot carries copies of the units, property ID and value type (set when the block is
+     * constructed, e.g., from a project file), which are updated as well.
+     *
+     * @param {string} key - 'value', 'units', 'property_id' or 'value_type'
+     * @param {string} value - for 'property_id' and 'value_type' without the mupif prefix
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        let slot = this.getSlots('out')[0];
+        if(key === 'value' && String(value).trim() !== ''){
+            this.value = String(value).trim();
+            return true;
+        }
+        if(key === 'units'){
+            this.units = slot.units = value;
+            return true;
+        }
+        if(key === 'property_id'){
+            this.property_id = slot.obj_type = 'mupif.DataID.' + value;
+            return true;
+        }
+        if(key === 'value_type'){
+            this.value_type = slot.value_type = 'mupif.ValueType.' + value;
+            return true;
+        }
+        return false;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();

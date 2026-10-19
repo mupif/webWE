@@ -215,6 +215,29 @@ class SlotExt extends Slot{
 
     getClassName(){return 'SlotExt';}
 
+    /**
+     * @returns {EditableParameter[]} the name of the external slot (the name of the input or output of the
+     *          workflow class)
+     */
+    getParameters(){
+        return [{key: 'name', label: 'Name', type: 'text', value: this.name}];
+    }
+
+    /**
+     * @param {string} key - 'name'
+     * @param {string} value - new name; it must be a non-empty name not used by another external slot
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        value = String(value).trim();
+        if(key !== 'name' || value === '')
+            return false;
+        if(this.parent_block.getSlots().some(s => s !== this && s.name === value))
+            return false;
+        this.name = value;
+        return true;
+    }
+
     /** @returns {BlockLayout|null} position of the slot terminal on the canvas */
     getLayout(){return this.layout;}
 

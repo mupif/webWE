@@ -38,6 +38,37 @@ class BlockPhysicalQuantity extends Block{
         return [];
     }
 
+    /**
+     * @returns {EditableParameter[]} value and units of the quantity
+     */
+    getParameters(){
+        return [
+            {key: 'value', label: 'Value', type: 'text', value: String(this.value)},
+            {key: 'units', label: 'Units', type: 'select', value: this.units, options: parameterOptions(mupif_Units)}
+        ];
+    }
+
+    /**
+     * The output slot carries a copy of the units (set when the block is constructed, e.g., from a project
+     * file), which is updated as well.
+     *
+     * @param {string} key - 'value' or 'units'
+     * @param {string} value
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        if(key === 'value' && String(value).trim() !== ''){
+            this.value = String(value).trim();
+            return true;
+        }
+        if(key === 'units'){
+            this.units = value;
+            this.getSlots('out')[0].units = value;
+            return true;
+        }
+        return false;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();

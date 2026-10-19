@@ -40,6 +40,26 @@ class BlockInputFile extends Block{
         return [];
     }
 
+    /**
+     * @returns {EditableParameter[]} name of the input file
+     */
+    getParameters(){
+        return [{key: 'filename', label: 'File name', type: 'text', value: this.filename}];
+    }
+
+    /**
+     * @param {string} key - 'filename'
+     * @param {string} value
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        if(key === 'filename'){
+            this.filename = String(value).trim();
+            return true;
+        }
+        return false;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();

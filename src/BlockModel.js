@@ -276,6 +276,45 @@ class BlockModel extends Block {
         super.modificationQuery(keyword, value);
     }
 
+    /**
+     * @returns {EditableParameter[]} the model metadata (chosen from the models loaded in the editor) and the
+     *          working directory
+     */
+    getParameters(){
+        let md_list = this.editor.list_of_model_metadata;
+        let options = md_list.map(md => ({value: md['ID'], label: md['Name']}));
+        let current = this.md['ID'] || '';
+        if(!options.some(o => o.value === current))
+            options.unshift({value: current, label: this.md['Name'] || '(no metadata)'});
+        return [
+            {key: 'metadata', label: 'Model', type: 'select', value: current, options: options},
+            {key: 'working_directory', label: 'Working directory', type: 'text', value: this.input_file_directory}
+        ];
+    }
+
+    /**
+     * @param {string} key - 'metadata' (the ID of a model loaded in the editor; replacing the metadata
+     *        rebuilds the slots and removes their data links) or 'working_directory'
+     * @param {string} value
+     * @returns {boolean} true when the value was accepted
+     */
+    setParameter(key, value){
+        if(key === 'working_directory'){
+            this.input_file_directory = String(value).trim();
+            return true;
+        }
+        if(key === 'metadata'){
+            if(value === (this.md['ID'] || ''))
+                return true;
+            let md = this.editor.list_of_model_metadata.find(m => m['ID'] === value);
+            if(!md)
+                return false;
+            this.setMetadataAndUpdate(md);
+            return true;
+        }
+        return false;
+    }
+
     defineMenu() {
         super.defineMenu();
         this.addMoveMenuItems();
