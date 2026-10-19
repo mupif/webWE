@@ -34,6 +34,9 @@ repository root); `workflow_editor.html?example_id=1` opens an example. The work
   places them at the clicked point). A selected object can be deleted with `Delete`; `↑`/`↓` change the
   execution order of the selected block.
 - **Mouse wheel** zooms, dragging the blank canvas pans; the toolbar offers *Fit* and *1:1*.
+- **Undo / redo**: `Ctrl+Z` undoes, `Ctrl+Y` (or `Ctrl+Shift+Z`) redoes any edit of the project (blocks, links,
+  parameters, positions, project settings; up to 100 steps), also via the ↶ ↷ toolbar buttons. Zoom, pan, the
+  selection and the list of loaded models are not part of the history; loading a project starts a new history.
 
 **Execution order.** The generated code executes the blocks of every container in their *execution order*,
 which is independent of the position of the blocks on the canvas. Executable blocks (models, variables, loops
