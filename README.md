@@ -37,6 +37,10 @@ repository root); `workflow_editor.html?example_id=1` opens an example. The wind
   class or server code; it is updated after every edit, highlights the code of the selected block and can be
   copied or downloaded.
 
+The side panels can be collapsed with the « / » buttons in their headers (a collapsed panel leaves a narrow rail
+to open it again) or from the *View* menu (*Block palette*, *Sidebar*, *Canvas only*), and resized by dragging
+their edge towards the canvas; the browser remembers their state and widths.
+
 On the canvas:
 
 - **Blocks** can be placed anywhere by dragging their header. Dropping a block onto a container (Time Loop,

@@ -63,6 +63,12 @@ class WorkflowEditor{
         this.theme = null;
 
         /**
+         * Collapsible side panels (see src/view/Panels.js), or null when the editor runs headless.
+         * @type {PanelLayout|null}
+         */
+        this.panels = null;
+
+        /**
          * Copied block (clipboard record, see {@link WorkflowEditor#copyBlock}), or null.
          * @type {{blocks: Object[], datalinks: Object[]}|null}
          */

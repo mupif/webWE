@@ -70,6 +70,9 @@ const APP_MENUS = [
         {id: 'theme-dark', label: 'Dark theme', checked: s => s.editor.theme.preference === 'dark'},
         {id: 'theme-system', label: 'Theme of the system', checked: s => s.editor.theme.preference === 'system'},
         '-',
+        {id: 'palette', label: 'Block palette', checked: s => s.editor.panels.isOpen('palette')},
+        {id: 'sidebar', label: 'Sidebar', checked: s => s.editor.panels.isOpen('sidebar')},
+        {id: 'canvas-only', label: 'Canvas only (hide or show both panels)'},
         {id: 'show-inspector', label: 'Inspector'},
         {id: 'show-code', label: 'Generated code'}
     ]},
@@ -202,8 +205,11 @@ class AppShell{
             'theme-light': () => editor.theme.setPreference('light'),
             'theme-dark': () => editor.theme.setPreference('dark'),
             'theme-system': () => editor.theme.setPreference('system'),
-            'show-inspector': () => editor.code_preview.showTab('inspector'),
-            'show-code': () => editor.code_preview.showTab('code'),
+            'palette': () => editor.panels.toggle('palette'),
+            'sidebar': () => editor.panels.toggle('sidebar'),
+            'canvas-only': () => editor.panels.showCanvasOnly(),
+            'show-inspector': () => { editor.panels.setOpen('sidebar', true); editor.code_preview.showTab('inspector'); },
+            'show-code': () => { editor.panels.setOpen('sidebar', true); editor.code_preview.showTab('code'); },
             'shortcuts': () => showShortcutHelp(),
             'mupif': () => window.open('http://mupif.org', '_blank'),
             // the inspector shows the project settings when nothing is selected

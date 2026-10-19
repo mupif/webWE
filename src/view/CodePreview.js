@@ -129,16 +129,18 @@ class CodePreview{
         this.sidebar.querySelectorAll('.sidebar_tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
         this.sidebar.querySelector('#app_inspector').hidden = tab !== 'inspector';
         this.el.hidden = tab !== 'code';
-        // the code needs more room than the inspector
+        // the code needs more room than the inspector; the sidebar remembers a width for each tab (Panels.js)
         this.sidebar.classList.toggle('wide', tab === 'code');
+        if(this.editor.panels)
+            this.editor.panels.apply(false);
         this.refresh();
     }
 
     /**
-     * Regenerate and show the code (only while the code tab is shown).
+     * Regenerate and show the code (only while the code tab is shown and the sidebar is open).
      */
     refresh(){
-        if(this.el.hidden)
+        if(this.el.hidden || this.sidebar.classList.contains('collapsed'))
             return;
         let problems_el = this.el.querySelector('.code_problems');
         let view = this.el.querySelector('.code_view');

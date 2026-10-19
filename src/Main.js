@@ -257,6 +257,7 @@ function main(visual=false)
         editor.palette = new BlockPalette(editor, document.getElementById('app_palette'));
         editor.inspector = new Inspector(editor, document.getElementById('app_inspector'));
         editor.code_preview = new CodePreview(editor, document.getElementById('app_sidebar'));
+        editor.panels = new PanelLayout(editor, document.getElementById('app_palette'), document.getElementById('app_sidebar'));
         editor.theme = new ThemeManager(editor);
     }
 

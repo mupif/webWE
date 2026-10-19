@@ -254,6 +254,8 @@ aside#app_palette{
 }
 
 div.palette_search{
+    display: flex;
+    gap: 6px;
     padding: 10px;
     border-bottom: 1px solid var(--app-border);
 }
@@ -380,11 +382,6 @@ aside#app_sidebar{
     min-height: 0;
     background: var(--app-surface);
     border-left: 1px solid var(--app-border);
-}
-
-aside#app_sidebar.wide{
-    width: 560px;
-    flex-basis: 560px;
 }
 
 nav.sidebar_tabs{
@@ -737,3 +734,106 @@ span.py_number{ color: #0550ae; }
 :root[data-theme="dark"] span.py_self{ color: #d2a8ff; }
 :root[data-theme="dark"] span.py_decorator{ color: #ffa657; }
 :root[data-theme="dark"] span.py_number{ color: #79c0ff; }
+
+/* ---------- collapsible and resizable side panels (src/view/Panels.js) ---------- */
+
+aside#app_palette, aside#app_sidebar{
+    position: relative;
+    transition: flex-basis 0.12s, width 0.12s;
+}
+
+body.panel_resizing aside#app_palette, body.panel_resizing aside#app_sidebar{
+    transition: none;
+}
+
+body.panel_resizing{
+    cursor: col-resize;
+    user-select: none;
+}
+
+/* the button collapsing a panel (in its header) */
+button.panel_collapse{
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+button.panel_collapse:hover{
+    background: var(--app-hover);
+    border-color: var(--app-border);
+}
+
+nav.sidebar_tabs button.panel_collapse{
+    align-self: center;
+    margin-bottom: 4px;
+}
+
+/* the handle on the edge towards the canvas */
+div.panel_resizer{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    z-index: 20;
+    cursor: col-resize;
+}
+
+div.panel_resizer_right{
+    right: -3px;
+}
+
+div.panel_resizer_left{
+    left: -3px;
+}
+
+div.panel_resizer:hover, body.panel_resizing div.panel_resizer{
+    background: var(--app-accent);
+    opacity: 0.4;
+}
+
+/* a collapsed panel shows only its rail */
+aside#app_palette.collapsed, aside#app_sidebar.collapsed{
+    width: 32px !important;
+    flex: 0 0 32px !important;
+}
+
+aside.collapsed > :not(.panel_rail){
+    display: none !important;
+}
+
+div.panel_rail{
+    display: none;
+}
+
+aside.collapsed > div.panel_rail{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 8px;
+}
+
+button.panel_rail_button{
+    writing-mode: vertical-rl;
+    padding: 10px 4px;
+    border: 1px solid var(--app-border);
+    border-radius: 6px;
+    background: var(--app-surface);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+aside#app_palette button.panel_rail_button{
+    transform: rotate(180deg);
+}
+
+button.panel_rail_button:hover{
+    background: var(--app-hover);
+}

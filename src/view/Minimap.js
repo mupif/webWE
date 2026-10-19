@@ -69,7 +69,8 @@ class CanvasMinimap{
                 this.centerAt(evt);
         });
         this.el.addEventListener('pointerup', () => { this.dragging = false; });
-        window.addEventListener('resize', () => this.updateViewport());
+        // the canvas changes its size with the window and when the side panels are collapsed or resized
+        new ResizeObserver(() => this.updateViewport()).observe(canvas.el);
         this.setVisible(canvas.loadOption('mupif_we_show_minimap', true), false);
     }
 
