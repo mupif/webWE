@@ -31,9 +31,11 @@ repository root); `workflow_editor.html?example_id=1` opens an example. The wind
   load further metadata files with *Load…*;
 - the **canvas** in the middle, where the workflow is drawn (based on the vendored
   [JointJS](https://www.jointjs.com/) library in `lib/joint/`);
-- the **inspector** on the right, showing the selected block, data link or external slot, or the project
-  settings and external inputs/outputs when nothing is selected. Parameters are applied with `Enter` or when
-  leaving a field.
+- the **sidebar** on the right with two tabs: the **inspector**, showing the selected block, data link or
+  external slot, or the project settings and external inputs/outputs when nothing is selected (parameters are
+  applied with `Enter` or when leaving a field), and the **code** preview, showing the generated execution,
+  class or server code; it is updated after every edit, highlights the code of the selected block and can be
+  copied or downloaded.
 
 On the canvas:
 
@@ -42,15 +44,23 @@ On the canvas:
   it a top-level block. Containers grow with their content; *Arrange child blocks* in the context menu or the
   inspector (or the `O` key) re-arranges the children by data flow, vertically or horizontally.
 - **Data links** are drawn by dragging from a slot (port) to another one; compatible slots are highlighted while
-  dragging. Hovering a link shows a remove button. Hovering a port shows the slot details.
+  dragging. Hovering a link shows a remove button. Hovering a port shows the slot details. Required inputs which
+  are not connected yet are drawn red; *View > Hide unconnected optional inputs* makes blocks with many optional
+  inputs compact.
 - **Right click** opens the context menu of a block, a link, an external slot or of the canvas (adding blocks
   places them at the clicked point). A selected object can be deleted with `Delete`; `↑`/`↓` change the
   execution order of the selected block.
-- **Mouse wheel** zooms, dragging the blank canvas pans; the canvas toolbar offers *Fit* and *1:1*.
+- **Mouse wheel** zooms, dragging the blank canvas pans; the canvas toolbar offers *Fit* and *1:1*, the
+  **minimap** in the corner shows the whole workflow (click or drag in it to move the view).
+- **Copy / paste**: `Ctrl+C` / `Ctrl+V` copy and paste the selected block with its content and the data links
+  inside it (into the selected container, or into the container in the middle of the view); `Ctrl+D` or
+  *Duplicate* in the context menu duplicates it.
 - **Undo / redo**: `Ctrl+Z` undoes, `Ctrl+Y` (or `Ctrl+Shift+Z`) redoes any edit of the project (blocks, links,
   parameters, positions, project settings; up to 100 steps), also via the top bar buttons. Zoom, pan, the
   selection and the list of loaded models are not part of the history; loading a project starts a new history.
 - `Ctrl+S` saves and `Ctrl+O` opens a project; *Help > Keyboard and mouse* lists all controls.
+- Errors (e.g., an invalid data link) are shown as notifications in the bottom-right corner. *View* also offers a
+  light and a dark theme (or the theme of the system).
 
 **Execution order.** The generated code executes the blocks of every container in their *execution order*,
 which is independent of the position of the blocks on the canvas. Executable blocks (models, variables, loops
