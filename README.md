@@ -21,22 +21,36 @@ or using pip:
 ## Using the editor
 
 Open `workflow_editor.html` in a browser (served by any web server, e.g., `python3 -m http.server` in the
-repository root); `workflow_editor.html?example_id=1` opens an example. The workflow is drawn on an SVG canvas
-(based on the vendored [JointJS](https://www.jointjs.com/) library in `lib/joint/`):
+repository root); `workflow_editor.html?example_id=1` opens an example. The window has four parts:
+
+- the **top bar** with the *File* (new, open, save, generate code), *Edit*, *View* and *Help* menus, the project
+  name (click it to edit the project settings) and the undo/redo buttons;
+- the **block palette** on the left: drag a block onto the canvas, or into a container (the target container is
+  outlined), or click it to add it to the selected container. The search field filters the blocks. *Loaded
+  models* lists the model metadata available in the editor; drag a model to add a model block of that kind,
+  load further metadata files with *Load…*;
+- the **canvas** in the middle, where the workflow is drawn (based on the vendored
+  [JointJS](https://www.jointjs.com/) library in `lib/joint/`);
+- the **inspector** on the right, showing the selected block, data link or external slot, or the project
+  settings and external inputs/outputs when nothing is selected. Parameters are applied with `Enter` or when
+  leaving a field.
+
+On the canvas:
 
 - **Blocks** can be placed anywhere by dragging their header. Dropping a block onto a container (Time Loop,
   Do While, Run in background, Allocate model at runtime) nests it there, dropping it on the blank canvas makes
-  it a top-level block. Containers grow with their content; *Arrange child blocks* in the context menu (or the
-  `O` key) re-arranges the children by data flow, vertically or horizontally.
+  it a top-level block. Containers grow with their content; *Arrange child blocks* in the context menu or the
+  inspector (or the `O` key) re-arranges the children by data flow, vertically or horizontally.
 - **Data links** are drawn by dragging from a slot (port) to another one; compatible slots are highlighted while
   dragging. Hovering a link shows a remove button. Hovering a port shows the slot details.
 - **Right click** opens the context menu of a block, a link, an external slot or of the canvas (adding blocks
   places them at the clicked point). A selected object can be deleted with `Delete`; `↑`/`↓` change the
   execution order of the selected block.
-- **Mouse wheel** zooms, dragging the blank canvas pans; the toolbar offers *Fit* and *1:1*.
+- **Mouse wheel** zooms, dragging the blank canvas pans; the canvas toolbar offers *Fit* and *1:1*.
 - **Undo / redo**: `Ctrl+Z` undoes, `Ctrl+Y` (or `Ctrl+Shift+Z`) redoes any edit of the project (blocks, links,
-  parameters, positions, project settings; up to 100 steps), also via the ↶ ↷ toolbar buttons. Zoom, pan, the
+  parameters, positions, project settings; up to 100 steps), also via the top bar buttons. Zoom, pan, the
   selection and the list of loaded models are not part of the history; loading a project starts a new history.
+- `Ctrl+S` saves and `Ctrl+O` opens a project; *Help > Keyboard and mouse* lists all controls.
 
 **Execution order.** The generated code executes the blocks of every container in their *execution order*,
 which is independent of the position of the blocks on the canvas. Executable blocks (models, variables, loops
@@ -46,12 +60,12 @@ toolbar. Data and helper blocks (constants, input files, conversions, comparison
 values are evaluated where they are read.
 When a block reads data computed by a block executed later, the data link and the label of the reading block
 are marked red (orange inside a loop, where the value of the previous iteration is read) and the toolbar shows
-the number of problems. *Order by dependencies* reorders the blocks so that every block is executed after the
+the number of problems (the inspector explains them). *Order by dependencies* reorders the blocks so that every block is executed after the
 blocks it reads from.
 
 ### Project file
 
-Projects are saved as JSON (*Project > Save to JSON*). Since the canvas editor, blocks and external slots may
+Projects are saved as JSON (*File > Save project*). Since the canvas editor, blocks and external slots may
 contain an optional `layout` record with their position (`x`, `y`, relative to the containing block) and, for
 containers, their size (`w`, `h`). The layout does not influence the generated code. Projects without layout
 (e.g., created by older versions) are arranged automatically when opened.
