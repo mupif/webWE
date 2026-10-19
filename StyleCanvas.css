@@ -111,7 +111,6 @@ div#workflowCanvas .joint-link:hover [joint-selector="line"]{
 div.canvas_context_menu{
     position: fixed;
     z-index: 400;
-    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 /* flow arrows of the hovered block (see src/view/FlowOverlay.js) */

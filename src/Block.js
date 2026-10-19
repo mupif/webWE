@@ -756,7 +756,7 @@ class Block{
 
         let menus = menu_record.getMenus();
         for(let i=0;i<menus.length;i++){
-            html += '<div class="block_menu_item">'+menus[i].getName()+'&nbsp;&#129078;';
+            html += '<div class="block_menu_item block_menu_parent">'+menus[i].getName()+'<span class="block_menu_arrow">&rsaquo;</span>';
             html += '<div class="block_menu_submenu">';
             html += '<div class="block_menu block_menu_'+level+'">';
             html += this.generateMenuHtml(menus[i], level+1);
