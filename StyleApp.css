@@ -3,6 +3,7 @@
  * the main area hosting the canvas and the pages, and the shared look of buttons, menus and dialogs.
  */
 
+/* colors of the light theme; the dark theme (data-theme="dark" on <html>, see src/view/Theme.js) redefines them */
 :root{
     --app-font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --app-text: #1f2328;
@@ -11,7 +12,40 @@
     --app-panel: #f6f8fa;
     --app-hover: #eaeef2;
     --app-accent: #1e66f5;
+    --app-surface: #ffffff;
+    --app-surface-glass: rgba(255, 255, 255, 0.95);
+    --app-disabled: #b0b7bf;
+    --app-divider: #eef1f4;
+    --app-error-bg: #fff0f0;
+    --app-warning-bg: #fff8e6;
+    --app-code-bg: #fbfcfd;
+    --app-marked: #fff4cc;
+    --app-line-number: #a0a8b0;
     --app-topbar-h: 44px;
+    color-scheme: light;
+}
+
+:root[data-theme="dark"]{
+    --app-text: #e6edf3;
+    --app-muted: #9198a1;
+    --app-border: #3d444d;
+    --app-panel: #151b23;
+    --app-hover: #262c36;
+    --app-accent: #3b7cff;
+    --app-surface: #0d1117;
+    --app-surface-glass: rgba(21, 27, 35, 0.95);
+    --app-disabled: #545d68;
+    --app-divider: #262c36;
+    --app-error-bg: #3c1618;
+    --app-warning-bg: #3a2a0c;
+    --app-code-bg: #0d1117;
+    --app-marked: #3a3112;
+    --app-line-number: #4d5560;
+    color-scheme: dark;
+}
+
+body{
+    background: var(--app-surface);
 }
 
 html, body{
@@ -34,6 +68,11 @@ div#app button{
     font-family: inherit;
 }
 
+/* controls use the theme text color (zero specificity, so that the rules of the controls take precedence) */
+:where(div#app, div.canvas_context_menu) :is(button, input, select){
+    color: var(--app-text);
+}
+
 /* ---------- top bar ---------- */
 
 header#app_topbar{
@@ -41,7 +80,7 @@ header#app_topbar{
     align-items: center;
     gap: 6px;
     padding: 0 10px;
-    background: #ffffff;
+    background: var(--app-surface);
     border-bottom: 1px solid var(--app-border);
     z-index: 200;
 }
@@ -84,7 +123,7 @@ header#app_topbar button:hover:not(:disabled){
 }
 
 header#app_topbar button:disabled{
-    color: #b0b7bf;
+    color: var(--app-disabled);
     cursor: default;
 }
 
@@ -122,7 +161,7 @@ div.app_menu div.app_menu_list{
     left: 0;
     min-width: 240px;
     padding: 4px;
-    background: #ffffff;
+    background: var(--app-surface);
     border: 1px solid var(--app-border);
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(31, 35, 40, 0.18);
@@ -157,6 +196,7 @@ button.app_menu_item span.app_menu_check{
 
 button.app_menu_item span.app_menu_label{
     flex: 1;
+    white-space: nowrap;
 }
 
 button.app_menu_item span.app_menu_shortcut{
@@ -224,7 +264,7 @@ div.palette_search input{
     border: 1px solid var(--app-border);
     border-radius: 6px;
     font: inherit;
-    background: #ffffff;
+    background: var(--app-surface);
 }
 
 div.palette_search input:focus{
@@ -262,7 +302,7 @@ div.palette_item{
 }
 
 div.palette_item:hover{
-    background: #ffffff;
+    background: var(--app-surface);
     box-shadow: 0 1px 3px rgba(31, 35, 40, 0.15);
 }
 
@@ -302,7 +342,7 @@ button.palette_load, button.palette_icon{
 
 button.palette_load{
     border-color: var(--app-border);
-    background: #ffffff;
+    background: var(--app-surface);
     color: var(--app-text);
 }
 
@@ -321,7 +361,7 @@ div.palette_ghost{
     position: fixed;
     z-index: 1000;
     pointer-events: none;
-    background: #ffffff;
+    background: var(--app-surface);
     box-shadow: 0 6px 16px rgba(31, 35, 40, 0.25);
     font-family: var(--app-font);
     font-size: 13px;
@@ -338,7 +378,7 @@ aside#app_sidebar{
     width: 300px;
     flex: 0 0 300px;
     min-height: 0;
-    background: #ffffff;
+    background: var(--app-surface);
     border-left: 1px solid var(--app-border);
 }
 
@@ -368,7 +408,7 @@ nav.sidebar_tabs button{
 }
 
 nav.sidebar_tabs button.active{
-    background: #ffffff;
+    background: var(--app-surface);
     border-color: var(--app-border);
     color: var(--app-text);
     font-weight: 600;
@@ -462,7 +502,7 @@ label.inspector_field input, label.inspector_field select, div.inspector_actions
     border: 1px solid var(--app-border);
     border-radius: 5px;
     font: inherit;
-    background: #ffffff;
+    background: var(--app-surface);
 }
 
 label.inspector_field input:focus, label.inspector_field select:focus{
@@ -513,7 +553,7 @@ ul.inspector_slots li{
     display: flex;
     gap: 8px;
     padding: 4px 0;
-    border-bottom: 1px solid #eef1f4;
+    border-bottom: 1px solid var(--app-divider);
 }
 
 span.inspector_dot{
@@ -556,12 +596,12 @@ p.inspector_problem{
 }
 
 p.inspector_problem.error{
-    background: #fff0f0;
+    background: var(--app-error-bg);
     border-left: 3px solid #e03131;
 }
 
 p.inspector_problem.warning{
-    background: #fff8e6;
+    background: var(--app-warning-bg);
     border-left: 3px solid #f08c00;
 }
 
@@ -575,7 +615,7 @@ button.inspector_button{
     padding: 4px 10px;
     border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: #ffffff;
+    background: var(--app-surface);
     font: inherit;
     cursor: pointer;
 }
@@ -585,7 +625,7 @@ button.inspector_button:hover:not(:disabled){
 }
 
 button.inspector_button:disabled{
-    color: #b0b7bf;
+    color: var(--app-disabled);
     cursor: default;
 }
 
@@ -594,7 +634,7 @@ button.inspector_button.danger{
 }
 
 button.inspector_button.danger:hover{
-    background: #fff0f0;
+    background: var(--app-error-bg);
     border-color: #ffa8a8;
 }
 
@@ -620,7 +660,7 @@ div.code_toolbar select{
     border: 1px solid var(--app-border);
     border-radius: 5px;
     font: inherit;
-    background: #ffffff;
+    background: var(--app-surface);
 }
 
 span.code_spacer{
@@ -631,7 +671,7 @@ button.code_button{
     padding: 4px 10px;
     border: 1px solid var(--app-border);
     border-radius: 6px;
-    background: #ffffff;
+    background: var(--app-surface);
     font: inherit;
     cursor: pointer;
 }
@@ -644,7 +684,7 @@ div.code_problems p{
     margin: 8px 10px 0 10px;
     padding: 6px 8px;
     border-radius: 6px;
-    background: #fff0f0;
+    background: var(--app-error-bg);
     border-left: 3px solid #e03131;
     font-size: 12px;
 }
@@ -654,7 +694,7 @@ pre.code_view{
     margin: 0;
     padding: 8px 0;
     overflow: auto;
-    background: #fbfcfd;
+    background: var(--app-code-bg);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     font-size: 12px;
     line-height: 1.5;
@@ -675,12 +715,12 @@ span.code_line::before{
     left: 0;
     width: 40px;
     text-align: right;
-    color: #a0a8b0;
+    color: var(--app-line-number);
     user-select: none;
 }
 
 span.code_line.marked{
-    background: #fff4cc;
+    background: var(--app-marked);
 }
 
 span.py_comment{ color: #6a737d; font-style: italic; }
@@ -689,3 +729,11 @@ span.py_keyword{ color: #b3134d; font-weight: 600; }
 span.py_self{ color: #8250df; }
 span.py_decorator{ color: #b35900; }
 span.py_number{ color: #0550ae; }
+
+/* syntax colors of the code preview in the dark theme */
+:root[data-theme="dark"] span.py_comment{ color: #8b949e; }
+:root[data-theme="dark"] span.py_string{ color: #7ee2a8; }
+:root[data-theme="dark"] span.py_keyword{ color: #ff7b9c; }
+:root[data-theme="dark"] span.py_self{ color: #d2a8ff; }
+:root[data-theme="dark"] span.py_decorator{ color: #ffa657; }
+:root[data-theme="dark"] span.py_number{ color: #79c0ff; }

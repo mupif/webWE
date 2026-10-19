@@ -57,11 +57,35 @@ const BLOCK_COLORS = {
     'we_block_input_file': '#ffd08a'
 };
 
-/** Text colors of the block shape. */
+/** Text colors on the colored block headers (the same in both themes). */
 const BLOCK_TEXT_COLOR = '#1f2328';
 const BLOCK_MUTED_TEXT_COLOR = '#57606a';
 
-/** Colors of data links and ports, keyed by the slot data type (Slot.getDataType()). */
+/**
+ * Colors of the canvas which depend on the theme of the editor (see src/view/Theme.js): paper background and
+ * grid, block bodies and borders, texts on the bodies, port rings and the default link color.
+ */
+const CANVAS_THEMES = {
+    light: {paper: '#f7f8fa', grid: '#c9ced6', body: '#ffffff', stroke: '#8c959f', text: '#1f2328', muted: '#57606a',
+        port_stroke: '#24292f', link: '#555555'},
+    dark: {paper: '#0d1117', grid: '#2d333b', body: '#1c2128', stroke: '#545d68', text: '#e6edf3', muted: '#9aa5b1',
+        port_stroke: '#d0d7de', link: '#9aa5b1'}
+};
+
+/** The canvas theme in use (see setCanvasTheme). @type {Object} */
+let canvas_theme = CANVAS_THEMES.light;
+
+/**
+ * Select the canvas colors; the canvas must be redrawn afterwards.
+ *
+ * @param {string} name - 'light' or 'dark'
+ */
+function setCanvasTheme(name){
+    canvas_theme = CANVAS_THEMES[name] || CANVAS_THEMES.light;
+}
+
+/** Colors of data links and ports, keyed by the slot data type (Slot.getDataType()); other types use the
+ * link color of the canvas theme (CANVAS_THEMES). */
 const DATA_TYPE_COLORS = {
     'mupif.Property': '#8e44ad',
     'mupif.PhysicalQuantity': '#c0392b',
@@ -69,8 +93,6 @@ const DATA_TYPE_COLORS = {
     'mupif.PyroFile': '#d35400',
     'number': '#27ae60'
 };
-/** Color of data links and ports of other data types. @type {string} */
-const DATA_TYPE_DEFAULT_COLOR = '#555555';
 
 /** Accent color of the execution flow (badges and flow arrows). @type {string} */
 const EXECUTION_FLOW_COLOR = '#1e66f5';
@@ -130,7 +152,7 @@ function htmlToTextLines(html){
  * @returns {string} color of ports and links of the given data type
  */
 function dataTypeColor(type){
-    return DATA_TYPE_COLORS[type] || DATA_TYPE_DEFAULT_COLOR;
+    return DATA_TYPE_COLORS[type] || canvas_theme.link;
 }
 
 /**
@@ -369,10 +391,11 @@ function slotPortItems(slots, group, x, top){
             group: group,
             args: {x: x, y: top + i * g.PORT_ROW_H + g.PORT_ROW_H / 2},
             attrs: {
-                portBody: missing ? {fill: '#ffffff', stroke: MISSING_INPUT_COLOR, strokeWidth: 2.5} :
-                    {fill: dataTypeColor(s.getDataType())},
+                portBody: missing ? {fill: canvas_theme.body, stroke: MISSING_INPUT_COLOR, strokeWidth: 2.5} :
+                    {fill: dataTypeColor(s.getDataType()), stroke: canvas_theme.port_stroke},
                 portTitle: {text: slotTooltip(s)},
-                label: {text: s.name, fontSize: 10, fontFamily: CANVAS_FONT_FAMILY, fill: missing ? MISSING_INPUT_COLOR : '#111'}
+                label: {text: s.name, fontSize: 10, fontFamily: CANVAS_FONT_FAMILY,
+                    fill: missing ? MISSING_INPUT_COLOR : canvas_theme.text}
             }
         };
     });
@@ -400,14 +423,15 @@ function createBlockCell(block, box, id, z){
         size: {width: box.w, height: box.h},
         attrs: {
             // containers are tinted with their color, so that nesting stays visible
-            body: d.container ? {fill: d.color, fillOpacity: 0.16} : {},
+            body: d.container ? {fill: d.color, fillOpacity: 0.16, stroke: canvas_theme.stroke} :
+                {fill: canvas_theme.body, stroke: canvas_theme.stroke},
             header: {fill: d.color},
             headerBase: {fill: d.color},
             title: {x: titleX(label), text: d.title},
             codeName: {text: d.codeName},
-            params: {text: d.params.join('\n')},
+            params: {text: d.params.join('\n'), fill: canvas_theme.muted},
             // only executed blocks have an execution label
-            badgeBody: {width: badge_w, display: label === '' ? 'none' : null},
+            badgeBody: {width: badge_w, display: label === '' ? 'none' : null, stroke: canvas_theme.body},
             badgeTitle: {text: 'Execution order: ' + label},
             badgeLabel: {x: badge_w / 2 - 8, text: label, display: label === '' ? 'none' : null}
         },
@@ -431,7 +455,7 @@ function createExtSlotCell(slot, box, id){
         id: slot.getUID(),
         group: provides ? 'out' : 'in',
         args: {x: provides ? box.w : 0, y: box.h / 2},
-        attrs: {portBody: {fill: dataTypeColor(slot.getDataType())}, portTitle: {text: slotTooltip(slot)}}
+        attrs: {portBody: {fill: dataTypeColor(slot.getDataType()), stroke: canvas_theme.port_stroke}, portTitle: {text: slotTooltip(slot)}}
     };
     return new joint.shapes.mupif.ExtSlot({
         id: id,
@@ -439,7 +463,7 @@ function createExtSlotCell(slot, box, id){
         position: {x: box.x, y: box.y},
         size: {width: box.w, height: box.h},
         attrs: {
-            body: {fill: provides ? '#d5f5d0' : '#fde2c8'},
+            body: {fill: provides ? '#d5f5d0' : '#fde2c8', stroke: canvas_theme.stroke},
             label: {text: slot.name}
         },
         ports: {items: [port]}

@@ -57,6 +57,12 @@ class WorkflowEditor{
         this.code_preview = null;
 
         /**
+         * Light/dark theme of the editor (see src/view/Theme.js), or null when the editor runs headless.
+         * @type {ThemeManager|null}
+         */
+        this.theme = null;
+
+        /**
          * Copied block (clipboard record, see {@link WorkflowEditor#copyBlock}), or null.
          * @type {{blocks: Object[], datalinks: Object[]}|null}
          */

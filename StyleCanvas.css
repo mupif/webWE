@@ -36,7 +36,7 @@ div.canvas_toolbar{
     gap: 6px;
     align-items: center;
     padding: 3px 6px;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--app-surface-glass);
     border: 1px solid var(--app-border, #d0d7de);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(31, 35, 40, 0.12);
@@ -153,7 +153,7 @@ div.canvas_minimap{
     width: 220px;
     height: 150px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--app-surface-glass);
     border: 1px solid var(--app-border, #d0d7de);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(31, 35, 40, 0.15);

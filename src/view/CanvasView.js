@@ -103,7 +103,7 @@ class CanvasView{
             // links end at the edge of the port circle, so that the port itself stays clickable for new links
             defaultConnectionPoint: {name: 'boundary', args: {offset: 1}},
             // data links: dragged from a slot port, dropped on a compatible one
-            defaultLink: () => new joint.shapes.mupif.DataLink({attrs: {line: {stroke: DATA_TYPE_DEFAULT_COLOR}}}),
+            defaultLink: () => new joint.shapes.mupif.DataLink({attrs: {line: {stroke: canvas_theme.link}}}),
             validateConnection: (view_s, magnet_s, view_t, magnet_t) =>
                 this.canConnect(view_s, magnet_s, view_t, magnet_t),
             linkPinning: false,
@@ -178,6 +178,19 @@ class CanvasView{
             button.addEventListener('click', () => commands[button.dataset.cmd]());
         });
         this.el.parentElement.insertBefore(this.toolbar_el, this.el);
+    }
+
+    /**
+     * Apply the canvas colors of a theme (paper background, grid, minimap) and redraw the blocks.
+     *
+     * @param {string} name - 'light' or 'dark'
+     */
+    applyTheme(name){
+        setCanvasTheme(name);
+        this.paper.drawBackground({color: canvas_theme.paper});
+        this.paper.setGrid({name: 'dot', args: {color: canvas_theme.grid}});
+        this.minimap.paper.drawBackground({color: canvas_theme.paper});
+        this.render({keepView: true});
     }
 
     /**
