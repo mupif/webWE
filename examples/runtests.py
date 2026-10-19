@@ -42,7 +42,7 @@ tests = [
 
 #: standalone Node unit test scripts (paths relative to this directory);
 #: each script must exit with a non-zero status on failure
-UNIT_TESTS = ["test_layout_json.js", "test_execution_order.js", "test_datalinks.js", "test_autolayout.js", "test_flow.js", "test_history.js", "test_parameters.js"]
+UNIT_TESTS = ["test_layout_json.js", "test_execution_order.js", "test_datalinks.js", "test_autolayout.js", "test_flow.js", "test_history.js", "test_parameters.js", "test_codegen.js"]
 
 
 def path(name):

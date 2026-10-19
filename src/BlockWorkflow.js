@@ -32,32 +32,41 @@ class BlockWorkflow extends Block{
         return slot.getCodeRepresentation();
     }
 
-    canGenerateCode(type){
+    /**
+     * Reasons why code of the given type cannot be generated from the workflow (headless; e.g., for the code
+     * preview of the editor).
+     *
+     * @param {string} type - 'exec' (execution code), 'class' (workflow class) or 'server' (job manager server)
+     * @returns {string[]} problems; empty when the code can be generated
+     */
+    getCodeGenerationProblems(type){
+        let problems = [];
         if(type === 'exec'){
-            let result = true;
-            if(this.getSlots().length) {
-                result = false;
-                console.log('Execution code cannot be generated with external inputs.');
-                if(this.editor.visual)
-                    myQuery_show_error('Execution code cannot be generated with external inputs.');
-            }
-            let blocks = this.getBlocksRecursive(BlockTimeloop);
-            if(!blocks.length) {
-                result = false;
-                console.log('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
-                if(this.editor.visual)
-                    myQuery_show_error('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
-            }
-            return result;
+            if(this.getSlots().length)
+                problems.push('Execution code cannot be generated with external inputs.');
+            if(!this.getBlocksRecursive(BlockTimeloop).length)
+                problems.push('Execution code cannot be generated without a Timeloop or another block defining a timestep.');
+        }else if(type !== 'class' && type !== 'server'){
+            problems.push('Type of code is not valid!');
         }
-        if(type === 'class'){
-            return true;
-        }
-        if(type === 'server'){
-            return true;
-        }
-        console.log('Type of code is not valid!');
-        return false;
+        return problems;
+    }
+
+    /**
+     * Check whether code of the given type can be generated; the problems are logged and, in the graphical
+     * editor, shown to the user.
+     *
+     * @param {string} type - 'exec', 'class' or 'server'
+     * @returns {boolean} true when the code can be generated
+     */
+    canGenerateCode(type){
+        let problems = this.getCodeGenerationProblems(type);
+        problems.forEach(problem => {
+            console.log(problem);
+            if(this.editor.visual)
+                myQuery_show_error(problem);
+        });
+        return problems.length === 0;
     }
 
     generateAllElementCodeNames(){
